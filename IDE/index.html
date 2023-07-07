@@ -1,0 +1,37 @@
+<script src="http://unpkg.com/tone"></script>
+<button id="play-button">Play/Pause</button>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.11/lib/codemirror.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.11/lib/codemirror.css">
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.11/mode/javascript/javascript.js"></script>
+
+<script src="onLoop.js"></script>
+<script src="webAudio_main.js"></script>
+<script src="webAudio_math.js"></script>
+
+<style>
+li {
+    width: 25%;
+    float: left;
+}
+
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
+  width: 50%;
+}
+</style>
+
+<!-- <div>Current Pitch Sequence: </div><div id="curSeq"></div>
+<div>New Pitch Sequence : </div><div id="newSeq"></div>
+<div>Duration Sequence : </div><div id="curSeqDurs"></div>
+<div>Enable Sequence : </div><div id="curSeqEnable"></div> -->
+
+<!-- <ol id="midimonitor"></ol> -->
+
+<div>Web Audio Live Coding Environment </div><div id="lastMidi"></div>
+<!-- create a small box on the top right for console messages -->
+<div id="console" style="position: absolute; top: 7.7%; right: 0; width: 48%; height: 98%; overflow: scroll; background-color: #eee; border: 1px solid #000;"></div>
+
+
+<br>
+<!-- <div>Selected Sequence Index: </div><div id="selectedSeq"></div>
