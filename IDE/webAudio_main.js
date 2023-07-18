@@ -630,7 +630,8 @@ function initializeCodeBox() {
 		'volume = context.createGain()\n',
 		'volume.gain.value = 0.1\n',
 		'osc.connect( volume )\n\n',
-		'volume.connect( context.destination )\n'
+		'volume.connect( context.destination )\n\n',
+		'for(i=0;i<20;i++) addCircle(random()*20)\n'
 		];
 	code = ''
 	for (i=0;i<audioCodeExample.length;i++) code = code + audioCodeExample[i]

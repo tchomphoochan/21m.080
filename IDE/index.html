@@ -3,10 +3,13 @@
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.11/lib/codemirror.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.11/lib/codemirror.css">
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.11/mode/javascript/javascript.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
 
 <script src="onLoop.js"></script>
 <script src="webAudio_main.js"></script>
 <script src="webAudio_math.js"></script>
+
+  <script src="sketch.js"></script>
 
 <style>
 li {
@@ -21,16 +24,13 @@ li {
 }
 </style>
 
-<!-- <div>Current Pitch Sequence: </div><div id="curSeq"></div>
-<div>New Pitch Sequence : </div><div id="newSeq"></div>
-<div>Duration Sequence : </div><div id="curSeqDurs"></div>
-<div>Enable Sequence : </div><div id="curSeqEnable"></div> -->
-
-<!-- <ol id="midimonitor"></ol> -->
 
 <div>Web Audio Live Coding Environment </div><div id="lastMidi"></div>
-<!-- create a small box on the top right for console messages -->
-<div id="console" style="position: absolute; top: 7.7%; right: 0; width: 48%; height: 98%; overflow: scroll; background-color: #eee; border: 1px solid #000;"></div>
+
+<!-- create a div on the top right for P5 sketch.js -->
+<div id="p5" style="position: absolute; top: 7.7%; right: 0; width: 48%; height: 98%; overflow: scroll; background-color: #eee; border: 1px solid #000;">
+  <p>This is a paragraph</p> <!-- example text -->
+</div>
 
 
 <br>
