@@ -4,10 +4,8 @@ import Editor from './Editor.js'
 function App() {
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <Editor />
-      </header>
+    <div>
+      <Editor />
     </div>
   );
 }
