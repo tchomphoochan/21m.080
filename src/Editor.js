@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-//import axios from "axios";
+//8:45
+import React, { useState, useEffect, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
 import { javascript } from '@codemirror/lang-javascript';
@@ -14,17 +14,25 @@ function Editor() {
     const value = localStorage.getItem('myValue') || '//Start coding here!';
 
     const [code, setCode] = useState(value);
-    const [elements, setElements] = useState([])
 
     useEffect(() => {
-        const lines = code.split('\n');
-        for (let i = 0; i < lines.length; i++) {
-            if ("createOscillator();" in lines[i]) {
-
+        return () => {
+            try {
+                eval(code); // Evaluate the Web Audio code entered by the user
+            } catch (error) {
+                console.error('Error evaluating Web Audio code:', error);
             }
-        }
-    }, []);
+        };
+    }, [code]);
 
+
+    const handleCodeChange = (value, viewUpdate) => {
+        localStorage.setItem('myValue', value);
+        setCode(value);
+
+        const state = viewUpdate.state.toJSON(stateFields);
+        localStorage.setItem('myEditorState', JSON.stringify(state));
+    };
 
     return (
         <>
@@ -39,19 +47,12 @@ function Editor() {
                             }
                             : undefined
                     }
-                    onChange={(value, viewUpdate) => {
-                        localStorage.setItem('myValue', value);
-                        setCode(value);
-
-                        const state = viewUpdate.state.toJSON(stateFields);
-                        localStorage.setItem('myEditorState', JSON.stringify(state));
-                    }}
+                    onChange={handleCodeChange}
                     theme={dracula}
                     height='100vh'
                     mode="javascript"
                     extensions={[javascript({ jsx: true })]}
                 />
-                <button onClick={run}>Run</button>
             </div>
             <div className="rightpage-container">
 
