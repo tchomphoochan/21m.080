@@ -1,11 +1,11 @@
-//8:45
+//6:45
 import React, { useState, useEffect, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
 import { javascript } from '@codemirror/lang-javascript';
 import { dracula } from '@uiw/codemirror-theme-dracula';
 
-import { Sketch } from '@p5-wrapper/react';
+import Canvas from "./Canvas.js";
 
 const stateFields = { history: historyField };
 
@@ -13,18 +13,10 @@ function Editor() {
     const serializedState = localStorage.getItem('myEditorState');
     const value = localStorage.getItem('myValue') || '//Start coding here!';
 
+    let acorn = require("acorn");
+
     const [code, setCode] = useState(value);
-
-    useEffect(() => {
-        return () => {
-            try {
-                eval(code); // Evaluate the Web Audio code entered by the user
-            } catch (error) {
-                console.error('Error evaluating Web Audio code:', error);
-            }
-        };
-    }, [code]);
-
+    const [ast, setAst] = useState();
 
     const handleCodeChange = (value, viewUpdate) => {
         localStorage.setItem('myValue', value);
@@ -34,9 +26,23 @@ function Editor() {
         localStorage.setItem('myEditorState', JSON.stringify(state));
     };
 
+    const handleKeyDown = (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+            // Evaluate the code when the user presses ctrl+enter
+            const ast = acorn.parse(code, { ecmaVersion: 'latest' });
+            setAst(ast);
+            console.log(ast);
+            try {
+                //runCode(code);
+            } catch (error) {
+                console.error('Error evaluating code:', error);
+            }
+        }
+    };
+
     return (
-        <>
-            <div className="leftpage-container">
+        <div className="flex-container">
+            <div className="flex-child">
                 <CodeMirror
                     value={value}
                     initialState={
@@ -52,14 +58,19 @@ function Editor() {
                     height='100vh'
                     mode="javascript"
                     extensions={[javascript({ jsx: true })]}
+                    onKeyDown={handleKeyDown}
+
                 />
             </div>
-            <div className="rightpage-container">
-
+            <div>
+                <Canvas height={200} />
             </div>
-        </>
+        </div>
     );
 }
 
 export default Editor;
 
+/*
+IDENTIFY: Variable name changes, deletions, Additions
+*/

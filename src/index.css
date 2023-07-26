@@ -13,16 +13,20 @@ code {
     monospace;
 }
 
-.leftpage-container {
-  width: 50%;
-  height: 100%;
-  float: left;
-  overflow: auto;
+.flex-container {
+  display: flex;
 }
 
-.rightpage-container {
-  width: 50%;
-  height: 100%;
-  float: right;
-  overflow: auto;
+.flex-child {
+  flex: 1;
+  border: 10px solid rgb(255, 255, 255);
+}
+
+.flex-child:first-child {
+  margin-right: 5px;
+}
+
+.center-content {
+  align-items: center;
+  justify-content: center;
 }
