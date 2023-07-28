@@ -1,2 +1,2 @@
-# 21m.080
-Web Audio Support for 21M.080
+# midiCoder
+Live coding environment for working with MIDI controllers
