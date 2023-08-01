@@ -3,8 +3,6 @@ import Sketch from "react-p5";
 
 function Canvas(props) {
     const canvasParentRef = useRef();
-    let a = 300;
-    let b = 300;
     let setup = (p5, canvasParentRef) => {
         //const containerWidth = canvasParentRef.current.clientWidth;
         let xyz = p5.createCanvas(p5.windowWidth / 2, props.height).parent(canvasParentRef);

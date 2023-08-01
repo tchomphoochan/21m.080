@@ -1,4 +1,4 @@
-//6:45
+//13:40
 import React, { useState, useEffect, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -16,6 +16,7 @@ function Editor() {
     let acorn = require("acorn");
 
     const [code, setCode] = useState(value);
+    const [vars, setVars] = useState();
     const [ast, setAst] = useState();
 
     const handleCodeChange = (value, viewUpdate) => {
@@ -32,6 +33,8 @@ function Editor() {
             const ast = acorn.parse(code, { ecmaVersion: 'latest' });
             setAst(ast);
             console.log(ast);
+            console.log("tokenizer:")
+
             try {
                 //runCode(code);
             } catch (error) {
