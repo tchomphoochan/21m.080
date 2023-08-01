@@ -1,17 +1,16 @@
 //run = whether or not to evaluate code
-export function traverse(code, run, prevVars, prevFuncNodes) {
+export function traverse(code, tracker = null) {
     let acorn = require('acorn');
     let walk = require('acorn-walk');
     let ast = acorn.parse(code, { ecmaVersion: 'latest' });
 
-    let global_vars = {};
-    //let funcNodes = [];
-
     class VariableTracker {
-        constructor(parent = null) {
+        constructor(prevTracker, parent = null) {
             this.vars = {};
-            this.funcNodes = [];
+            this.funcNodes = {};
             this.parent = parent;
+            this.children = {};
+            this.prevTracker = prevTracker;
         }
 
         getVal(name) {
@@ -20,21 +19,20 @@ export function traverse(code, run, prevVars, prevFuncNodes) {
                 if (name in curr.vars) {
                     return curr[name];
                 }
-                curr = this.parent;
+                curr = curr.parent;
             }
             return null;
         }
 
         getFunc(name) {
-            let funcNode = undefined;
             let curr = this;
-            while (funcNode == undefined && curr != null) {
-                funcNode = curr.funcNodes.find(
-                    (fn) => fn.node.id.name === name
-                );
+            while (curr != null) {
+                if (name in curr.funcNodes) {
+                    return curr[name];
+                }
                 curr = curr.parent;
             }
-            return funcNode;
+            return null;
         }
 
         traverse() {
@@ -54,7 +52,7 @@ export function traverse(code, run, prevVars, prevFuncNodes) {
                     let name = indices[i][0]
                     let start = indices[i][1]
                     let end = indices[i][2]
-                    currCode = currCode.slice(0, start) + "getVal(" + name + ")" + code.slice(end + 1);
+                    currCode = currCode.slice(0, start) + "this.getVal(" + name + ")" + code.slice(end + 1);
                 }
                 try {
                     eval(currCode);
@@ -63,17 +61,11 @@ export function traverse(code, run, prevVars, prevFuncNodes) {
                     console.log("Error evaluating code");
                 }
             }
-            // function evaluate(node) {
-            //     try {
-            //         eval(code.slice(node.start, node.end));
-            //     } catch (error) {
-            //         // If eval encounters an error, return undefined
-            //         console.log("Error evaluating code");
-            //     }
-            // }
 
             function evalVar(name, node) {
-                val = this.getVal(name);
+                let val = this.getVal(name);
+                let oldVal = null;
+
                 if (val != null) {
                     try {
                         if (isPlayingSound(val)) {
@@ -85,24 +77,35 @@ export function traverse(code, run, prevVars, prevFuncNodes) {
                 }
                 insertIdentifiers(node);
             }
+            function getPrevTracker(name) {
+                if (name in this.children) {
+                    return this.children[name];
+                }
+            }
             //2nd param = state where vars will be stored but we use whole instance of class
             //3rd param = functions applied when node is of that type
             walk.recursive(ast, this, {
                 FunctionDeclaration(node) {
                     // Store the function node and parameters temporarily (wait to traverse until function called)
-                    state.funcNodes.push({
+                    let changed = state.prevTracker == null || state.prevTracker.funcNodes[funcName].node != node;
+                    state.funcNodes[node.id.name] = {
                         node: node,
                         params: node.params.map((param) => param.name),
-                    });
+                        changed: changed
+                    }
                 },
 
                 CallExpression(node, state) {
                     const funcName = node.callee.name;
                     //Check if name in funcNodes
                     const funcNode = state.getFunc(funcName);
-                    if (funcNode) {
+                    if (funcNode && !funcNode.changed) {
+                        state.children[funcName] = prevTracker.children[funcNode];
+                    }
+                    else if (funcNode) {
                         //create new tracker to store info about function params & args
-                        const funcScopeTracker = new VariableTracker(state);
+                        const funcScopeTracker = new VariableTracker(null, state);
+                        state.children[funcName] = funcScopeTracker;
                         for (let i = 0; i < funcNode.params.length; i++) {
                             // Add function parameters to the current scope
                             const paramName = funcNode.params[i].name;
@@ -168,5 +171,4 @@ How should scope be dealt with?
 When block is evaluated, can it be a block within another block?
 What if line affects code in other parts like loops
 
-Update prevVars at end
 */
