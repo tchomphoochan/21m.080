@@ -59,8 +59,9 @@ export const starterCode = [
 	'clearInterval( seq )',
 	'',
 	'//gui elements',
-	'for(i=0;i<8;i++) gui.addCircle(25)',
-	'for(i=0;i<8;i++) gui.addCircle()'
+	'gui.addElement("knob","LABEL")',
+	'gui.addElement("slider","LABEL")',
+	'gui.addElement("toggle","LABEL")'
 ];
 
 //inputs and outputs are the available midi ports
