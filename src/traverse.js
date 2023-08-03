@@ -1,16 +1,40 @@
 //run = whether or not to evaluate code
-export function traverse(code, tracker = null) {
+export function traverse(code, prevVars = null) {
     let acorn = require('acorn');
     let walk = require('acorn-walk');
     let ast = acorn.parse(code, { ecmaVersion: 'latest' });
+    let varNames = new Set();
+    let variables = {};
+    let incr = 0;
+    let length = 'globalThis.'.length();
+
+    const visitors = {
+        Identifier(node) {
+            code = code.splice(node.start + incr, node.end + incr) + "globalThis." + code.splice(node.end + incr);
+            incr += length;
+            varNames.add(node.name);
+        }
+    }
+
+    walk.simple(ast, visitors);
+    console.log(code);
+    eval(code);
+    for (varName in varNames) {
+        try {
+            let val = eval(varName);
+            if (prevVars && isPlayingSound(prevVars[varName])) {
+                prevVars[varName].stop();
+            }
+            if (isPlayingSound(val)) {
+                variables[varName] = val;
+            }
+        } catch (error) {
+            //no need for action
+        }
+    }
 
     class VariableTracker {
-        constructor(prevTracker, parent = null) {
-            this.vars = {};
-            this.funcNodes = {};
-            this.parent = parent;
-            this.children = {};
-            this.prevTracker = prevTracker;
+        constructor() {
         }
 
         getVal(name) {
