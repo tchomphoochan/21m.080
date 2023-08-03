@@ -36,9 +36,14 @@ function Editor() {
                 for (const declaration of node.declarations) {
                     let name = declaration.id.name;
                     let start = declaration.start;
+                    let end = declaration.end;
                     code = code.substring(0, start + incr) + "globalThis." + code.substring(start + incr);
                     incr += length;
                     varNames.add(name);
+                    //In case of no assignment, set to null
+                    if (!declaration.init) {
+                        code = code.substring(0, end + incr) + " = null" + code.substring(end + incr);
+                    }
                 }
             },
         }
