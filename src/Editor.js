@@ -13,16 +13,18 @@ function Editor() {
     const value = localStorage.getItem('myValue') || '//Start coding here!';
 
     const [code, setCode] = useState(value);
+    const [vars, setVars] = useState({});
+    const [liveMode, setLiveMode] = useState(false);
+    const [middleButton, setMiddleButton] = useState("button-container");
 
     function isPlayingSound(audioNode) {
         return audioNode.context.currentTime < audioNode.stopTime;
     }
 
-    function traverse(code, prevVars = null) {
+    function traverse(code) {
         let acorn = require('acorn');
         let walk = require('acorn-walk');
         let ast = acorn.parse(code, { ecmaVersion: 'latest' });
-        console.log(ast);
         let varNames = new Set();
         let variables = {};
         let incr = 0;
@@ -49,22 +51,28 @@ function Editor() {
         }
 
         walk.recursive(ast, null, visitors);
-        console.log(code);
+        console.log(varNames);
         eval(code);
 
-        for (const varName of varNames) {
-            try {
-                let val = eval(varName);
-                if (prevVars && isPlayingSound(prevVars[varName])) {
-                    prevVars[varName].stop();
-                }
-                if (isPlayingSound(val)) {
-                    variables[varName] = val;
-                }
-            } catch (error) {
-                //no need for action
-            }
-        }
+        //will fix later
+        // for (const varName of varNames) {
+        //     try {
+        //         let val = eval(varName);
+        //         console.log(val);
+        //         if (liveMode) {
+        //             if (varName in vars && isPlayingSound(vars[varName])) {
+        //                 vars[varName].stop();
+        //             }
+        //         }
+        //         if (isPlayingSound(val)) {
+        //             variables[varName] = val;
+        //         }
+        //     } catch (error) {
+        //         console.log("Error stoping variable in live mode.", error);
+        //     }
+        // }
+        //console.log(variables);
+        //setVars(variables);
     }
 
     const handleCodeChange = (value, viewUpdate) => {
@@ -85,9 +93,46 @@ function Editor() {
         }
     };
 
+    const playClicked = () => {
+        traverse(code);
+
+    }
+
+    const liveClicked = () => {
+        if (liveMode) {
+            setLiveMode(false);
+            setMiddleButton("button-container");
+        }
+        else {
+            setLiveMode(true);
+            setMiddleButton("button-container middle-clicked");
+        }
+
+    }
+
+    const stopClicked = () => {
+        setLiveMode(false);
+        setMiddleButton("button-container");
+        for (const key in vars) {
+            let variable = vars[key];
+            try {
+                variable.stop();
+            } catch (error) {
+                console.log("Error stopping all variables.", error);
+            }
+        }
+        setVars({});
+
+    }
+
     return (
         <div className="flex-container">
             <div className="flex-child">
+                <div className="flex-container">
+                    <button className="button-container" onClick={playClicked}>Play</button>
+                    <button className={middleButton} onClick={liveClicked}>Live</button>
+                    <button className="button-container" onClick={stopClicked}>Stop</button>
+                </div>
                 <CodeMirror
                     value={value}
                     initialState={serializedState
