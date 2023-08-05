@@ -1,3 +1,11 @@
+
+import { midi, onMIDISuccess, onMIDIFailure, setMidiInput, setMidiOutput, getMidiIO,
+	handleMidiInput, outputMidiID, midiMap, ccMap, stopMap, mute, muted, toggleMute } from "./midiCoder/midi_control.js";
+import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from './midiCoder/seq_control.js'
+import { makingIf, startTern } from "./midiCoder/algorithm_control.js";
+import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"
+import {floor, ceil, peak, cos, round, trunc, abs} from './midiCoder/midi_math.js';
+
 //run = whether or not to evaluate code
 export function traverse(code, tracker = null) {
     let acorn = require('acorn');
