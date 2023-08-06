@@ -1,5 +1,5 @@
-//7:00
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+//14:06
+import React, { useState } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
 import { javascript } from '@codemirror/lang-javascript';
@@ -17,62 +17,93 @@ function Editor() {
     const [liveMode, setLiveMode] = useState(false);
     const [middleButton, setMiddleButton] = useState("button-container");
 
-    function isPlayingSound(audioNode) {
-        return audioNode.context.currentTime < audioNode.stopTime;
+    function removeComments(code) {
+        // Regular expression to match single-line and multi-line comments
+        const commentRegex = /\/\/.*?$|\/\*[\s\S]*?\*\//gm;
+
+        // Remove comments from the code using the regular expression
+        const cleanedCode = code.replace(commentRegex, '');
+
+        return cleanedCode;
     }
 
-    function traverse(code) {
+    function traverse(string) {
+        string = removeComments(string);
         let acorn = require('acorn');
         let walk = require('acorn-walk');
-        let ast = acorn.parse(code, { ecmaVersion: 'latest' });
-        let varNames = new Set();
-        let variables = {};
+        let ast = acorn.parse(string, { ecmaVersion: 'latest' });
         let incr = 0;
+        let varNames = [];
+        let variables = {};
         let length = 'globalThis.'.length;
         const visitors = {
             VariableDeclaration(node, state, c) {
                 let kind = node.kind;
-                code = code.substring(0, node.start + incr) + code.substring(node.start + incr + kind.length);
+                string = string.substring(0, node.start + incr) + string.substring(node.start + incr + kind.length);
                 incr -= kind.length;
                 //Continue walk to search for identifiers
                 for (const declaration of node.declarations) {
                     let name = declaration.id.name;
                     let start = declaration.start;
                     let end = declaration.end;
-                    code = code.substring(0, start + incr) + "globalThis." + code.substring(start + incr);
+                    string = string.substring(0, start + incr) + "globalThis." + string.substring(start + incr);
                     incr += length;
-                    varNames.add(name);
+                    varNames.push(name);
                     //In case of no assignment, set to null
                     if (!declaration.init) {
-                        code = code.substring(0, end + incr) + " = null" + code.substring(end + incr);
+                        string = string.substring(0, end + incr) + " = null" + string.substring(end + incr);
                     }
                 }
             },
         }
 
         walk.recursive(ast, null, visitors);
-        console.log(varNames);
-        eval(code);
+        eval(string);
 
-        //will fix later
-        // for (const varName of varNames) {
-        //     try {
-        //         let val = eval(varName);
-        //         console.log(val);
-        //         if (liveMode) {
-        //             if (varName in vars && isPlayingSound(vars[varName])) {
-        //                 vars[varName].stop();
-        //             }
-        //         }
-        //         if (isPlayingSound(val)) {
-        //             variables[varName] = val;
-        //         }
-        //     } catch (error) {
-        //         console.log("Error stoping variable in live mode.", error);
-        //     }
-        // }
-        //console.log(variables);
-        //setVars(variables);
+        //REMINDER: Issue may arise from scheduled sounds
+        for (const varName of varNames) {
+            let val = eval(varName);
+            //Add name value pairs to variables dictionary for all audioNodes
+            try {
+                let isAudioNode = val.context || val instanceof AudioContext;
+                if (isAudioNode) {
+                    variables[varName] = val;
+                }
+            } catch (error) {
+                //Variable isn't an audioNode
+            }
+
+            //Remove all sounds that have been changed
+            if (liveMode) {
+                if (varName in vars) {
+                    try {
+                        vars[varName].stop();
+                    } catch (error) {
+                        //val not playing sound
+                    }
+                }
+            }
+        }
+
+        //Remove all sounds that have been deleted
+        if (liveMode) {
+            for (const [key, val] of Object.entries(vars)) {
+                if (!(key in variables)) {
+                    if (!(code.includes(key))) {
+                        try {
+                            val.stop();
+                        } catch (error) {
+                            //val not playing sound
+                        }
+                    }
+                    else {
+                        variables[key] = val;
+                    }
+                }
+            }
+        }
+        console.log(variables);
+        setVars(variables);
     }
 
     const handleCodeChange = (value, viewUpdate) => {
@@ -85,15 +116,19 @@ function Editor() {
 
     const handleKeyDown = (event) => {
         if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-            try {
-                traverse(code);
-            } catch (error) {
-                console.error('Error evaluating code:', error);
+            if (liveMode) {
+                try {
+                    //Add code to get codeBlock instead
+                    traverse(code);
+                } catch (error) {
+                    console.error('Error evaluating code:', error);
+                }
             }
         }
     };
 
     const playClicked = () => {
+        stopClicked();
         traverse(code);
 
     }
@@ -118,7 +153,7 @@ function Editor() {
             try {
                 variable.stop();
             } catch (error) {
-                console.log("Error stopping all variables.", error);
+                //No action needed
             }
         }
         setVars({});
