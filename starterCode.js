@@ -1,4 +1,13 @@
 export const starterCode = [
+	'osc = context.createOscillator()\nosc.start()\n',
+	'volume = context.createGain()\n',
+	'volume.gain.value = .1',
+	'gui.addElement("knob","VOL",volume.gain.value)',
+	'osc.connect( volume )\n',
+	'volume.connect( context.destination )\n\n',
+	'\n\n\n\n\n',
+
+
 	'//audio objects',
 	'vco = new Tone.Oscillator().start()',
 	'vcf = new Tone.Filter()',
@@ -59,9 +68,9 @@ export const starterCode = [
 	'clearInterval( seq )',
 	'',
 	'//gui elements',
-	'gui.addElement("knob","LABEL")',
-	'gui.addElement("slider","LABEL")',
-	'gui.addElement("toggle","LABEL")'
+	'gui.addElement("knob","KNOB")',
+	'gui.addElement("slider","SLIDER")',
+	'gui.addElement("toggle","TOGGLE")'
 ];
 
 //inputs and outputs are the available midi ports
