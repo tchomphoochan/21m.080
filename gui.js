@@ -118,7 +118,7 @@ const gui_sketch = function(my) {
   my.keyReleased = function() {
     currKey = 'none';
   }
-  
+
   my.draw = function() {
     my.angleMode(DEGREES);
     my.textStyle(BOLD);
@@ -174,7 +174,8 @@ const gui_sketch = function(my) {
 
         // MAP TO CONTROLS
         // volume.gain.value = elements[i].value;
-        elements[i].mapTo = elements[i].value;
+        // eval(elements[i].mapTo +'= ' + elements[i].value + ';');
+        // elements[i].mapTo = elements[i].value;
         
       } 
       else if (elements[i].type == 'slider'){
@@ -438,6 +439,8 @@ const gui_sketch = function(my) {
   
 
   let elements = [];
+
+
 
   my.addElement = function(type,label,mapTo, x='default',y='default',minval=0,maxval=1,value=0.25,size=1) {
     // calculate default values
