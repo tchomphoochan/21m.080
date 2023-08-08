@@ -1,20 +1,29 @@
-import { useRef } from "react";
-import Sketch from "react-p5";
+import { useRef, useEffect, useState } from 'react';
+import p5 from 'p5';
 
 function Canvas(props) {
-    const canvasParentRef = useRef();
-    let setup = (p5, canvasParentRef) => {
-        //const containerWidth = canvasParentRef.current.clientWidth;
-        let xyz = p5.createCanvas(p5.windowWidth / 2, props.height).parent(canvasParentRef);
+    const canvasRef = useRef(null);
+    const sketch = p => {
+        var sketch = function (p) {
+            p.x = 100;
+            p.y = 100;
+
+            p.setup = function () {
+                p.createCanvas(200, 200);
+                p.background(51);
+            }
+
+            p.draw = function () {
+                p.fill(255, 0, 200, 25);
+            }
+        }
     };
-    let draw = (p5) => {
-        p5.background("rgb(100%,0%,10%)");
-    };
-    return (
-        <div className="flex-child" ref={canvasParentRef}>
-            <Sketch setup={(p5) => setup(p5, canvasParentRef.current)} draw={draw} />
-        </div>
-    );
+    // while (!canvasRef.current) {
+
+    // }
+    console.log(canvasRef)
+    let myp5 = new p5(sketch, "container");
+
 }
 
 export default Canvas;

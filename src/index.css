@@ -26,6 +26,11 @@ code {
   margin-right: 5px;
 }
 
+.canvas-container {
+  display: inline-block;
+  vertical-align: top;
+}
+
 .center-content {
   align-items: center;
   justify-content: center;
