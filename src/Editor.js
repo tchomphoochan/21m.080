@@ -1,9 +1,10 @@
-//6
-import { useState } from 'react';
+//6:54
+import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
 import { javascript } from '@codemirror/lang-javascript';
 
+import p5 from 'p5';
 import Canvas from "./Canvas.js";
 import * as midiMain from './midiCoder/midi_main.js';
 
@@ -42,6 +43,7 @@ var curLineNum = 0;
 //Save history in browser
 const stateFields = { history: historyField };
 
+
 function Editor() {
     window.setupClock();
     // eval('import * as midiControl from "./midiCoder/midi_control.js";    import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from "./midiCoder/seq_control.js"; import { makingIf, startTern } from "./midiCoder/algorithm_control.js";    import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"; import {floor, ceil, peak, cos, round, trunc, abs} from "./midiCoder/midi_math.js";');
@@ -58,6 +60,10 @@ function Editor() {
     const [liveMode, setLiveMode] = useState(false);
     const [middleButton, setMiddleButton] = useState("button-container");
     const [canvases, setCanvases] = useState({});
+
+    useEffect(() => {
+        window.p5 = p5;
+    }, []);
 
     function removeComments() {
         // Regular expression to match single-line and multi-line comments
@@ -85,8 +91,8 @@ function Editor() {
     }
 
     function traverse(string) {
-        const { extracted, remaining } = extractNewP5Instances(string);
-        string = remaining;
+        // const { extracted, remaining } = extractNewP5Instances(string);
+        // string = remaining;
         let cleanedCode = removeComments();
         let acorn = require('acorn');
         let walk = require('acorn-walk');
@@ -121,6 +127,7 @@ function Editor() {
             },
         }
         walk.recursive(ast, null, visitors);
+        //string += "globalThis.p5= window.p5;\n" + string;
         eval(string);
 
         //REMINDER: Issue may arise from scheduled sounds
@@ -168,11 +175,10 @@ function Editor() {
         setVars(variables);
 
         //Add canvases
-        extracted.forEach((pair) => {
-            const { canvasName, sketchName } = pair;
-            setCanvases((prevCanvases) => ({ ...prevCanvases, [canvasName]: sketchName }));
-        });
-        console.log(canvases);
+        // extracted.forEach((pair) => {
+        //     const { canvasName, sketchName } = pair;
+        //     setCanvases((prevCanvases) => ({ ...prevCanvases, [canvasName]: sketchName }));
+        // });
     }
 
     //save history in browser and update code value
@@ -278,7 +284,6 @@ function Editor() {
                 />
             </div>
             <div id="container" className="flex-child">
-                <Canvas />
             </div>
         </div>
     );
