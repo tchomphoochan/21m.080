@@ -1,8 +1,9 @@
 export const starterCode = [
 	'osc = context.createOscillator()\nosc.start()\n',
 	'volume = context.createGain()\n',
-	'volume.gain.value = .1',
-	'gui.addElement("knob","VOL",volume.gain.value)',
+	'volume.gain.value = .1\n',
+	'gui.addElement({type:"knob",label:"VOL",mapto:"volume.gain.value"})\n',
+	'gui.removeElement("VOL")\n',
 	'osc.connect( volume )\n',
 	'volume.connect( context.destination )\n\n',
 	'\n\n\n\n\n',

@@ -28,28 +28,29 @@ const gui_sketch = function(my) {
 
     my.button = createButton('Add Elements');
     my.button.parent('gui_div'); //'p5 is the name of the div to draw into'
-    my.button.position(0, 0);
+    my.button.position(10, 14);
+    my.button.size(10, 14);
 
     my.button.mousePressed(buttonPress);
     // buttonPress();
     
-    my.keyboardBtn = createButton('Keyboard');
-    my.keyboardBtn.parent('gui_div'); //'p5 is the name of the div to draw into'
-    my.keyboardBtn.position(100, 0);
+    // my.keyboardBtn = createButton('Keyboard');
+    // my.keyboardBtn.parent('gui_div'); //'p5 is the name of the div to draw into'
+    // my.keyboardBtn.position(100, 0);
 
-    my.keyboardBtn.mousePressed(addKeyboard);
+    // my.keyboardBtn.mousePressed(addKeyboard);
     
     // buttonPress();
 
     my.startSeq = createButton('PLAY seq');
     my.startSeq.parent('gui_div'); //'p5 is the name of the div to draw into'
-    my.startSeq.position(0, 40);
+    my.startSeq.position(10, 40);
     my.startSeq.mousePressed(
       function() {seq = setInterval( mySeq, 400 )}
     );
     my.stopSeq = createButton('STOP seq');
     my.stopSeq.parent('gui_div'); //'p5 is the name of the div to draw into'
-    my.stopSeq.position(0, 60);
+    my.stopSeq.position(10, 60);
     my.stopSeq.mousePressed(
       function() {clearInterval(seq)}
     );
@@ -92,6 +93,9 @@ const gui_sketch = function(my) {
   let sliderLength=100;
   // radio
   let boxSize = 30;
+  let seqBoxSize = 30;
+  let seqUpdateState = 'ON';
+  let seqUpdateStarted = false;
   
   // Knob Control Variables
   let ogY = 0;
@@ -113,19 +117,41 @@ const gui_sketch = function(my) {
 
   my.keyPressed = function() {
     currKey = keyCode;
-    console.log('key: '+currKey);
+    // console.log('key: '+currKey);
   }
   my.keyReleased = function() {
     currKey = 'none';
   }
 
   my.draw = function() {
+    my.background(elementColor2);
     my.angleMode(DEGREES);
     my.textStyle(BOLD);
     my.textAlign (CENTER, CENTER);
+    // draw grid
+    push();
+    my.strokeWeight(1);
+    my.stroke(elementColor3);
+    my.fill(elementColor3);
+    let yOffset = 100
+    for (let i = 0; i < 20; i++) {
+      my.line(0,i*yOffset,5,i*yOffset);
+    }
+    for (let i = 0; i < 20; i++) {
+      my.line(i*yOffset,0,i*yOffset,5);
+    }
+    my.noStroke();
+    my.textSize(7);
+    my.textStyle(NORMAL);
+    my.text('100',yOffset,10)
+    my.text('100',12,yOffset)
+    pop();
+    // my.fill(elementColor1);
+    // my.rect(0,yOffset,1000,110);
+
+
     // ITERATE THRU ALL ELEMENTS and UPDATE THEM IF NEEDED
     my.fill(elementColor1);
-    my.background(elementColor2);
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].type == 'knob'){
         // ADJUST KNOB ANGLE WHILE DRAGGING
@@ -174,9 +200,7 @@ const gui_sketch = function(my) {
 
         // MAP TO CONTROLS
         // volume.gain.value = elements[i].value;
-        // eval(elements[i].mapTo +'= ' + elements[i].value + ';');
-        // elements[i].mapTo = elements[i].value;
-        
+        eval(elements[i].mapto +'= ' + elements[i].value + ';');
       } 
       else if (elements[i].type == 'slider'){
         // ADJUST SLIDER VAL WHILE DRAGGING
@@ -215,11 +239,13 @@ const gui_sketch = function(my) {
         my.fill(elementColor3);
         my.noStroke();
         let normalizedValue  = int((elements[i].value + 90) * valueScale) + 50;
-        // let valToGain = normalizedValue * 0.1;
-        // // volume.gain.value = valToGain;
+        
         my.text(normalizedValue, 0, sliderLength/2+20);
         my.text(elements[i].label, 0, sliderLength/2+35);
         my.pop();
+
+        // MAP TO CONTROLS
+        eval(elements[i].mapto +'= ' + elements[i].value + ';');
       } 
       else if (elements[i].type == 'toggle' ){
         // draw element
@@ -250,6 +276,9 @@ const gui_sketch = function(my) {
         my.textSize(85/toggleText.length);
         my.text(toggleText, 0, 1);
         my.pop();
+
+        // MAP TO CONTROLS
+        eval(elements[i].mapto +'= ' + elements[i].value + ';');
       }
       else if (elements[i].type == 'momentary' ){
         // draw element
@@ -272,6 +301,9 @@ const gui_sketch = function(my) {
         my.textSize(85/text.length);
         my.text(text, 0, 1);
         my.pop();
+
+        // MAP TO CONTROLS
+        eval(elements[i].mapto +'= ' + elements[i].value + ';');
       }
       else if (elements[i].type == 'radio'){
         // CURRENTLY ASSUMING ONLY 4 OPTIONS
@@ -306,10 +338,10 @@ const gui_sketch = function(my) {
 
           } 
         }
-
-        
         my.pop();
 
+        // MAP TO CONTROLS
+        eval(elements[i].mapto +'= ' + elements[i].value + ';');
       }
       else if (elements[i].type == 'keyboard'){
         // draw element
@@ -351,9 +383,54 @@ const gui_sketch = function(my) {
           my.rect(xShift, 0, 35, -80);
         }
       }
+      else if (elements[i].type == 'sequencer'){
+        // draw element
+        my.translate(20,100);
+        my.push();
+        my.fill(elementColor2);
+        my.stroke(elementColor1);
+        let seqBoxSize = 30;
+        for (let track =0; track < 4; track++){
+          my.push();
+          my.fill(elementColor1);
+          my.noStroke();
+          my.text('TRK',seqBoxSize/2,track*seqBoxSize);
+          my.pop();
+          for (let step =0; step < 8; step++){
+            let x = (step+1)*seqBoxSize;
+            let y = track*seqBoxSize;
+            if (dragging == true){
+              let stepState = elements[i].value[track][step];
+              if ((my.mouseX > x && my.mouseX < x+boxSize) && (my.mouseY > y && my.mouseY < y+boxSize)){
+                console.log(elements[i].value)
+                if (seqUpdateStarted) {
+                  let newval = 1;
+                  if (seqUpdateState == 'OFF'){
+                    newval = 0;
+                  }
+                  elements[i].value[track][step] = newval;
+                  stepState = newval;
+                } else {
+                  seqUpdateStarted = true;
+                  seqUpdateState = 'ON';
+                  if (stepState == 1){
+                    seqUpdateState = 'OFF';
+                  }
+                }
+                my.fill(elementColor2);
+                if (stepState == 1) {
+                  my.fill(elementColor1);
+                }
+              }
+            }
+            my.rect((step+1)*seqBoxSize,track*seqBoxSize,seqBoxSize);
+          }
+        }
+        my.pop();
+      } 
       else if (elements[i].type == 'idk'){
         // draw element
-      }
+      } 
     }
   }
 
@@ -415,6 +492,15 @@ const gui_sketch = function(my) {
           else if (boxSize < mousePos && mousePos <= (2*boxSize)){elements[i].value = 4;}
         } 
       }
+      else if (elements[i].type == "sequencer"){
+        if (my.mouseX >= (elements[i].x) && my.mouseX <= (seqBoxSize*9 + elements[i].x)){
+          if (my.mouseY >= (elements[i].y) && my.mouseX <= (seqBoxSize*4 + elements[i].y)){
+            dragging = true; // start dragging
+            currElement = i;
+            console.log('curE: '+currElement);
+          }
+        } 
+      }
     }
   }
     
@@ -425,10 +511,10 @@ const gui_sketch = function(my) {
       dragging = false;
   }
 
-  let UserElement = function(type,label,mapTo,x,y,minval,maxval,value,size) {
+  let UserElement = function(type,label,mapto,x,y,minval,maxval,value,size) {
     this.type = type;
     this.label = label;
-    this.mapTo = mapTo;
+    this.mapto = mapto;
     this.x = x;
     this.y = y;
     this.minval = minval;
@@ -442,38 +528,82 @@ const gui_sketch = function(my) {
 
 
 
-  my.addElement = function(type,label,mapTo, x='default',y='default',minval=0,maxval=1,value=0.25,size=1) {
-    // calculate default values
-    let xGap = 100;
-    if (x == 'default') {
-      x = x0 + elements.length*xGap;
-    } 
-    if (y == 'default') {
-      y = y0;
+  // my.addElement = function(type,label,mapto, {x="_default",y="_default",minval="_default",maxval="_default",value="_default",size="_default"}) {
+  my.addElement = function({type,label,mapto, x,y,minval,maxval,value,size}) {
+    console.log(elements);
+    console.log('?: '+x);
+    // NEW OR UPDATE EXISTING?
+    let update = false;
+    for (let i = 0; i < elements.length; i++) {
+      if (elements[i].label == label) {
+        console.log('UPDATE element');
+        update = true;
+        // UPDATE VALS
+        if (type != undefined) {elements[i].type = type;}
+        if (mapto != undefined) {elements[i].mapto = mapto;}
+        if (x != undefined) {elements[i].x = x;}
+        if (y != undefined) {elements[i].y = y;}
+        if (minval != undefined) {elements[i].minval = minval;}
+        if (maxval != undefined) {elements[i].maxval = maxval;}
+        if (value != undefined) {elements[i].value = value;}
+        if (size != undefined) {elements[i].size = size;}
+        break
+      }
+      else {
+        console.log('NEW element');
+      }
     }
-    if (type == 'toggle') {
-      value = 0;
-    } 
-    else if (type == 'radio') {
-      value = 1;
+
+    if (update == false){
+      let xGap = 100;
+      // default default values
+      if (x == undefined) {x = x0 + elements.length*xGap;}
+      if (y == undefined) { y = y0;}
+      if (minval == undefined) {minval=0;}
+      if (maxval == undefined) {maxval=1;}
+      if (value == undefined) {value=0.25;}
+      if (size == undefined) {size=1;}
+
+      if (type == 'toggle') {
+        value = 0;
+      } 
+      else if (type == 'radio') {
+        value = 1;
+      }
+      else if (type == 'sequencer') {
+        // 8 x 4track
+        value = [[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]];
+      }
+      // change default initial value based on type of element?
+      // maybe also change default range to -1,1 for some elements
+      elements.push(new UserElement(type,label,mapto,x,y,minval,maxval,value,size));
+      if (type == "slider"){
+        // slider = createSlider(0, 255, 100);
+        // slider.parent('p5'); //'p5 is the name of the div to draw into'
+        // slider.position(x, y);
+      }
+      else if (type == 'toggle') {
+        let toggleText = "OFF";
+        my.push();
+        my.fill (255,0,0);
+        my.translate(x, y);
+        my.ellipse(0, 0, r*2, r*2);
+        my.fill(0);
+        my.text(toggleText, 0, 0);
+        my.pop();
+      }
     }
-    // change default initial value based on type of element?
-    // maybe also change default range to -1,1 for some elements
-    elements.push(new UserElement(type,label,mapTo,x,y,minval,maxval,value,size));
-    if (type == "slider"){
-      // slider = createSlider(0, 255, 100);
-      // slider.parent('p5'); //'p5 is the name of the div to draw into'
-      // slider.position(x, y);
-    }
-    else if (type == 'toggle') {
-      let toggleText = "OFF";
-      my.push();
-      my.fill (255,0,0);
-      my.translate(x, y);
-      my.ellipse(0, 0, r*2, r*2);
-      my.fill(0);
-      my.text(toggleText, 0, 0);
-      my.pop();
+  }
+  my.removeElement = function(label) {
+    console.log('BEFORE');
+    console.log(elements);
+    for (let i = 0; i < elements.length; i++) {
+      if (elements[i].label == label) {
+        elements.splice(i,1);
+        console.log('AFTER');
+        console.log(elements);
+        
+      }
     }
   }
 
