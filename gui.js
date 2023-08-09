@@ -4,6 +4,7 @@ const gui_sketch = function(my) {
 
   my.x_size = document.getElementById('gui_div').offsetWidth;
   my.y_size = document.getElementById('gui_div').offsetHeight;
+  my.dimRatio = 0.5
 
   my.setup = function() {
     // COLOR VARS
@@ -54,6 +55,10 @@ const gui_sketch = function(my) {
     my.stopSeq.mousePressed(
       function() {clearInterval(seq)}
     );
+
+    my.angleMode(DEGREES);
+    my.textStyle(BOLD);
+    my.textAlign (CENTER, CENTER);
 
   }
 
@@ -124,10 +129,9 @@ const gui_sketch = function(my) {
   }
 
   my.draw = function() {
+    //settings
     my.background(elementColor2);
-    my.angleMode(DEGREES);
-    my.textStyle(BOLD);
-    my.textAlign (CENTER, CENTER);
+    
     // draw grid
     push();
     my.strokeWeight(1);
@@ -170,7 +174,7 @@ const gui_sketch = function(my) {
         my.push();
         my.stroke(elementColor3);
         my.fill(transparentColor);  
-        my.translate(elements[i].x, elements[i].y);
+        my.translate( my.scaleX(elements[i].x), my.scaleY(elements[i].y) );
         my.strokeWeight(3);
         my.arc(0, 0, r*2.3, r*2.3,135,45);
         my.stroke(elementColor1);
@@ -593,7 +597,11 @@ const gui_sketch = function(my) {
         my.pop();
       }
     }
-  }
+
+    return elements[elements.length - 1];
+
+  }//addElement
+
   my.removeElement = function(label) {
     console.log('BEFORE');
     console.log(elements);
@@ -605,6 +613,14 @@ const gui_sketch = function(my) {
         
       }
     }
+  }//removeElement
+
+  my.scaleX = function(val){
+    return (val/100) * my.x_size;
+  }
+
+  my.scaleY = function(val){
+    return (val/100) * my.x_size * my.dimRatio;
   }
 
 }
