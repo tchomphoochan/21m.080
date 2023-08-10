@@ -63,6 +63,8 @@ function Editor() {
 
     useEffect(() => {
         window.p5 = p5;
+        const initialCanvases = "var sketch = function(p) {\np.setup = function() {\np.createCanvas(200, 200);\np.background(51);\n};\np.draw = function() {\np.fill(255, 0, 200, 25);\n};\n};\nglobalThis.canvas1 = new p5(sketch, 'container1');\nglobalThis.canvas2 = new p5(sketch, 'container2');\nglobalThis.canvas3 = new p5(sketch, 'container3');";
+        eval(initialCanvases);
     }, []);
 
     function removeComments() {
@@ -74,34 +76,18 @@ function Editor() {
         return cleanedCode;
     }
 
-    function extractNewP5Instances(string) {
-        const pattern = /\s*(let|var|const)\s+([\w$]+)\s*=\s*new\s+p5\s*\(\s*([\w$]+)\s*\)\s*;/g;
-        const extracted = [];
-        let remaining = string;
-
-        let match;
-        while ((match = pattern.exec(string)) !== null) {
-            const canvasName = match[2];
-            const sketchName = match[3];
-            extracted.push({ canvasName, sketchName });
-            remaining = remaining.replace(match[0], '');
-        }
-
-        return { extracted, remaining };
-    }
-
     function traverse(string) {
-        // const { extracted, remaining } = extractNewP5Instances(string);
-        // string = remaining;
         let cleanedCode = removeComments();
         let acorn = require('acorn');
         let walk = require('acorn-walk');
         let ast = acorn.parse(string, { ecmaVersion: 'latest' });
 
         let incr = 0; //tracks index while editing string
+        // let p5Instances = {};
         let varNames = []; //Names of All varnames
         let variables = {}; //Name, val pairs of ONLY audioNodes
-        let length = 'globalThis.'.length;
+        let length1 = 'globalThis.'.length;
+        let length2 = " = null".length;
 
         //Take action when we see a VariableDeclaration Node
         const visitors = {
@@ -117,17 +103,43 @@ function Editor() {
                     let end = declaration.end;
                     //Add globalThis to string & name to varNames
                     string = string.substring(0, start + incr) + "globalThis." + string.substring(start + incr);
-                    incr += length;
+                    incr += length1;
                     varNames.push(name);
                     //In case of no assignment, set to var to null
-                    if (!declaration.init) {
+                    let init = declaration.init;
+                    if (!init) {
                         string = string.substring(0, end + incr) + " = null" + string.substring(end + incr);
+                        incr += length2;
+                    }
+                    else {
+                        //check for p5 instances & create relevent divs
+                        // try {
+                        //     if (init.callee.name === "p5") {
+                        //         console.log("success");
+                        //         let id = init.arguments[1].value;
+                        //         if(name in canvases){
+                        //             string = string.substring(0, start + incr) + string.substring(end + incr);
+                        //             incr -= end - start;
+                        //         }
+                        //         else{
+                        //             p5Instances[name] = id;
+                        //         }
+                        //         //setCanvases(prevCanvases => ({ ...prevCanvases, [name]: id }));
+                        //     }
+                        // } catch (error) {
+                        //     //not p5 instance
+                        // }
                     }
                 }
             },
         }
+
         walk.recursive(ast, null, visitors);
-        //string += "globalThis.p5= window.p5;\n" + string;
+        while (canvases == {}) {
+
+        }
+        console.log(canvases);
+        // console.log(document.querySelector('container'));
         eval(string);
 
         //REMINDER: Issue may arise from scheduled sounds
@@ -174,11 +186,6 @@ function Editor() {
         }
         setVars(variables);
 
-        //Add canvases
-        // extracted.forEach((pair) => {
-        //     const { canvasName, sketchName } = pair;
-        //     setCanvases((prevCanvases) => ({ ...prevCanvases, [canvasName]: sketchName }));
-        // });
     }
 
     //save history in browser and update code value
@@ -283,7 +290,10 @@ function Editor() {
                     onStatistics={handleStatistics}
                 />
             </div>
-            <div id="container" className="flex-child">
+            <div className="flex-child">
+                <div id="container1"></div>
+                <div id="container2"></div>
+                <div id="container3"></div>
             </div>
         </div>
     );
