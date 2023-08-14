@@ -1,13 +1,41 @@
 //example of P5.js code in my mode
 //https://youtu.be/Su792jEauZg
+let x_size,y_size;
+let globalScale = 1;
+
+let fullscreen = false;
+function fullscreenGUI(){
+  console.log("FS");
+
+  if (fullscreen){
+    //reset
+    document.getElementById('gui_div').style.top = "2%";
+    document.getElementById('gui_div').style.right = "2";
+    document.getElementById('gui_div').style.width = "49%";
+    document.getElementById('gui_div').style.height = "32%";
+    globalScale = 1;
+    fullscreen = false
+  } else {
+    //make fs
+    document.getElementById('gui_div').style.top = "4%";
+    document.getElementById('gui_div').style.right = ".5%";
+    document.getElementById('gui_div').style.width = "99%";
+    document.getElementById('gui_div').style.height = "96%";
+    // globalScale = 1.2;
+    fullscreen = true
+  }
+  x_size = document.getElementById('gui_div').offsetWidth *.99;
+  y_size = document.getElementById('gui_div').offsetHeight *.97;
+  gui.resizeCanvas(x_size, y_size);
+}
 const gui_sketch = function(my) {
 
-  my.x_size = document.getElementById('gui_div').offsetWidth;
-  my.y_size = document.getElementById('gui_div').offsetHeight;
+  x_size = document.getElementById('gui_div').offsetWidth *.99;
+  y_size = document.getElementById('gui_div').offsetHeight *.97;
   my.dimRatio = 0.5
 
   my.setup = function() {
-    my.createCanvas(my.x_size, my.y_size);
+    my.createCanvas(x_size, y_size);
     
     //slow down draw rate
     my.frameRate(30)
@@ -16,14 +44,14 @@ const gui_sketch = function(my) {
     whiteColor = color(255);
     blackColor = color(0);
     transparentColor = color(0,0);
-    elementColor1 = color(255,40,0);
-    elementColor2 = color(220,229,234);
-    elementColor3 = color(0,85);
+    my.color1 = color(255,40,0);
+    my.color2 = color(220,229,234);
+    my.color3 = color(0,85);
     bgColorShift = 100;
 
-    my.background(elementColor2)
+    my.background(my.color2)
     my.background(bgColorShift)
-    bgshift = 2;
+    bgshift = 3;
     my.noStroke();
     // my.button = createButton('Add Elements');
     // my.button.parent('gui_div'); //'p5 is the name of the div to draw into'
@@ -43,7 +71,6 @@ const gui_sketch = function(my) {
     // my.stopSeq.mousePressed(
     //   function() {clearInterval(seq)}
     // );
-
     my.angleMode(DEGREES);
     my.textStyle(BOLD);
     my.textAlign (CENTER, CENTER);
@@ -55,8 +82,13 @@ const gui_sketch = function(my) {
   let forceDraw = false;
   let currElement = 0;
   let currKey = 'none';
+
+  let createHorzDivision, createVertDivision, currVertDiv, currHorzDiv;
+  let vertDivisions = [];
+  let horzDivisions = [];
   
   // UI ELEMENTS DEFAULT VALUES
+  let SCALE = 1;
   let x0 = 50;
   let y0 = 180;
   let r = 40; // knob/button size
@@ -78,9 +110,9 @@ const gui_sketch = function(my) {
   let buttonPress = function() {
     // for testing
     console.log('buton pres')
+    my.addElement({type:"slider",label:"SCALE",mapto:"fakevar",max:2,value:1})
     my.addElement({type:"radio",label:"radio",mapto:"fillervar"})
     my.addElement({type:"knob",label:"kVOL",mapto:"fillervar"})
-    my.addElement({type:"slider",label:"sVOL",mapto:"fillervar"})
     my.addElement({type:"toggle",label:"togl",mapto:"fillervar"})
     my.addElement({type:"momentary",label:"momn",mapto:"fillervar"})
   }
@@ -92,30 +124,77 @@ const gui_sketch = function(my) {
   my.keyPressed = function() {currKey = keyCode;}
   my.keyReleased = function() {currKey = 'none';}
 
-  my.draw = function() {
-    if (dragging == false){
-      if (forceDraw == true){
-        forceDraw = false;
-      } else {
-        return;
-      }
-    } 
-    console.log("drawing");
-    //settings
-    // my.background(elementColor2);
-    bgColorShift += bgshift;
-    if (bgColorShift > 240){
-      bgshift = -2.3;
-    } else if(bgColorShift < 70) {
-      bgshift = 2.3;
+  let lastValues = [];
+  let lastNumElements = 0;
+  function checkIfValuesChanged(){
+    // check if elements list changed size
+    let numElements = elements.length;
+    if (numElements != lastNumElements){
+      lastNumElements = numElements;
+      return true;
     }
-    my.background(bgColorShift);
+
+    // build array of current values from all elements
+    let currValues = []
+    for (let i = 0; i < elements.length; i++) {
+      currValues.push(elements[i].value);
+    }
+    // console.log("OLD #: "+lastNumElements)
+    // console.log("NEW #: "+numElements)
+    // check all values against lastValues array
+    for (let i = 0; i < lastValues.length; i++) {
+      if (currValues[i] != lastValues[i]){
+        lastValues = currValues;
+        return true;
+      }
+    }
+
+    // if nothing changed
+    return false;
+  }
+  
+  let needsUpdate = true;
+
+  my.draw = function() { //drwwwwwww
+    // if (needsUpdate == false){
+    //   if (forceDraw == true){
+    //     forceDraw = false;
+    //   } 
+    //   else {
+    //     // needsUpdate = true;
+    //     return;
+    //   }
+    // } 
+
+    // console.log("drawing");
+    //settings
+    my.background(my.color2);
+    // bgColorShift += bgshift;
+    // if (bgColorShift > 240){
+    //   bgshift = -3;
+    // } else if(bgColorShift < 70) {
+    //   bgshift = 3;
+    // }
+    // my.background(bgColorShift);
     
+    // scale test
+    let tempScale = elements[0].value * globalScale;
+    let edgeGapX = x_size * (1-tempScale) * 0.5 ;
+    let edgeGapY = y_size * (1-tempScale) * 0.5 ;
+    my.translate(edgeGapX,edgeGapY);
+    my.scale(tempScale);
+
+    my.push();
+    my.fill(255,127);
+    // my.rectMode(CENTER);
+    my.rect(0,0,x_size,y_size)
+    my.pop();
+
     // draw grid
-    push();
+    my.push();
     my.strokeWeight(1);
-    my.stroke(elementColor3);
-    my.fill(elementColor3);
+    my.stroke(my.color3);
+    my.fill(my.color3);
     let yOffset = 100
     for (let i = 0; i < 20; i++) {
       my.line(0,i*yOffset,5,i*yOffset);
@@ -127,13 +206,34 @@ const gui_sketch = function(my) {
     my.textSize(7);
     my.textStyle(NORMAL);
     my.text('100',yOffset,10)
-    my.text('100',12,yOffset)
-    pop();
+    my.pop();
+
+    //divisions
+    my.push();
+    my.rect(0,0,6,y_size);
+    my.rect(0,0,x_size,6);
+    my.stroke(my.color3);
+    for (let i=0; i < vertDivisions.length; i++){
+      my.line(vertDivisions[i],0,vertDivisions[i],y_size);
+    }
+    for (let i=0; i < horzDivisions.length; i++){
+      my.line(0, horzDivisions[i], x_size, horzDivisions[i]);
+    }
+    if (createVertDivision == true) {
+      my.line(my.mouseX,0,my.mouseX,y_size);
+      currVertDiv = my.mouseX;
+    } else if (createHorzDivision == true) {
+      console.log(my.mouseY)
+      // my.line(my.mouseX,0,my.mouseX,y_size);
+      my.line(0, my.mouseY, x_size, my.mouseY);
+      currHorzDiv = my.mouseY;
+    } 
+    my.pop();
 
 
     // ITERATE THRU ALL ELEMENTS and UPDATE THEM IF NEEDED
 
-    my.fill(elementColor1);
+    my.fill(my.color1);
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].type == 'knob' || elements[i].type == 'dial'){
         // ADJUST KNOB ANGLE WHILE DRAGGING
@@ -150,31 +250,31 @@ const gui_sketch = function(my) {
         }
         // DRAW KNOB
         my.push();
-        my.stroke(elementColor3);
+        my.stroke(my.color3);
         my.fill(transparentColor);  
         my.translate( my.scaleX(elements[i].x), my.scaleY(elements[i].y) );
         my.strokeWeight(3);
         my.arc(0, 0, r*2.3, r*2.3,135,45);
-        my.stroke(elementColor1);
+        my.stroke(my.color1);
         let valueInDegrees = elements[i].value * 270 - 225; // range is -225 to 45 deg
         my.arc(0, 0, r*2.3, r*2.3,135,valueInDegrees+.01  );
         my.strokeWeight(2);
 
-        my.fill (elementColor2);
-        my.stroke(elementColor3);
+        my.fill (my.color2);
+        my.stroke(my.color3);
         if (dragging && currElement==i) {
-          my.fill (elementColor1);
+          my.fill (my.color1);
           my.noStroke();
         }
         my.ellipse(0, 0, r*1.8, r*1.8);
         my.rotate(valueInDegrees);
-        my.stroke(elementColor3);
+        my.stroke(my.color3);
         my.strokeWeight(12);
         my.line(r*.25, 0, r*.6, 0);
         my.pop();
 
         // LABEL
-        my.fill(elementColor3);
+        my.fill(my.color3);
         my.noStroke();
         let normalizedValue  = int((elements[i].value + 90) * valueScale) + 50;
         my.text(normalizedValue, elements[i].x, elements[i].y+r+15);
@@ -185,6 +285,11 @@ const gui_sketch = function(my) {
         eval(elements[i].mapto +'= ' + elements[i].value + ';');
       } 
       else if (elements[i].type == 'slider' || elements[i].type == 'fader'){
+        tempScale2 = tempScale;
+        if (i == 0){
+
+          tempScale2 = 1;
+        }
         // ADJUST SLIDER VAL WHILE DRAGGING
         if (dragging && currElement==i) {
           var dy = elements[currElement].y - my.mouseY - ogY;
@@ -200,29 +305,30 @@ const gui_sketch = function(my) {
         my.push(); 
         my.translate(elements[i].x, elements[i].y);
         // full slider line
-        my.stroke(elementColor3);
+        my.stroke(my.color3);
         my.strokeWeight(7);
         my.line(0,sliderLength/2, 0,-sliderLength/2);
         // active slider line
-        my.stroke(elementColor1);
+        my.stroke(my.color1);
         let convertedVal = elements[i].value * sliderLength;
         my.line(0,sliderLength/2,0,sliderLength/2-convertedVal);
         // control point
-        my.fill(elementColor2);
+        my.fill(my.color2);
         my.strokeWeight(2);
         if (dragging && currElement==i) {
-          my.fill(elementColor1);
+          my.fill(my.color1);
           my.strokeWeight(4);
         }
         let cpSize = 15;
         my.ellipse(0,(sliderLength/2)-convertedVal,cpSize,cpSize);
 
         // // label
-        my.fill(elementColor3);
+        my.fill(my.color3);
         my.noStroke();
-        let normalizedValue  = int((elements[i].value + 90) * valueScale) + 50;
+        // let normalizedValue  = value;
+        let convertedValue  = int((elements[i].value + 90) * valueScale) + 50;
         
-        my.text(normalizedValue, 0, sliderLength/2+20);
+        my.text(convertedValue, 0, sliderLength/2+20);
         my.text(elements[i].label, 0, sliderLength/2+35);
         my.pop();
 
@@ -232,25 +338,25 @@ const gui_sketch = function(my) {
       else if (elements[i].type == 'toggle' ){
         // draw element
         my.push();
-        my.stroke(elementColor1);
+        my.stroke(my.color1);
         my.strokeWeight(2);
         // let toggleText = "OFF";
         if (currElement == i){
           currElement = "none";
           elements[i].value = 1 - elements[i].value;
         }
-        let textColor = elementColor1;
+        let textColor = my.color1;
         if (elements[i].value == 0){
-          my.stroke(elementColor1);
+          my.stroke(my.color1);
           my.strokeWeight(3);
           // toggleText = "ON";
         }
         else if (elements[i].value == 1) {
-          my.stroke(elementColor3);
-          textColor = elementColor3;
+          my.stroke(my.color3);
+          textColor = my.color3;
         }
         my.translate(elements[i].x, elements[i].y);
-        my.fill(elementColor2);
+        my.fill(my.color2);
         my.ellipse(0, 0, r*2, r*2);
         my.fill (textColor);
         my.noStroke();
@@ -265,13 +371,13 @@ const gui_sketch = function(my) {
       else if (elements[i].type == 'momentary' ){
         // draw element
         my.push();
-        my.fill(elementColor2);
-        my.stroke(elementColor3);
+        my.fill(my.color2);
+        my.stroke(my.color3);
         my.strokeWeight(2);
-        let textColor = elementColor3;
+        let textColor = my.color3;
         if (currElement == i && dragging){
-          my.stroke(elementColor1);
-          textColor = elementColor1;
+          my.stroke(my.color1);
+          textColor = my.color1;
           my.strokeWeight(3);
         }
 
@@ -292,8 +398,8 @@ const gui_sketch = function(my) {
         my.push();
         my.translate(elements[i].x, elements[i].y);
         
-        my.fill(elementColor2);
-        my.stroke(elementColor1);
+        my.fill(my.color2);
+        my.stroke(my.color1);
         my.rect(-boxSize/2,-2*boxSize,boxSize,boxSize);
         my.rect(-boxSize/2,-boxSize,boxSize,boxSize);
         my.rect(-boxSize/2,0,boxSize,boxSize);
@@ -301,7 +407,7 @@ const gui_sketch = function(my) {
         
         my.textSize(11);
         my.noStroke();
-        my.fill(elementColor1);
+        my.fill(my.color1);
         my.text("SIN", 0,-1.5*boxSize);
         my.text("SAW", 0,-0.5*boxSize);
         my.text("TRI", 0,0.5*boxSize);
@@ -309,9 +415,9 @@ const gui_sketch = function(my) {
         // FILL IN ACTIVE BUTTON
         let active = elements[i].value;
         let factor = active - 3;
-        my.fill(elementColor1);
+        my.fill(my.color1);
         my.rect(-boxSize/2,factor*boxSize,boxSize,boxSize);
-        my.fill(elementColor2);
+        my.fill(my.color2);
         for (let i = 1; i <= 4; i++) {
           if (active == i) {
             let txts = ["SIN","SAW","TRI","SQR"];
@@ -329,12 +435,12 @@ const gui_sketch = function(my) {
         // draw element
         my.push();
         my.fill(255);
-        my.stroke(elementColor1);
+        my.stroke(my.color1);
         my.strokeWeight(2);
-        // let textColor = elementColor3;
+        // let textColor = my.color3;
         // if (currElement == i && dragging){
-        //   my.stroke(elementColor1);
-        //   textColor = elementColor1;
+        //   my.stroke(my.color1);
+        //   textColor = my.color1;
         //   my.strokeWeight(3);
         // }
 
@@ -349,7 +455,7 @@ const gui_sketch = function(my) {
           i = whiteKeys[j]-1;
           my.fill(255);
           if (currKey == keys[i]) {
-            my.fill(elementColor1);
+            my.fill(my.color1);
           }
           xShift = 60*j;
           my.rect(xShift, 60, 60, -140);
@@ -359,7 +465,7 @@ const gui_sketch = function(my) {
           i = blackKeys[j]-1;
           my.fill(0);
           if (currKey == keys[i]) {
-            my.fill(elementColor1);
+            my.fill(my.color1);
           }
           xShift = 60*(i-j-1);
           my.rect(xShift, 0, 35, -80);
@@ -369,12 +475,12 @@ const gui_sketch = function(my) {
         // draw element
         my.translate(20,100);
         my.push();
-        my.fill(elementColor2);
-        my.stroke(elementColor1);
+        my.fill(my.color2);
+        my.stroke(my.color1);
         let seqBoxSize = 30;
         for (let track =0; track < 4; track++){
           my.push();
-          my.fill(elementColor1);
+          my.fill(my.color1);
           my.noStroke();
           my.text('TRK',seqBoxSize/2,track*seqBoxSize);
           my.pop();
@@ -399,9 +505,9 @@ const gui_sketch = function(my) {
                     seqUpdateState = 'OFF';
                   }
                 }
-                my.fill(elementColor2);
+                my.fill(my.color2);
                 if (stepState == 1) {
-                  my.fill(elementColor1);
+                  my.fill(my.color1);
                 }
               }
             }
@@ -414,11 +520,14 @@ const gui_sketch = function(my) {
         // draw element
       } 
     }
+    // update for next round
+    needsUpdate = checkIfValuesChanged();
   }// draw
 
 
   my.mousePressed = function() {
     console.log('\click');
+    currElement = "none";
     dragging = true; // start dragging
     for (let i = 0; i < elements.length; i++) {
       // if mouse is inside knob
@@ -471,31 +580,45 @@ const gui_sketch = function(my) {
           }
         } 
       }
-      else {
-        currElement = "none";
-      }
     }// for loop
+    // grid edges
+    console.log('else')
+    if (my.mouseX <= 6){
+      createVertDivision = true;
+      console.log('v')
+    } else if (my.mouseY <= 6){
+      console.log('h')
+      createHorzDivision = true;
+    }
     console.log('curE: '+currElement);
   }// mousePressed
     
   
   my.mouseReleased = function() {
     console.log('\nmouse released');
+    console.log(createVertDivision);
     // Stop dragging
-      dragging = false;
+    dragging = false;
+    if (createVertDivision == true) {
+      createVertDivision = false;
+      vertDivisions.push(currVertDiv);
+    } else if (createHorzDivision == true) {
+      createHorzDivision = false;
+      horzDivisions.push(currHorzDiv);
+    }
   }
-  // my.color1 = function(val) {
-  //   elementColor1 = color(val)
+  // my.my.color1 = function(val) {
+  //   my.color1 = color(val)
   // }
 
-  let UserElement = function(type,label,mapto,x,y,minval,maxval,value,size) {
+  let UserElement = function(type,label,mapto,x,y,min,max,value,size) {
     this.type = type;
     this.label = label;
     this.mapto = mapto;
     this.x = x;
     this.y = y;
-    this.minval = minval;
-    this.maxval = maxval;
+    this.min = min;
+    this.max = max;
     this.value = value;
     this.size = size;
   }
@@ -505,8 +628,8 @@ const gui_sketch = function(my) {
 
 
 
-  // my.addElement = function(type,label,mapto, {x="_default",y="_default",minval="_default",maxval="_default",value="_default",size="_default"}) {
-  my.addElement = function({type,label,mapto, x,y,minval,maxval,value,size}) {
+  // my.addElement = function(type,label,mapto, {x="_default",y="_default",min="_default",max="_default",value="_default",size="_default"}) {
+  my.addElement = function({type,label,mapto, x,y,min,max,value,size}) {
     console.log(elements);
     console.log('?: '+x);
     forceDraw = true; // so that the canvas will update even tho we are not clicking it
@@ -521,8 +644,8 @@ const gui_sketch = function(my) {
         if (mapto != undefined) {elements[i].mapto = mapto;}
         if (x != undefined) {elements[i].x = x;}
         if (y != undefined) {elements[i].y = y;}
-        if (minval != undefined) {elements[i].minval = minval;}
-        if (maxval != undefined) {elements[i].maxval = maxval;}
+        if (min != undefined) {elements[i].min = min;}
+        if (max != undefined) {elements[i].max = max;}
         if (value != undefined) {elements[i].value = value;}
         if (size != undefined) {elements[i].size = size;}
         break
@@ -537,8 +660,8 @@ const gui_sketch = function(my) {
       // default default values
       if (x == undefined) {x = x0 + elements.length*xGap;}
       if (y == undefined) { y = y0;}
-      if (minval == undefined) {minval=0;}
-      if (maxval == undefined) {maxval=1;}
+      if (min == undefined) {min=0;}
+      if (max == undefined) {max=1;}
       if (value == undefined) {value=0.25;}
       if (size == undefined) {size=1;}
 
@@ -554,17 +677,17 @@ const gui_sketch = function(my) {
       }
       // change default initial value based on type of element?
       // maybe also change default range to -1,1 for some elements
-      elements.push(new UserElement(type,label,mapto,x,y,minval,maxval,value,size));
-      if (type == 'toggle') {
-        let toggleText = "OFF";
-        my.push();
-        my.fill (255,0,0);
-        my.translate(x, y);
-        my.ellipse(0, 0, r*2, r*2);
-        my.fill(0);
-        my.text(toggleText, 0, 0);
-        my.pop();
-      }
+      elements.push(new UserElement(type,label,mapto,x,y,min,max,value,size));
+      // if (type == 'toggle') {
+      //   let toggleText = "OFF";
+      //   my.push();
+      //   my.fill (255,0,0);
+      //   my.translate(x, y);
+      //   my.ellipse(0, 0, r*2, r*2);
+      //   my.fill(0);
+      //   my.text(toggleText, 0, 0);
+      //   my.pop();
+      // }
     }
 
     return elements[elements.length - 1];
@@ -586,12 +709,12 @@ const gui_sketch = function(my) {
 
   my.scaleX = function(val){
     return val;
-    // return (val/100) * my.x_size;
+    // return (val/100) * m;
   }
 
   my.scaleY = function(val){
     return val;
-    return (val/100) * my.x_size * my.dimRatio;
+    return (val/100) * x_size * my.dimRatio;
   }
 
 }

@@ -1,4 +1,6 @@
 export const starterCode = [
+	'gui.color1 = color(0,0,255);',
+	'color1(0,0,255);\n\n',
 	'osc = context.createOscillator()\nosc.start()\n',
 	'volume = context.createGain()\n',
 	'volume.gain.value = .1\n',
