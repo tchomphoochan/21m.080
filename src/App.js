@@ -12,9 +12,7 @@ import Editor from './Editor.js'
 function App() {
 
   return (
-    <div>
-      <Editor />
-    </div>
+    <Editor />
   );
 }
 export default App;

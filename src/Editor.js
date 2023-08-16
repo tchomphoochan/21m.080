@@ -1,4 +1,4 @@
-//6:54
+//4
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -49,22 +49,37 @@ function Editor() {
     // eval('import * as midiControl from "./midiCoder/midi_control.js";    import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from "./midiCoder/seq_control.js"; import { makingIf, startTern } from "./midiCoder/algorithm_control.js";    import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"; import {floor, ceil, peak, cos, round, trunc, abs} from "./midiCoder/midi_math.js";');
     // eval('console.log(Seq)');
     const imports = 'import { midi, onMIDISuccess, onMIDIFailure, setMidiInput, setMidiOutput, getMidiIO, handleMidiInput, outputMidiID, midiMap, ccMap, stopMap, mute, muted, toggleMute } from "./midiCoder/midi_control.js"; import * as midiControl from "./midiCoder/midi_control.js";    import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from "./midiCoder/seq_control.js"; import { makingIf, startTern } from "./midiCoder/algorithm_control.js";    import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"; import {floor, ceil, peak, cos, round, trunc, abs} from "./midiCoder/midi_math.js";'; // Add your required imports here
-    // const codeMirrorRef = useRef(null);
+
+    window.p5 = p5;
 
     //Save history in browser
     const serializedState = localStorage.getItem('myEditorState');
     const value = localStorage.getItem('myValue') || '//Start coding here!';
+    const storedCanvases = localStorage.getItem('canvases');
+
 
     const [code, setCode] = useState(value); //full string of user code
     const [vars, setVars] = useState({}); //current audioNodes
     const [liveMode, setLiveMode] = useState(false);
     const [middleButton, setMiddleButton] = useState("button-container");
-    const [canvases, setCanvases] = useState({});
+    const [canvases, setCanvases] = useState([]);
+    const [canvasRendered, setCanvasRendered] = useState(false);
+    const [addClicked, setAddClicked] = useState(false);
+    const [canvasName, setCanvasName] = useState('');
+
 
     useEffect(() => {
-        window.p5 = p5;
-        const initialCanvases = "var sketch = function(p) {\np.setup = function() {\np.createCanvas(200, 200);\np.background(51);\n};\np.draw = function() {\np.fill(255, 0, 200, 25);\n};\n};\nglobalThis.canvas1 = new p5(sketch, 'container1');\nglobalThis.canvas2 = new p5(sketch, 'container2');\nglobalThis.canvas3 = new p5(sketch, 'container3');";
-        eval(initialCanvases);
+        //localStorage.setItem('canvases', '');
+        const storedCanvases = localStorage.getItem('canvases');
+        if (storedCanvases) {
+            renderP5Div();
+            const prevCanvases = JSON.parse(storedCanvases);
+            setCanvases(prevCanvases);
+            console.log(prevCanvases);
+            for (const id of prevCanvases) {
+                addDiv(id);
+            }
+        }
     }, []);
 
     function removeComments() {
@@ -111,33 +126,12 @@ function Editor() {
                         string = string.substring(0, end + incr) + " = null" + string.substring(end + incr);
                         incr += length2;
                     }
-                    else {
-                        //check for p5 instances & create relevent divs
-                        // try {
-                        //     if (init.callee.name === "p5") {
-                        //         console.log("success");
-                        //         let id = init.arguments[1].value;
-                        //         if(name in canvases){
-                        //             string = string.substring(0, start + incr) + string.substring(end + incr);
-                        //             incr -= end - start;
-                        //         }
-                        //         else{
-                        //             p5Instances[name] = id;
-                        //         }
-                        //         //setCanvases(prevCanvases => ({ ...prevCanvases, [name]: id }));
-                        //     }
-                        // } catch (error) {
-                        //     //not p5 instance
-                        // }
-                    }
+
                 }
             },
         }
 
         walk.recursive(ast, null, visitors);
-        while (canvases == {}) {
-
-        }
         console.log(canvases);
         // console.log(document.querySelector('container'));
         eval(string);
@@ -263,14 +257,90 @@ function Editor() {
         setVars({});
     }
 
+    const addCanvas = () => {
+        setAddClicked(true);
+    }
+
+    const handleCanvasNameChange = (event) => {
+        setCanvasName(event.target.value);
+    };
+
+    const submitName = (event) => {
+        if (event.key === 'Enter') {
+            renderCanvas(canvasName);
+            setCanvasName('');
+            setAddClicked(false);
+        }
+    };
+
+    function renderP5Div() {
+        if (!canvasRendered) {
+            const p5Div = document.createElement('div');
+            p5Div.classList.add("flex-child");
+            p5Div.id = 'p5';
+            document.getElementById('main').appendChild(p5Div);
+            setCanvasRendered(true);
+        }
+    }
+
+    function renderCanvas(name) {
+        renderP5Div();
+        addDiv(name);
+        const varName = eval(name);
+        window.varName = new p5(getSketch(name), name);
+        setCanvases((prevArray) => [...prevArray, name]);
+        localStorage.setItem('canvases', JSON.stringify([...canvases, name]));
+    }
+
+    function addDiv(id) {
+        const p5Div = document.createElement('div');
+        const parentDiv = document.getElementById('p5');
+        p5Div.id = id;
+        p5Div.classList.add('p5Div');
+        parentDiv.appendChild(p5Div);
+    }
+
+    function getSketch(id) {
+        var sketch = function (p) {
+            p.div = document.getElementById(id);
+            p.x = 100;
+            p.y = 100;
+
+            p.setup = function () {
+                p.createCanvas(p.div.offsetWidth, p.div.offsetHeight);
+            };
+
+            p.draw = function () {
+            };
+
+            p.windowResized = function () {
+                p.resizeCanvas(p.div.offsetWidth, p.div.offsetHeight);
+            }
+        };
+        return sketch;
+    }
+
+    //window.addEventListener("resize", updateCanvases);
+
     return (
-        <div className="flex-container">
+        <div id="main" className="flex-container">
             <div className="flex-child">
-                <div className="flex-container">
+                <span style={{ display: 'flex', alignItems: 'center' }}>
                     <button className="button-container" onClick={playClicked}>Play</button>
                     <button className={middleButton} onClick={liveClicked}>Live</button>
                     <button className="button-container" onClick={stopClicked}>Stop</button>
-                </div>
+                    {addClicked ? (
+                        <input
+                            type="text"
+                            placeholder="Enter Canvas Name"
+                            value={canvasName}
+                            onChange={handleCanvasNameChange}
+                            onKeyDown={submitName}
+                        />
+                    ) : (
+                        <button className="button-container" onClick={addCanvas}>Add Canvas</button>
+                    )}
+                </span>
                 <CodeMirror
                     value={value}
                     initialState={serializedState
@@ -288,12 +358,8 @@ function Editor() {
                     onKeyDown={handleKeyDown}
                     //onClick={handleClick}
                     onStatistics={handleStatistics}
+                    height='890px'
                 />
-            </div>
-            <div className="flex-child">
-                <div id="container1"></div>
-                <div id="container2"></div>
-                <div id="container3"></div>
             </div>
         </div>
     );
