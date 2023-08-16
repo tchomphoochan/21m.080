@@ -1,6 +1,6 @@
 //example of P5.js code in my mode
 //https://youtu.be/Su792jEauZg
-let x_size,y_size;
+let x_size,y_size,edgeGapX,edgeGapY;
 let globalScale = 1;
 
 let fullscreen = false;
@@ -21,12 +21,15 @@ function fullscreenGUI(){
     document.getElementById('gui_div').style.right = ".5%";
     document.getElementById('gui_div').style.width = "99%";
     document.getElementById('gui_div').style.height = "96%";
-    // globalScale = 1.2;
+    globalScale = 2;
     fullscreen = true
   }
   x_size = document.getElementById('gui_div').offsetWidth *.99;
   y_size = document.getElementById('gui_div').offsetHeight *.97;
   gui.resizeCanvas(x_size, y_size);
+
+  edgeGapX = x_size * (1-globalScale) * 0.5 ;
+  edgeGapY = y_size * (1-globalScale) * 0.5 ;
 }
 const gui_sketch = function(my) {
 
@@ -46,7 +49,7 @@ const gui_sketch = function(my) {
     transparentColor = color(0,0);
     my.color1 = color(255,40,0);
     my.color2 = color(220,229,234);
-    my.color3 = color(0,85);
+    my.color3 = color(140,146,150);
     bgColorShift = 100;
 
     my.background(my.color2)
@@ -91,10 +94,12 @@ const gui_sketch = function(my) {
   let SCALE = 1;
   let x0 = 50;
   let y0 = 180;
-  let r = 40; // knob/button size
+  let r = 40; // button size
+  let rKnob = 40; // knob size
   // slider
   let sliderThickness = 15;
   let sliderLength=100;
+  let sliderSensitivity = .008;
   // radio
   let boxSize = 30;
   let seqBoxSize = 30;
@@ -102,7 +107,6 @@ const gui_sketch = function(my) {
   let seqUpdateStarted = false;
   // knob
   let ogY = 0;
-  let valueScale = 50/180 // x/180 where x is 1/2 of output range
   let yScale = 0.009; // alters sensitivity of turning the knob
   let ogValue = 0;
 
@@ -110,10 +114,12 @@ const gui_sketch = function(my) {
   let buttonPress = function() {
     // for testing
     console.log('buton pres')
-    my.addElement({type:"slider",label:"SCALE",mapto:"fakevar",max:2,value:1})
-    my.addElement({type:"radio",label:"radio",mapto:"fillervar"})
-    my.addElement({type:"knob",label:"kVOL",mapto:"fillervar"})
-    my.addElement({type:"toggle",label:"togl",mapto:"fillervar"})
+    my.addElement({type:"knob",label:"SL1",mapto:"fakevar",min:0,max:2,value:1,size:.5})
+    my.addElement({type:"knob",label:"SL2",mapto:"fakevar",min:0,max:3,value:2,size:1})
+    my.addElement({type:"knob",label:"SL3",mapto:"fakevar",min:1,max:2,value:1,size:2})
+    my.addElement({type:"radio",label:"radio",mapto:"fillervar",radioOptions:['a','b','c','d','e']})
+    my.addElement({type:"slider",label:"kVOL",mapto:"fillervar",size:1})
+    my.addElement({type:"toggle",label:"togl",mapto:"fillervar",size:2})
     my.addElement({type:"momentary",label:"momn",mapto:"fillervar"})
   }
 
@@ -156,40 +162,6 @@ const gui_sketch = function(my) {
   let needsUpdate = true;
 
   my.draw = function() { //drwwwwwww
-    // if (needsUpdate == false){
-    //   if (forceDraw == true){
-    //     forceDraw = false;
-    //   } 
-    //   else {
-    //     // needsUpdate = true;
-    //     return;
-    //   }
-    // } 
-
-    // console.log("drawing");
-    //settings
-    my.background(my.color2);
-    // bgColorShift += bgshift;
-    // if (bgColorShift > 240){
-    //   bgshift = -3;
-    // } else if(bgColorShift < 70) {
-    //   bgshift = 3;
-    // }
-    // my.background(bgColorShift);
-    
-    // scale test
-    let tempScale = elements[0].value * globalScale;
-    let edgeGapX = x_size * (1-tempScale) * 0.5 ;
-    let edgeGapY = y_size * (1-tempScale) * 0.5 ;
-    my.translate(edgeGapX,edgeGapY);
-    my.scale(tempScale);
-
-    my.push();
-    my.fill(255,127);
-    // my.rectMode(CENTER);
-    my.rect(0,0,x_size,y_size)
-    my.pop();
-
     // draw grid
     my.push();
     my.strokeWeight(1);
@@ -197,10 +169,10 @@ const gui_sketch = function(my) {
     my.fill(my.color3);
     let yOffset = 100
     for (let i = 0; i < 20; i++) {
-      my.line(0,i*yOffset,5,i*yOffset);
+        my.line(0,i*yOffset,5,i*yOffset);
     }
     for (let i = 0; i < 20; i++) {
-      my.line(i*yOffset,0,i*yOffset,5);
+        my.line(i*yOffset,0,i*yOffset,5);
     }
     my.noStroke();
     my.textSize(7);
@@ -214,185 +186,60 @@ const gui_sketch = function(my) {
     my.rect(0,0,x_size,6);
     my.stroke(my.color3);
     for (let i=0; i < vertDivisions.length; i++){
-      my.line(vertDivisions[i],0,vertDivisions[i],y_size);
+        my.line(vertDivisions[i],0,vertDivisions[i],y_size);
     }
     for (let i=0; i < horzDivisions.length; i++){
-      my.line(0, horzDivisions[i], x_size, horzDivisions[i]);
+        my.line(0, horzDivisions[i], x_size, horzDivisions[i]);
     }
-    if (createVertDivision == true) {
-      my.line(my.mouseX,0,my.mouseX,y_size);
-      currVertDiv = my.mouseX;
-    } else if (createHorzDivision == true) {
-      console.log(my.mouseY)
-      // my.line(my.mouseX,0,my.mouseX,y_size);
-      my.line(0, my.mouseY, x_size, my.mouseY);
-      currHorzDiv = my.mouseY;
-    } 
     my.pop();
 
 
-    // ITERATE THRU ALL ELEMENTS and UPDATE THEM IF NEEDED
-
-    my.fill(my.color1);
+  // ITERATE THRU ALL ELEMENTS and UPDATE THEM IF NEEDED
     for (let i = 0; i < elements.length; i++) {
+    // UPDATE KNOB VALUE
       if (elements[i].type == 'knob' || elements[i].type == 'dial'){
-        // ADJUST KNOB ANGLE WHILE DRAGGING
         if (dragging && currElement==i) {
-          var dy = elements[currElement].y - my.mouseY - ogY;
-          var angleY = dy*yScale;
-          elements[currElement].value = angleY + ogValue;
-          if (elements[currElement].value >= 1) {
-            elements[currElement].value = 1;
+          console.log('\nVAL: '+elements[i].value)
+          console.log('ogV: '+ogValue)
+          let dy = elements[i].y - my.mouseY - ogY; // mouse units
+          let dyScaled = dy*yScale; // mouse units + scaled for sensitivity
+          let dyConverted = -elements[i].min+dyScaled*(elements[i].max-elements[i].min) + elements[i].min; // convert to 'value' units
+          console.log('dyC: '+dyConverted)
+          elements[i].value = dyConverted + ogValue; // convert to value units
+          if (elements[i].value >= elements[i].max) {
+            elements[i].value = elements[i].max;
           }
-          else if (elements[currElement].value <= 0) {
-            elements[currElement].value = 0;
+          else if (elements[i].value <= elements[i].min) {
+            elements[i].value = elements[i].min;
           }
         }
-        // DRAW KNOB
-        my.push();
-        my.stroke(my.color3);
-        my.fill(transparentColor);  
-        my.translate( my.scaleX(elements[i].x), my.scaleY(elements[i].y) );
-        my.strokeWeight(3);
-        my.arc(0, 0, r*2.3, r*2.3,135,45);
-        my.stroke(my.color1);
-        let valueInDegrees = elements[i].value * 270 - 225; // range is -225 to 45 deg
-        my.arc(0, 0, r*2.3, r*2.3,135,valueInDegrees+.01  );
-        my.strokeWeight(2);
-
-        my.fill (my.color2);
-        my.stroke(my.color3);
-        if (dragging && currElement==i) {
-          my.fill (my.color1);
-          my.noStroke();
-        }
-        my.ellipse(0, 0, r*1.8, r*1.8);
-        my.rotate(valueInDegrees);
-        my.stroke(my.color3);
-        my.strokeWeight(12);
-        my.line(r*.25, 0, r*.6, 0);
-        my.pop();
-
-        // LABEL
-        my.fill(my.color3);
-        my.noStroke();
-        let normalizedValue  = int((elements[i].value + 90) * valueScale) + 50;
-        my.text(normalizedValue, elements[i].x, elements[i].y+r+15);
-        my.text(elements[i].label, elements[i].x, elements[i].y+r+30);
-
-        // MAP TO CONTROLS
-        // volume.gain.value = elements[i].value;
-        eval(elements[i].mapto +'= ' + elements[i].value + ';');
       } 
+    // UPDATE SLIDER VALUE
       else if (elements[i].type == 'slider' || elements[i].type == 'fader'){
-        tempScale2 = tempScale;
-        if (i == 0){
-
-          tempScale2 = 1;
-        }
-        // ADJUST SLIDER VAL WHILE DRAGGING
         if (dragging && currElement==i) {
-          var dy = elements[currElement].y - my.mouseY - ogY;
-          var angleY = dy*.006;
-          elements[currElement].value = angleY - ogValue;
-          if (elements[currElement].value >= 1) {
-            elements[currElement].value = 1;
+          var dy = elements[i].y - my.mouseY - ogY;
+          var dyScaled = dy*(sliderSensitivity/elements[i].size); // scale for sensitivity based on size
+          elements[i].value = dyScaled - ogValue; // update value
+          if (elements[i].value >= elements[i].max) {
+            elements[i].value = elements[i].max;
           }
-          else if (elements[currElement].value <= 0) {
-            elements[currElement].value = 0;
+          else if (elements[i].value <= elements[i].min) {
+            elements[i].value = elements[i].min;
           }
         }
-        my.push(); 
-        my.translate(elements[i].x, elements[i].y);
-        // full slider line
-        my.stroke(my.color3);
-        my.strokeWeight(7);
-        my.line(0,sliderLength/2, 0,-sliderLength/2);
-        // active slider line
-        my.stroke(my.color1);
-        let convertedVal = elements[i].value * sliderLength;
-        my.line(0,sliderLength/2,0,sliderLength/2-convertedVal);
-        // control point
-        my.fill(my.color2);
-        my.strokeWeight(2);
-        if (dragging && currElement==i) {
-          my.fill(my.color1);
-          my.strokeWeight(4);
-        }
-        let cpSize = 15;
-        my.ellipse(0,(sliderLength/2)-convertedVal,cpSize,cpSize);
-
-        // // label
-        my.fill(my.color3);
-        my.noStroke();
-        // let normalizedValue  = value;
-        let convertedValue  = int((elements[i].value + 90) * valueScale) + 50;
-        
-        my.text(convertedValue, 0, sliderLength/2+20);
-        my.text(elements[i].label, 0, sliderLength/2+35);
-        my.pop();
-
-        // MAP TO CONTROLS
-        eval(elements[i].mapto +'= ' + elements[i].value + ';');
       } 
-      else if (elements[i].type == 'toggle' ){
-        // draw element
-        my.push();
-        my.stroke(my.color1);
-        my.strokeWeight(2);
-        // let toggleText = "OFF";
-        if (currElement == i){
-          currElement = "none";
-          elements[i].value = 1 - elements[i].value;
-        }
-        let textColor = my.color1;
-        if (elements[i].value == 0){
-          my.stroke(my.color1);
-          my.strokeWeight(3);
-          // toggleText = "ON";
-        }
-        else if (elements[i].value == 1) {
-          my.stroke(my.color3);
-          textColor = my.color3;
-        }
-        my.translate(elements[i].x, elements[i].y);
-        my.fill(my.color2);
-        my.ellipse(0, 0, r*2, r*2);
-        my.fill (textColor);
-        my.noStroke();
-        let toggleText = elements[i].label;
-        my.textSize(85/toggleText.length);
-        my.text(toggleText, 0, 1);
-        my.pop();
+    
+    // TOGGLE VALUE GETS UPDATED IN mousePressed()
 
-        // MAP TO CONTROLS
-        eval(elements[i].mapto +'= ' + elements[i].value + ';');
-      }
+    // UPDATE MOMENTARY BUTTON VALUE
       else if (elements[i].type == 'momentary' ){
-        // draw element
-        my.push();
-        my.fill(my.color2);
-        my.stroke(my.color3);
-        my.strokeWeight(2);
-        let textColor = my.color3;
         if (currElement == i && dragging){
-          my.stroke(my.color1);
-          textColor = my.color1;
-          my.strokeWeight(3);
+          elements[i].value = 1;
+        } else {
+          elements[i].value = 0;
         }
-
-        my.translate(elements[i].x, elements[i].y);
-        my.ellipse(0, 0, r*2, r*2);
-        my.fill (textColor);
-        my.noStroke();
-        let text = elements[i].label;
-        my.textSize(85/text.length);
-        my.text(text, 0, 1);
-        my.pop();
-
-        // MAP TO CONTROLS
-        eval(elements[i].mapto +'= ' + elements[i].value + ';');
       }
+    // RADIO BUTTON VALUE GETS UPDATED IN mousePressed()
       else if (elements[i].type == 'radio'){
         // CURRENTLY ASSUMING ONLY 4 OPTIONS
         my.push();
@@ -520,18 +367,19 @@ const gui_sketch = function(my) {
         // draw element
       } 
     }
+    redraw();
     // update for next round
-    needsUpdate = checkIfValuesChanged();
+    // needsUpdate = checkIfValuesChanged();
   }// draw
 
 
   my.mousePressed = function() {
-    console.log('\click');
+    console.log('click');
     currElement = "none";
     dragging = true; // start dragging
     for (let i = 0; i < elements.length; i++) {
-      // if mouse is inside knob
       if (elements[i].type == "knob" || elements[i].type == 'dial'){
+        console.log('checking')
         if (dist(my.mouseX, my.mouseY, elements[i].x, elements[i].y) < r) { 
           ogY = y0 - my.mouseY;
           ogValue = elements[i].value;
@@ -545,11 +393,13 @@ const gui_sketch = function(my) {
             ogY = y0 - my.mouseY;
             ogValue = -elements[i].value;
             currElement = i;
+            break
           }
         }
       } 
       else if (elements[i].type == "toggle"){
         if (dist(my.mouseX, my.mouseY, elements[i].x, elements[i].y) < r) { 
+          elements[i].value = 1 - elements[i].value;
           currElement = i;
           break
         }
@@ -562,32 +412,37 @@ const gui_sketch = function(my) {
       }
       else if (elements[i].type == "radio"){
         if (Math.abs(elements[i].x - my.mouseX) <= (boxSize/2)){
-          if (Math.abs(elements[i].y - my.mouseY) <= (boxSize*2)){
-            currElement = i;
-            elements[i].value = 1;
+          let numBoxes = elements[i].radioOptions.length;
+          let boxID = 1;
+          let mousePosY = my.mouseY - elements[i].y;
+          let lowerBound = -boxSize*(numBoxes/2);
+          let upperBound = lowerBound + boxSize;
+          for (let j=0; j < numBoxes; j++){
+            if (upperBound >= mousePosY && mousePosY >= lowerBound){
+              elements[i].value = boxID;
+              break
+            }
+            boxID += 1;
+            upperBound += boxSize;
+            lowerBound += boxSize;
           }
-          // update active radio button
-          let mousePos = my.mouseY - elements[i].y;
-          if (-boxSize < mousePos && mousePos <= 0){elements[i].value = 2;}
-          else if (0 < mousePos && mousePos <= boxSize){elements[i].value = 3;}
-          else if (boxSize < mousePos && mousePos <= (2*boxSize)){elements[i].value = 4;}
         } 
       }
       else if (elements[i].type == "sequencer"){
         if (my.mouseX >= (elements[i].x) && my.mouseX <= (seqBoxSize*9 + elements[i].x)){
           if (my.mouseY >= (elements[i].y) && my.mouseX <= (seqBoxSize*4 + elements[i].y)){
             currElement = i;
+            break
           }
-        } 
+        }
       }
     }// for loop
     // grid edges
-    console.log('else')
     if (my.mouseX <= 6){
       createVertDivision = true;
-      console.log('v')
+      console.log('v');
     } else if (my.mouseY <= 6){
-      console.log('h')
+      console.log('h');
       createHorzDivision = true;
     }
     console.log('curE: '+currElement);
@@ -595,8 +450,8 @@ const gui_sketch = function(my) {
     
   
   my.mouseReleased = function() {
-    console.log('\nmouse released');
-    console.log(createVertDivision);
+    // console.log('\nmouse released');
+    // console.log(createVertDivision);
     // Stop dragging
     dragging = false;
     if (createVertDivision == true) {
@@ -610,29 +465,32 @@ const gui_sketch = function(my) {
   // my.my.color1 = function(val) {
   //   my.color1 = color(val)
   // }
+  let elements = [];
 
-  let UserElement = function(type,label,mapto,x,y,min,max,value,size) {
-    this.type = type;
-    this.label = label;
-    this.mapto = mapto;
-    this.x = x;
-    this.y = y;
-    this.min = min;
-    this.max = max;
-    this.value = value;
-    this.size = size;
+  let UserElement = function(type,label,mapto,x,y,min,max,value,prev,size,showLabel,showValue, radioOptions,horizontal) {
+    this.type = type; // str: type of element
+    this.label = label; // str: name and unique ID
+    this.mapto = mapto; // str: variable it is controlling
+
+    this.x = x; // #: pos
+    this.y = y; // #: pos
+    this.min = min; // #: units of what its mapped to
+    this.max = max; // #; units of what its mapped to
+    this.value = value; // #: current value
+    this.prev = prev; // #:cprevious value
+    this.size = size; // #
+    this.showLabel = showLabel; // bool
+    this.showValue = showValue; // bool
+    this.showValue = showValue; // bool
+
+    this.radioOptions = radioOptions; // array
+    this.horizontal = horizontal; // bool: for slider or radio buttons
   }
   
 
-  let elements = [];
-
-
-
-  // my.addElement = function(type,label,mapto, {x="_default",y="_default",min="_default",max="_default",value="_default",size="_default"}) {
-  my.addElement = function({type,label,mapto, x,y,min,max,value,size}) {
-    console.log(elements);
-    console.log('?: '+x);
-    forceDraw = true; // so that the canvas will update even tho we are not clicking it
+  my.addElement = function({type,label,mapto, x,y,min,max,value,prev,size,showLabel,showValue,radioOptions,horizontal}) {
+    // console.log(elements);
+    // forceDraw = true; // so that the canvas will update even tho we are not clicking it
     // NEW OR UPDATE EXISTING?
     let update = false;
     for (let i = 0; i < elements.length; i++) {
@@ -648,6 +506,10 @@ const gui_sketch = function(my) {
         if (max != undefined) {elements[i].max = max;}
         if (value != undefined) {elements[i].value = value;}
         if (size != undefined) {elements[i].size = size;}
+        if (showLabel != undefined) {elements[i].showLabel = showLabel;}
+        if (showValue != undefined) {elements[i].showValue = showValue;}
+        if (radioOptions != undefined) {elements[i].radioOptions = radioOptions;}
+        if (horizontal != undefined) {elements[i].horizontal = horizontal;}
         break
       }
       else {
@@ -662,47 +524,37 @@ const gui_sketch = function(my) {
       if (y == undefined) { y = y0;}
       if (min == undefined) {min=0;}
       if (max == undefined) {max=1;}
-      if (value == undefined) {value=0.25;}
+      if (value == undefined) {value=(max-min)/2;}
+      if (prev == undefined) {prev="";}
       if (size == undefined) {size=1;}
+      if (showLabel == undefined) {showLabel=true;}
+      if (showValue == undefined) {showValue=true;}
+      if (radioOptions == undefined) {radioOptions=["!!!"];}
+      if (horizontal == undefined) {horizontal=false;}
 
       if (type == 'toggle') {
         value = 0;
-      } 
+      }
       else if (type == 'radio') {
+        min = 1;
+        max = radioOptions.length;
         value = 1;
       }
       else if (type == 'sequencer') {
         // 8 x 4track
         value = [[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]];
       }
-      // change default initial value based on type of element?
-      // maybe also change default range to -1,1 for some elements
-      elements.push(new UserElement(type,label,mapto,x,y,min,max,value,size));
-      // if (type == 'toggle') {
-      //   let toggleText = "OFF";
-      //   my.push();
-      //   my.fill (255,0,0);
-      //   my.translate(x, y);
-      //   my.ellipse(0, 0, r*2, r*2);
-      //   my.fill(0);
-      //   my.text(toggleText, 0, 0);
-      //   my.pop();
-      // }
+      elements.push(new UserElement(type,label,mapto,x,y,min,max,value,prev,size,showLabel,showValue,radioOptions,horizontal));
+      console.log(elements);
     }
 
     return elements[elements.length - 1];
-
   }//addElement
 
   my.removeElement = function(label) {
-    console.log('BEFORE');
-    console.log(elements);
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].label == label) {
         elements.splice(i,1);
-        console.log('AFTER');
-        console.log(elements);
-        
       }
     }
   }//removeElement
@@ -711,12 +563,200 @@ const gui_sketch = function(my) {
     return val;
     // return (val/100) * m;
   }
-
   my.scaleY = function(val){
     return val;
     return (val/100) * x_size * my.dimRatio;
   }
 
+  function redraw() { //rdrwwwwwww
+    my.background(my.color2);
+    my.scale(globalScale);
+    my.fill(my.color1);
+    for (let i = 0; i < elements.length; i++) {
+      // DRAW KNOB
+      if (elements[i].type == 'knob' || elements[i].type == 'dial'){
+          my.push();
+          my.translate( my.scaleX(elements[i].x), my.scaleY(elements[i].y) );
+          let sz = elements[i].size;
+          my.stroke(my.color3);
+          my.fill(transparentColor);  
+          my.strokeWeight(6);
+          my.arc(0, 0, 2*rKnob*sz, 2*rKnob*sz,120,60);
+          my.stroke(my.color1);
+          let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max-elements[i].min) ; // normalize between 0-1
+          let valueInDegrees = valueNorm * 300 - 240; // range is -240 to 60 deg
+          my.arc(0, 0, 2*rKnob*sz, 2*rKnob*sz,120,valueInDegrees+.01);
+
+          if (dragging && currElement==i) {
+            my.stroke(my.color1);
+          }
+          // my.ellipse(0, 0, r*1.8, r*1.8);
+          my.rotate(valueInDegrees);
+
+          my.push();
+          my.stroke(my.color2);
+          my.strokeWeight(12);
+          my.line(0, 0, rKnob*sz, 0);
+          my.pop();
+
+          my.line(0, 0, rKnob*sz, 0);
+          my.pop();
+          // LABEL
+          my.fill(my.color3);
+          my.noStroke();
+          let roundto = 0;
+          if (elements[i].max <= .1) {
+            roundto = 3
+          } else if (elements[i].max <= 1) {
+            roundto = 2
+          } else if (elements[i].max <= 10) {
+            roundto = 1
+          }
+          my.textSize(13);
+          my.text(round(elements[i].value,roundto), elements[i].x, elements[i].y+rKnob*sz-2);
+          my.text(elements[i].label, elements[i].x, elements[i].y+rKnob*sz+13);
+          // MAP TO CONTROLS
+          eval(elements[i].mapto +'= ' + elements[i].value + ';');
+      }  
+    // END KNOB
+    // DRAW SLIDER
+      else if (elements[i].type == 'slider' || elements[i].type == 'fader'){
+        my.push(); 
+        let sz = elements[i].size;
+        my.translate(elements[i].x, elements[i].y);
+        // full slider line
+        my.stroke(my.color3);
+        my.strokeCap(SQUARE);
+        my.strokeWeight(14*sz);
+        my.line(0,sliderLength*sz/2, 0,-sliderLength*sz/2);
+        // active slider line
+        my.stroke(my.color1);
+        let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max-elements[i].min) ; // normalize between 0-1
+        let convertedVal = valueNorm * sliderLength*sz;
+        my.line(0,sliderLength*sz/2,0,sliderLength*sz/2-convertedVal);
+        // middle line
+        my.strokeWeight(2*sz);
+        my.stroke(my.color2);
+        my.line(0,.9*sliderLength*sz/2, 0,-.9*sliderLength*sz/2);
+
+        // control point
+        my.strokeWeight(14*sz);
+        my.stroke(my.color2);
+        let knobSize = 5*sz
+        let knobOffset = knobSize + 2 + 1*sz;
+        my.line(0,.9*(sliderLength*sz/2)-.9*convertedVal-knobOffset,0,.9*(sliderLength*sz/2)-.9*convertedVal+knobOffset);
+        my.stroke(my.color1);
+        my.line(0,.9*(sliderLength*sz/2)-.9*convertedVal-knobSize,0,.9*(sliderLength*sz/2)-.9*convertedVal+knobSize);
+
+        // LABEL
+        my.fill(my.color3);
+        my.noStroke();
+        let txt = elements[i].label;
+        my.textSize((2+sz)*4); // scales text based on num of char
+        my.text(txt, 0, -sliderLength*sz/2-10);
+
+        let roundto = 0;
+        if (elements[i].max <= .1) {
+          roundto = 3
+        } else if (elements[i].max <= 1) {
+          roundto = 2
+        } else if (elements[i].max <= 10) {
+          roundto = 1
+        }
+        my.textSize((5+sz)*2); // scales text based on num of char
+        my.text(round(elements[i].value,roundto), 0, sliderLength*sz/2+10);
+        my.pop();
+        // MAP TO CONTROLS
+        eval(elements[i].mapto +'= ' + elements[i].value + ';');
+      }
+    // END SLIDER
+    // DRAW TOGGLE BUTTON
+      else if (elements[i].type == 'toggle' ){
+        my.push(); // ASSUME ON STATE
+        my.stroke(my.color1);
+        my.strokeWeight(4);
+        let textColor = my.color1;
+        if (elements[i].value == 0) { // OFF STATE
+          my.stroke(my.color3);
+          my.strokeWeight(2);
+          textColor = my.color3;
+        }
+        my.translate(elements[i].x, elements[i].y);
+        my.fill(my.color2);
+        my.ellipse(0, 0, r*2, r*2);
+        my.fill(textColor);
+        my.noStroke();
+        let toggleText = elements[i].label;
+        my.textSize(85/toggleText.length); // scales text based on num of chars
+        my.text(toggleText, 0, 1);
+        my.pop();
+        // MAP TO CONTROLS
+        eval(elements[i].mapto +'= ' + elements[i].value + ';');
+      }
+    // END TOGGLE
+    // DRAW MOMENTARY BUTTON
+      else if (elements[i].type == 'momentary' ){
+        my.push(); // ASSUME OFF STATE
+        my.fill(my.color2);
+        my.stroke(my.color3);
+        my.strokeWeight(2);
+        let textColor = my.color3;
+        if (elements[i].value == 1){ // ON STATE
+          my.stroke(my.color1);
+          textColor = my.color1;
+          my.strokeWeight(4);
+        }
+        my.translate(elements[i].x, elements[i].y);
+        my.ellipse(0, 0, r*2, r*2);
+        my.fill (textColor);
+        my.noStroke();
+        let text = elements[i].label;
+        my.textSize(85/text.length); // scales text based on num of chars
+        my.text(text, 0, 1);
+        my.pop();
+        // MAP TO CONTROLS
+        eval(elements[i].mapto +'= ' + elements[i].value + ';');
+      }
+    // END MOMENTARY
+    // DRAW RADIO BUTTON
+      else if (elements[i].type == 'radio'){
+        my.push();
+        my.translate(elements[i].x, elements[i].y);
+        
+        my.fill(my.color2);
+        my.stroke(my.color1);
+        let numBoxes = elements[i].radioOptions.length
+        let yBoxInit = - Math.floor(numBoxes/2); // y scale for where to start drawing
+        if (numBoxes % 2 != 0){
+          yBoxInit += -0.5 // extra offset if numBoxes is odd
+        }
+        let yBox = yBoxInit;
+        for (let j=0; j < numBoxes; j++){
+          my.rect(-boxSize/2,yBox*boxSize,boxSize,boxSize);
+          yBox = yBox + 1; // adjust y scale
+        }
+        my.textSize(11);
+        my.noStroke();
+        my.fill(my.color1);
+        yBox = yBoxInit + 0.5; // reset to original value, add offset to center text
+        for (let j=0; j < numBoxes; j++){
+          my.text(elements[i].radioOptions[j], 0, yBox*boxSize);
+          yBox = yBox + 1; // adjust y scale
+        }
+        // FILL IN ACTIVE BUTTON
+        let active = elements[i].value - 1; // adjust for 0-indexing
+        yBox = yBoxInit + active;
+        my.fill(my.color1);
+        my.rect(-boxSize/2,yBox*boxSize,boxSize,boxSize);
+        my.fill(my.color2);
+        let txt = elements[i].radioOptions[active];
+        my.text(txt, 0,(yBox+.5)*boxSize);
+        my.pop();
+        // MAP TO CONTROLS
+        eval(elements[i].mapto +'= ' + elements[i].value + ';');
+      }
+    }  
+  }
 }
 
 
