@@ -54,9 +54,24 @@ code {
   align-items: center;
   overflow: hidden;
   border: 1px solid gray;
+  margin-top: -12px;
 }
 
 .span-container {
   display: flex;
   align-items: center;
+}
+
+.canvas-maximized {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  /* Adjust the z-index as needed */
 }

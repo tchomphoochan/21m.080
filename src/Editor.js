@@ -1,4 +1,4 @@
-//5:25
+//7:25
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -63,23 +63,19 @@ function Editor() {
     const [liveMode, setLiveMode] = useState(false);
     const [middleButton, setMiddleButton] = useState("button-container");
     const [canvases, setCanvases] = useState([]);
-    const [canvasRendered, setCanvasRendered] = useState(false);
     const [addClicked, setAddClicked] = useState(false);
     const [canvasName, setCanvasName] = useState('');
+    const [maximized, setMaximized] = useState('');
 
 
     useEffect(() => {
         localStorage.setItem('canvases', '');
         const storedCanvases = localStorage.getItem('canvases');
         if (storedCanvases) {
-            renderP5Div();
             const prevCanvases = JSON.parse(storedCanvases);
             setCanvases(prevCanvases);
-            console.log(prevCanvases);
-            for (const id of prevCanvases) {
-                addDiv(id);
-            }
         }
+        console.log(canvases);
     }, []);
 
     function removeComments() {
@@ -267,75 +263,27 @@ function Editor() {
 
     const submitName = (event) => {
         if (event.key === 'Enter') {
-            renderCanvas(canvasName);
+            setCanvases((prevCanvases) => {
+                const updatedCanvases = [...prevCanvases, canvasName];
+                localStorage.setItem('canvases', JSON.stringify(updatedCanvases));
+                return updatedCanvases;
+            });
             setCanvasName('');
             setAddClicked(false);
         }
     };
 
-    function renderP5Div() {
-        if (!canvasRendered) {
-            const p5Div = document.createElement('div');
-            p5Div.classList.add("flex-child");
-            p5Div.id = 'p5';
-            document.getElementById('main').appendChild(p5Div);
-            setCanvasRendered(true);
-        }
-    }
+    const handleCanvasDelete = (id) => {
+        setCanvases((prevCanvases) => {
+            const updatedCanvases = prevCanvases.filter((canvas) => canvas !== id);
+            localStorage.setItem('canvases', JSON.stringify(updatedCanvases));
+            return updatedCanvases;
+        });
+    };
 
-    function renderCanvas(name) {
-        renderP5Div();
-        addDiv(name);
-        const varName = eval(name);
-        window.varName = new p5(getSketch(name), name);
-        setCanvases((prevArray) => [...prevArray, name]);
-        localStorage.setItem('canvases', JSON.stringify([...canvases, name]));
-    }
-
-    function addDiv(id) {
-        const parentDiv = document.getElementById('p5');
-        const p5Div = document.createElement('div');
-        p5Div.classList.add('p5Div');
-        p5Div.id = id;
-        p5Div.style.marginTop = '2px';
-        const optionsDiv = document.createElement('span');
-        optionsDiv.classList.add('span-container');
-        const label = document.createElement('p');
-        label.innerText = id;
-        const maxButton = document.createElement('button');
-        maxButton.innerText = 'max';
-        maxButton.classList.add('button-container');
-        const delButton = document.createElement('button');
-        delButton.innerText = 'del';
-        delButton.classList.add('button-container');
-        optionsDiv.appendChild(label);
-        optionsDiv.appendChild(maxButton);
-        optionsDiv.appendChild(delButton);
-        parentDiv.appendChild(optionsDiv);
-        parentDiv.appendChild(p5Div);
-    }
-
-    function getSketch(id) {
-        var sketch = function (p) {
-            p.div = document.getElementById(id);
-            p.x = 100;
-            p.y = 100;
-
-            p.setup = function () {
-                p.createCanvas(p.div.offsetWidth, p.div.offsetHeight);
-            };
-
-            p.draw = function () {
-            };
-
-            p.windowResized = function () {
-                p.resizeCanvas(p.div.offsetWidth, p.div.offsetHeight);
-            }
-        };
-        return sketch;
-    }
-
-    //window.addEventListener("resize", updateCanvases);
+    const handleMaximizeCanvas = (canvasId) => {
+        setMaximized((prevMaximized) => [...prevMaximized, canvasId]);
+    };
 
     return (
         <div id="main" className="flex-container">
@@ -376,6 +324,13 @@ function Editor() {
                     height='890px'
                 />
             </div>
+            {canvases.length > 0 &&
+                <div className="flex-child">
+                    {canvases.map((id) => (
+                        <Canvas key={id} id={id} onDelete={handleCanvasDelete} onMaximize={handleMaximizeCanvas} />
+                    ))}
+                </div>
+            }
         </div>
     );
 }

@@ -1,21 +1,53 @@
-import { useRef, useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import p5 from 'p5';
 
 function Canvas(props) {
-    var sketch = function (p) {
-        p.x = 100;
-        p.y = 100;
+    const [isMaximized, setIsMaximized] = useState(false);
 
-        p.setup = function () {
-            p.createCanvas(200, 200);
-            p.background(51);
+    useEffect(() => {
+        const sketch = (p) => {
+            let div;
+            let x = 100;
+            let y = 100;
+
+            p.setup = function () {
+                div = document.getElementById(props.id);
+                p.createCanvas(div.offsetWidth, div.offsetHeight);
+            };
+
+            p.draw = function () {
+                // Your drawing code here
+            };
+
+            p.windowResized = function () {
+                p.resizeCanvas(div.offsetWidth, div.offsetHeight);
+            };
         };
 
-        p.draw = function () {
-            p.fill(255, 0, 200, 25);
-        };
+        window[eval(props.id)] = new p5(sketch);
+    }, [props.id]);
+
+    const maxClicked = () => {
+        setIsMaximized(!isMaximized);
+        props.onMaximize(props.id);
     };
-    let myp5 = new p5(sketch, "container1");
+
+    const delClicked = () => {
+        props.onDelete(props.id);
+    };
+
+    return (
+        <>
+            <span className="span-container">
+                <p>{props.id}</p>
+                <button className="button-container" onClick={maxClicked}>
+                    {isMaximized ? 'restore' : 'max'}
+                </button>
+                <button className="button-container" onClick={delClicked}>del</button>
+            </span>
+            <div id={props.id} className='p5Div'></div>
+        </>
+    );
 
 }
 
