@@ -54,5 +54,9 @@ code {
   align-items: center;
   overflow: hidden;
   border: 1px solid gray;
-  margin: 5px;
+}
+
+.span-container {
+  display: flex;
+  align-items: center;
 }

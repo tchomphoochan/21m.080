@@ -1,4 +1,4 @@
-//4
+//5:25
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -69,7 +69,7 @@ function Editor() {
 
 
     useEffect(() => {
-        //localStorage.setItem('canvases', '');
+        localStorage.setItem('canvases', '');
         const storedCanvases = localStorage.getItem('canvases');
         if (storedCanvases) {
             renderP5Div();
@@ -293,10 +293,25 @@ function Editor() {
     }
 
     function addDiv(id) {
-        const p5Div = document.createElement('div');
         const parentDiv = document.getElementById('p5');
-        p5Div.id = id;
+        const p5Div = document.createElement('div');
         p5Div.classList.add('p5Div');
+        p5Div.id = id;
+        p5Div.style.marginTop = '2px';
+        const optionsDiv = document.createElement('span');
+        optionsDiv.classList.add('span-container');
+        const label = document.createElement('p');
+        label.innerText = id;
+        const maxButton = document.createElement('button');
+        maxButton.innerText = 'max';
+        maxButton.classList.add('button-container');
+        const delButton = document.createElement('button');
+        delButton.innerText = 'del';
+        delButton.classList.add('button-container');
+        optionsDiv.appendChild(label);
+        optionsDiv.appendChild(maxButton);
+        optionsDiv.appendChild(delButton);
+        parentDiv.appendChild(optionsDiv);
         parentDiv.appendChild(p5Div);
     }
 
@@ -325,7 +340,7 @@ function Editor() {
     return (
         <div id="main" className="flex-container">
             <div className="flex-child">
-                <span style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="span-container">
                     <button className="button-container" onClick={playClicked}>Play</button>
                     <button className={middleButton} onClick={liveClicked}>Live</button>
                     <button className="button-container" onClick={stopClicked}>Stop</button>
