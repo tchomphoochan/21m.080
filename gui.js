@@ -125,6 +125,7 @@ const gui_sketch = function(my) {
     // my.addElement({type:"knob",label:"SL3",mapto:"fakevar",min:1,max:2,value:1,size:2})
     my.addElement({type:"radio",label:"radio",mapto:"fillervar",size:1,radioOptions:['a','b','c','d','e']})
     my.addElement({type:"slider",label:"sVOL",mapto:"fillervar",size:1})
+    my.addElement({type:"slider",label:"hor",mapto:"fillervar",size:1,horizontal:true})
     // my.addElement({type:"slider",label:"s2VOL",mapto:"fillervar",size:1,bipolar:true})
     // my.addElement({type:"slider",label:"kVOL2",mapto:"fillervar",size:.5})
     my.addElement({type:"toggle",label:"togl",mapto:"fillervar",size:1})
@@ -170,17 +171,20 @@ const gui_sketch = function(my) {
   let needsUpdate = true;
 
   my.draw = function() { //drwwwwwww
-  // ITERATE THRU ALL ELEMENTS and UPDATE THEM IF NEEDED
+    let valuesChanged = didValuesChange();
+    my.push();
+    my.fill(color(255,0,55));
+    my.ellipse(55,55,55,55);
+    my.pop();
+    // ITERATE THRU ALL ELEMENTS and UPDATE THEM IF NEEDED
     for (let i = 0; i < elements.length; i++) {
     // UPDATE KNOB VALUE
       if (elements[i].type == 'knob' || elements[i].type == 'dial'){
         if (dragging && currElement==i) {
-          console.log('\nVAL: '+elements[i].value)
-          console.log('ogV: '+ogValue)
+          elements[i].prev = elements[i].value; // store prev val
           let dy = elements[i].y*globalScale - my.mouseY - ogY; // mouse units
           let dyScaled = dy*yScale; // mouse units + scaled for sensitivity
           let dyConverted = -elements[i].min+dyScaled*(elements[i].max-elements[i].min) + elements[i].min; // convert to 'value' units
-          console.log('dyC: '+dyConverted)
           elements[i].value = dyConverted + ogValue; // convert to value units
           if (elements[i].value >= elements[i].max) {
             elements[i].value = elements[i].max;
@@ -193,6 +197,7 @@ const gui_sketch = function(my) {
     // UPDATE SLIDER VALUE
       else if (elements[i].type == 'slider' || elements[i].type == 'fader' ){
         if (dragging && currElement==i) {
+          elements[i].prev = elements[i].value; // store prev val
           var dy = elements[i].y*globalScale - my.mouseY - ogY;
           var dyScaled = dy*(sliderSensitivity/elements[i].size); // scale for sensitivity based on size
           elements[i].value = dyScaled - ogValue; // update value
@@ -206,9 +211,13 @@ const gui_sketch = function(my) {
       } 
     
     // TOGGLE VALUE GETS UPDATED IN mousePressed()
+      else if (elements[i].type == 'toggle' ){
+        elements[i].prev = elements[i].value; // store prev val
+      }
 
     // UPDATE MOMENTARY BUTTON VALUE
       else if (elements[i].type == 'momentary' ){
+        elements[i].prev = elements[i].value; // store prev val
         if (currElement == i && dragging){
           elements[i].value = 1;
         } else {
@@ -216,6 +225,11 @@ const gui_sketch = function(my) {
         }
       }
     // RADIO BUTTON VALUE GETS UPDATED IN mousePressed()
+      else if (elements[i].type == 'radio' ){
+        elements[i].prev = elements[i].value; // store prev val
+      }
+
+    // UPDATE KEYBOARD VALUES
       else if (elements[i].type == 'keyboard'){
         // draw element
         my.push();
@@ -305,11 +319,18 @@ const gui_sketch = function(my) {
         // draw element
       } 
     }
-    redraw();
-    // update for next round
-    // needsUpdate = checkIfValuesChanged();
+    if (valuesChanged == true) {redraw();}
   }// draw
-
+  function didValuesChange() {
+    for (let i = 0; i < elements.length; i++) {
+      if (elements[i].prev != elements[i].value) {
+        elements[i].prev = elements[i].value; // store prev val
+        return true
+      }
+    }
+    console.log('NO CHANGE xxxxxx')
+    return false
+  }
 
   my.mousePressed = function() {
     console.log('click');
@@ -317,7 +338,6 @@ const gui_sketch = function(my) {
     dragging = true; // start dragging
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].type == "knob" || elements[i].type == 'dial'){
-        console.log('checking')
         if (dist(my.mouseX, my.mouseY, elements[i].x*globalScale, elements[i].y*globalScale) < rKnob*globalScale*elements[i].size) { 
           ogY = elements[i].y*globalScale - my.mouseY;
           ogValue = elements[i].value;
@@ -450,6 +470,7 @@ const gui_sketch = function(my) {
         if (bipolar != undefined) {elements[i].bipolar = bipolar;}
         if (radioOptions != undefined) {elements[i].radioOptions = radioOptions;}
         if (horizontal != undefined) {elements[i].horizontal = horizontal;}
+        elements[i].prev = undefined;
         break
       }
       else {
@@ -469,6 +490,7 @@ const gui_sketch = function(my) {
       if (min == undefined) {min=0;}
       if (max == undefined) {max=1;}
       if (value == undefined) {value=(max-min)/2;}
+      prev = value;
       if (prev == undefined) {prev="";}
       if (size == undefined) {size=1;}
       if (showLabel == undefined) {showLabel=true;}
@@ -512,7 +534,13 @@ const gui_sketch = function(my) {
   }
 
   function redraw() { //rdrwwwwwww
-    // my.background(my.color2);
+    my.background(my.color2);
+
+    my.push();
+    my.fill(color(0,255,0));
+    my.ellipse(55,55,55,55);
+    my.pop();
+
     my.scale(globalScale);
 
     // draw grid
@@ -639,8 +667,11 @@ const gui_sketch = function(my) {
       else if (elements[i].type == 'slider' || elements[i].type == 'fader'){
         my.push(); 
         let sz = elements[i].size;
-        my.rectMode(CENTER);
         my.translate(elements[i].x, elements[i].y);
+        if (elements[i].horizontal == true){
+          my.rotate(90);
+        }
+        my.rectMode(CENTER);  
         // full slider line
         my.strokeCap(SQUARE);
         my.noStroke();
@@ -690,10 +721,19 @@ const gui_sketch = function(my) {
         // LABEL
         my.fill(my.color3);
         my.noStroke();
+        if (elements[i].horizontal == true){
+          my.rotate(-90)
+        }
         if (elements[i].showLabel == true) {
           let txt = elements[i].label;
           my.textSize((2+sz)*4); // scales text based on num of char
-          my.text(txt, 0, -sliderLength*sz/2-10);
+          let labelX = 0;
+          let labelY = -sliderLength*sz/2-10;
+          if (elements[i].horizontal == true){
+            my.text(txt, labelY - 5, labelX);
+          } else {
+            my.text(txt, labelX, labelY);
+          }
         }
         if (elements[i].showValue == true) {
           let roundto = 0;
@@ -705,7 +745,13 @@ const gui_sketch = function(my) {
             roundto = 1
           }
           my.textSize((5+sz)*2); // scales text based on num of char
-          my.text(round(elements[i].value,roundto), 0, sliderLength*sz/2+10);
+          let labelX = 0;
+          let labelY = sliderLength*sz/2+10;
+          if (elements[i].horizontal == true){
+            my.text(round(elements[i].value,roundto), labelY+5,labelX);
+          } else {
+            my.text(round(elements[i].value,roundto), labelX,labelY);
+          }
         }
         my.pop();
         // MAP TO CONTROLS
