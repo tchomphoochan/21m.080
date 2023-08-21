@@ -4,36 +4,37 @@ let x_size,y_size,edgeGapX,edgeGapY;
 let globalScale = 1;
 
 let fullscreen = false;
-function fullscreenGUI(){
-  console.log("FS");
+// function fullscreenGUI(){
+//   console.log("FS");
 
-  if (fullscreen){
-    //reset
-    document.getElementById('gui_div').style.top = "2%";
-    document.getElementById('gui_div').style.right = "2";
-    document.getElementById('gui_div').style.width = "49%";
-    document.getElementById('gui_div').style.height = "32%";
-    globalScale = 1;
-    fullscreen = false
-  } else {
-    //make fs
-    document.getElementById('gui_div').style.top = "4%";
-    document.getElementById('gui_div').style.right = ".5%";
-    document.getElementById('gui_div').style.width = "99%";
-    document.getElementById('gui_div').style.height = "96%";
-    globalScale = 2;
-    fullscreen = true
-  }
-  x_size = document.getElementById('gui_div').offsetWidth;
-  y_size = document.getElementById('gui_div').offsetHeight;
-  console.log()
-  // gui.dimRatio = y_size / x_size;
-  gui.resizeCanvas(x_size, y_size);
-  gui.background(100);
+//   if (fullscreen){
+//     //reset
+//     document.getElementById('gui_div').style.top = "2%";
+//     document.getElementById('gui_div').style.right = "2";
+//     document.getElementById('gui_div').style.width = "49%";
+//     document.getElementById('gui_div').style.height = "32%";
+//     globalScale = 1;
+//     fullscreen = false
+//   } else {
+//     //make fs
+//     document.getElementById('gui_div').style.top = "4%";
+//     document.getElementById('gui_div').style.right = ".5%";
+//     document.getElementById('gui_div').style.width = "99%";
+//     document.getElementById('gui_div').style.height = "96%";
+//     globalScale = 2;
+//     fullscreen = true
+//   }
+//   x_size = document.getElementById('gui_div').offsetWidth;
+//   y_size = document.getElementById('gui_div').offsetHeight;
+//   console.log()
+//   // gui.dimRatio = y_size / x_size;
+//   gui.resizeCanvas(x_size, y_size);
+//   gui.background(100);
 
-  edgeGapX = x_size * (1-globalScale) * 0.5 ;
-  edgeGapY = y_size * (1-globalScale) * 0.5 ;
-}
+//   edgeGapX = x_size * (1-globalScale) * 0.5 ;
+//   edgeGapY = y_size * (1-globalScale) * 0.5 ;
+// }//fullscreen
+
 const gui_sketch = function(my) {
 
   x_size = document.getElementById('gui_div').offsetWidth *.985;
@@ -81,7 +82,7 @@ const gui_sketch = function(my) {
     my.textStyle(BOLD);
     my.textAlign (CENTER, CENTER);
     buttonPress();  
-    fullscreenGUI()
+    my.fullscreenGUI()
   }//setup
 
 
@@ -119,17 +120,17 @@ const gui_sketch = function(my) {
   let buttonPress = function() {
     // for testing
     console.log('buton pres')
-    my.addElement({type:"knob",label:"SL1",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true})
-    my.addElement({type:"knob",label:"SL12",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true,bipolar:true})
-    // my.addElement({type:"knob",label:"SL2",mapto:"fakevar",min:0,max:3,value:2,size:1})
-    // my.addElement({type:"knob",label:"SL3",mapto:"fakevar",min:1,max:2,value:1,size:2})
-    my.addElement({type:"radio",label:"radio",mapto:"fillervar",size:1,radioOptions:['a','b','c','d','e']})
-    my.addElement({type:"slider",label:"sVOL",mapto:"fillervar",size:1})
-    my.addElement({type:"slider",label:"hor",mapto:"fillervar",size:1,horizontal:true})
-    // my.addElement({type:"slider",label:"s2VOL",mapto:"fillervar",size:1,bipolar:true})
-    // my.addElement({type:"slider",label:"kVOL2",mapto:"fillervar",size:.5})
-    my.addElement({type:"toggle",label:"togl",mapto:"fillervar",size:1})
-    my.addElement({type:"momentary",label:"momn",mapto:"fillervar",size:1})
+    // my.addElement({type:"knob",label:"SL1",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true})
+    // my.addElement({type:"knob",label:"SL12",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true,bipolar:true})
+    // // my.addElement({type:"knob",label:"SL2",mapto:"fakevar",min:0,max:3,value:2,size:1})
+    // // my.addElement({type:"knob",label:"SL3",mapto:"fakevar",min:1,max:2,value:1,size:2})
+    // my.addElement({type:"radio",label:"radio",mapto:"fillervar",size:1,radioOptions:['a','b','c','d','e']})
+    // my.addElement({type:"slider",label:"sVOL",mapto:"fillervar",size:1})
+    // my.addElement({type:"slider",label:"hor",mapto:"fillervar",size:1,horizontal:true})
+    // // my.addElement({type:"slider",label:"s2VOL",mapto:"fillervar",size:1,bipolar:true})
+    // // my.addElement({type:"slider",label:"kVOL2",mapto:"fillervar",size:.5})
+    // my.addElement({type:"toggle",label:"togl",mapto:"fillervar",size:1})
+    // my.addElement({type:"momentary",label:"momn",mapto:"fillervar",size:1})
   }
 
   let addKeyboard = function() {
@@ -444,6 +445,12 @@ const gui_sketch = function(my) {
 
     this.radioOptions = radioOptions; // array
     this.horizontal = horizontal; // bool: for slider or radio buttons
+
+    this.position = function(x,y){
+      this.x = my.scaleX(x);
+      this.y = my.scaleY(y);
+      redraw();
+    }
   }
   
 
@@ -515,6 +522,8 @@ const gui_sketch = function(my) {
       console.log(elements);
     }
 
+    redraw();
+
     return elements[elements.length - 1];
   }//addElement
 
@@ -527,9 +536,13 @@ const gui_sketch = function(my) {
   }//removeElement
 
   my.scaleX = function(val){
+    if( val < 0 ) val = 0;
+    else if ( val>100 ) val = 100;
     return (val/100) * x_size;
   }
   my.scaleY = function(val){
+    if( val < 0 ) val = 0;
+    else if ( val>100 ) val = 100;
     return (val/100) * y_size;
   }
 
@@ -897,6 +910,38 @@ const gui_sketch = function(my) {
     }
     lines.push([0,y,x_size,y,color])
   }
+
+  my.fullscreenGUI = function(){
+    console.log("FS");
+
+    if (fullscreen){
+      //reset
+      document.getElementById('gui_div').style.top = "2%";
+      document.getElementById('gui_div').style.right = "2";
+      document.getElementById('gui_div').style.width = "49%";
+      document.getElementById('gui_div').style.height = "32%";
+      globalScale = 1;
+      fullscreen = false
+    } else {
+      //make fs
+      document.getElementById('gui_div').style.top = "4%";
+      document.getElementById('gui_div').style.right = ".5%";
+      document.getElementById('gui_div').style.width = "99%";
+      document.getElementById('gui_div').style.height = "96%";
+      globalScale = 2;
+      fullscreen = true
+    }
+    x_size = document.getElementById('gui_div').offsetWidth;
+    y_size = document.getElementById('gui_div').offsetHeight;
+    console.log()
+    // gui.dimRatio = y_size / x_size;
+    my.resizeCanvas(x_size, y_size);
+    //my.background(100);
+    redraw();
+
+    edgeGapX = x_size * (1-globalScale) * 0.5 ;
+    edgeGapY = y_size * (1-globalScale) * 0.5 ;
+  }//fullscreen
 }
 
 
