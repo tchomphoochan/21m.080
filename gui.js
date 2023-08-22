@@ -235,11 +235,11 @@ const gui_sketch = function(my) {
         // draw element
         my.push();
         my.fill(255);
-        my.stroke(my.color1);
+        my.stroke(elements[i].color);
         my.strokeWeight(2);
         // let textColor = my.color3;
         // if (currElement == i && dragging){
-        //   my.stroke(my.color1);
+        //   my.stroke(elements[i].color);
         //   textColor = my.color1;
         //   my.strokeWeight(3);
         // }
@@ -276,7 +276,7 @@ const gui_sketch = function(my) {
         my.translate(20,100);
         my.push();
         my.fill(my.color2);
-        my.stroke(my.color1);
+        my.stroke(elements[i].color);
         let seqBoxSize = 30;
         for (let track =0; track < 4; track++){
           my.push();
@@ -427,7 +427,7 @@ const gui_sketch = function(my) {
   // }
   let elements = [];
 
-  let UserElement = function(type,label,mapto,x,y,min,max,value,prev,size,showLabel,showValue, bipolar, radioOptions,horizontal) {
+  let UserElement = function(type,label,mapto,x,y,min,max,value,prev,size,color,showLabel,showValue, bipolar, radioOptions,horizontal) {
     this.type = type; // str: type of element
     this.label = label; // str: name and unique ID
     this.mapto = mapto; // str: variable it is controlling
@@ -446,6 +446,8 @@ const gui_sketch = function(my) {
     this.radioOptions = radioOptions; // array
     this.horizontal = horizontal; // bool: for slider or radio buttons
 
+    this.color = my.color1;
+
     this.position = function(x,y){
       this.x = my.scaleX(x);
       this.y = my.scaleY(y);
@@ -453,8 +455,7 @@ const gui_sketch = function(my) {
     }
   }
   
-
-  my.addElement = function({type,label,mapto, x,y,min,max,value,prev,size,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+  my.addElement = function({type,label,mapto, x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
     // console.log(elements);
     // forceDraw = true; // so that the canvas will update even tho we are not clicking it
     // NEW OR UPDATE EXISTING?
@@ -472,6 +473,7 @@ const gui_sketch = function(my) {
         if (max != undefined) {elements[i].max = max;}
         if (value != undefined) {elements[i].value = value;}
         if (size != undefined) {elements[i].size = size;}
+        if (color != undefined) {elements[i].color = color;}
         if (showLabel != undefined) {elements[i].showLabel = showLabel;}
         if (showValue != undefined) {elements[i].showValue = showValue;}
         if (bipolar != undefined) {elements[i].bipolar = bipolar;}
@@ -500,6 +502,7 @@ const gui_sketch = function(my) {
       prev = value;
       if (prev == undefined) {prev="";}
       if (size == undefined) {size=1;}
+      if (color == undefined) {color = my.color1;}
       if (showLabel == undefined) {showLabel=true;}
       if (showValue == undefined) {showValue=true;}
       if (bipolar == undefined) {bipolar=false;}
@@ -518,7 +521,7 @@ const gui_sketch = function(my) {
         // 8 x 4track
         value = [[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]];
       }
-      elements.push(new UserElement(type,label,mapto,x,y,min,max,value,prev,size,showLabel,showValue,bipolar,radioOptions,horizontal));
+      elements.push(new UserElement(type,label,mapto,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal));
       console.log(elements);
     }
 
@@ -596,12 +599,12 @@ const gui_sketch = function(my) {
       my.pop();
     }
     my.pop();
-
-
-    my.fill(my.color1);
+    
     for (let i = 0; i < elements.length; i++) {
       // DRAW KNOB
-      if (elements[i].type == 'knob' || elements[i].type == 'dial'){
+      my.fill(elements[i].color);
+      if (elements[i].type == 'line') my.drawLine(i)
+      else if (elements[i].type == 'knob' || elements[i].type == 'dial'){
           my.push();
           my.translate(elements[i].x, elements[i].y);
           let sz = elements[i].size;
@@ -616,7 +619,7 @@ const gui_sketch = function(my) {
           my.fill(transparentColor);  
           my.arc(0, 0, 2*rKnob*sz, 2*rKnob*sz,120,60);
           // active arc
-          my.stroke(my.color1);
+          my.stroke(elements[i].color);
           let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max-elements[i].min) ; // normalize between 0-1
           let valueInDegrees = valueNorm * 300 - 240; // range is -240 to 60 deg
           let bipolarOffset = 0;
@@ -697,7 +700,7 @@ const gui_sketch = function(my) {
 
         // active line
         my.strokeWeight(sliderWidth*sz);
-        my.stroke(my.color1);
+        my.stroke(elements[i].color);
         let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max-elements[i].min) ; // normalize between 0-1
         let convertedVal = valueNorm * sliderLength*sz;
         let bipolarOffset = 0;
@@ -780,7 +783,7 @@ const gui_sketch = function(my) {
         my.fill(my.color2);  
         my.ellipse(0, 0, 2.2*rBtn*sz);
         // setting up color variables
-        my.stroke(my.color1);
+        my.stroke(elements[i].color);
         my.strokeWeight(4);
         let textColor = my.color1;
         if (elements[i].value == 0) { // OFF STATE
@@ -816,7 +819,7 @@ const gui_sketch = function(my) {
         my.strokeWeight(2);
         let textColor = my.color3;
         if (elements[i].value == 1){ // ON STATE
-          my.stroke(my.color1);
+          my.stroke(elements[i].color);
           textColor = my.color1;
           my.strokeWeight(4);
         }
@@ -888,27 +891,62 @@ const gui_sketch = function(my) {
         eval(elements[i].mapto +'= ' + elements[i].value + ';');
       }
     }  
-  }
-  my.line2 = function(x1,y1,x2,y2,color) {
-    my.line(x1,y1,x2,y2)
+  } //redraw
+
+  let lineNumber = 0
+
+  //******** LINES ********//
+  my.line2 = function(x1,y1,x2,y2,stroke=1,color,label=null) {
+    x1 = my.scaleY(x1)
+    x2 = my.scaleY(x2)
+    y1 = my.scaleY(y1)
+    y2 = my.scaleY(y2)
+    //my.line(x1,y1,x2,y2)
     if (color == undefined){
       color = my.color3;
     }
-    lines.push([x1,y1,x2,y2,color])
+    //lines.push([x1,y1,x2,y2,stroke,color])
+
+    let type = 'line'
+    if (label == null) label = 'line' + lineNumber
+    lineNumber+=1
+    mapto = 'mapto'
+    x=[x1,x2]
+    y=[y1,y2]
+    let min = 0
+    let max = 0
+    let size = stroke
+
+    elements.push(new UserElement(type,label,'mapto',x,y,0,0,0,0,size,0,0,0,0,0));
+
+    redraw()
+
+    return elements[elements.length - 1];
   }
   my.lineX = function(x,color) {
+    x = my.scaleX(x)
     my.line(x,0,x,y_size)
-    if (color == undefined){
+    if (color === undefined){
       color = my.color3;
     }
     lines.push([x,0,x,y_size,color])
+    redraw()
   }
+
   my.lineY = function(y,color) {
+    y = my.scaleY(y)
     my.line(0,y,x_size,y)
     if (color == undefined){
       color = my.color3;
     }
     lines.push([0,y,x_size,y,color])
+    redraw()
+  }
+
+  my.drawLine = function(i){
+    my.stroke( elements[i].color )
+    my.strokeWeight( elements[i].size )
+    my.line(elements[i].x[0],elements[i].y[0],elements[i].x[1],elements[i].y[1])
   }
 
   my.fullscreenGUI = function(){
