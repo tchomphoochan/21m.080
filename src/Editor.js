@@ -1,5 +1,5 @@
-//7:25
-import { useState, useEffect } from 'react';
+//2
+import { useState, useEffect, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
 import { javascript } from '@codemirror/lang-javascript';
@@ -65,17 +65,17 @@ function Editor() {
     const [canvases, setCanvases] = useState([]);
     const [addClicked, setAddClicked] = useState(false);
     const [canvasName, setCanvasName] = useState('');
-    const [maximized, setMaximized] = useState('');
-
+    const [codeMinimized, setCodeMinimized] = useState(false);
+    const [p5Minimized, setP5Minimized] = useState(true);
 
     useEffect(() => {
-        localStorage.setItem('canvases', '');
+        //localStorage.setItem('canvases', '');
         const storedCanvases = localStorage.getItem('canvases');
         if (storedCanvases) {
             const prevCanvases = JSON.parse(storedCanvases);
             setCanvases(prevCanvases);
+            setP5Minimized(false);
         }
-        console.log(canvases);
     }, []);
 
     function removeComments() {
@@ -281,57 +281,105 @@ function Editor() {
         });
     };
 
-    const handleMaximizeCanvas = (canvasId) => {
-        setMaximized((prevMaximized) => [...prevMaximized, canvasId]);
-    };
+    const codeMinClicked = () => {
+        setCodeMinimized(!codeMinimized);
+    }
+
+    const canvasMinClicked = () => {
+        setP5Minimized(!p5Minimized);
+    }
+
+    // const handleMaximizeCanvas = (canvasId) => {
+    //     setMaximized((prevMaximized) => [...prevMaximized, canvasId]);
+    // };
+
 
     return (
-        <div id="main" className="flex-container">
-            <div className="flex-child">
-                <span className="span-container">
-                    <button className="button-container" onClick={playClicked}>Play</button>
-                    <button className={middleButton} onClick={liveClicked}>Live</button>
-                    <button className="button-container" onClick={stopClicked}>Stop</button>
-                    {addClicked ? (
-                        <input
-                            type="text"
-                            placeholder="Enter Canvas Name"
-                            value={canvasName}
-                            onChange={handleCanvasNameChange}
-                            onKeyDown={submitName}
-                        />
-                    ) : (
-                        <button className="button-container" onClick={addCanvas}>Add Canvas</button>
-                    )}
-                </span>
-                <CodeMirror
-                    value={value}
-                    initialState={serializedState
-                        ? {
-                            json: JSON.parse(serializedState || ''),
-                            fields: stateFields,
-                        }
-                        : undefined
-                    }
-                    options={{
-                        mode: 'javascript',
-                    }}
-                    extensions={[javascript({ jsx: true })]}
-                    onChange={handleCodeChange}
-                    onKeyDown={handleKeyDown}
-                    //onClick={handleClick}
-                    onStatistics={handleStatistics}
-                    height='890px'
-                />
+        <>
+            <div className="flex-container">
+                {!codeMinimized &&
+                    <div className="flex-child">
+                        <span className="span-container">
+                            <span >
+                                <button className="button-container" onClick={playClicked}>Play</button>
+                                <button className={middleButton} onClick={liveClicked}>Live</button>
+                                <button className="button-container" onClick={stopClicked}>Stop</button>
+                            </span>
+                            {canvases.length === 0 && (
+                                addClicked ? (
+                                    <input
+                                        style={{ borderRadius: '8px' }}
+                                        type="text"
+                                        placeholder="Enter Canvas Name"
+                                        value={canvasName}
+                                        onChange={handleCanvasNameChange}
+                                        onKeyDown={submitName}
+                                    />
+                                ) : (
+                                    <button className="button-container" onClick={addCanvas}>
+                                        Add Canvas
+                                    </button>
+                                )
+                            )}
+                            {canvases.length > 0 &&
+                                <span>
+                                    <button className="button-container" onClick={codeMinClicked}>-</button>
+                                    <button className="button-container" onClick={canvasMinClicked}>{p5Minimized ? '<=' : '+'}</button>
+                                </span>
+                            }
+                        </span>
+                        <div id="codebox" style={{ display: "flex", flex: 1, flexDirection: "column" }}>
+                            <CodeMirror
+                                id="codemirror"
+                                value={value}
+                                initialState={serializedState
+                                    ? {
+                                        json: JSON.parse(serializedState || ''),
+                                        fields: stateFields,
+                                    }
+                                    : undefined
+                                }
+                                options={{
+                                    mode: 'javascript',
+                                }}
+                                extensions={[javascript({ jsx: true })]}
+                                onChange={handleCodeChange}
+                                onKeyDown={handleKeyDown}
+                                //onClick={handleClick}
+                                onStatistics={handleStatistics}
+                                height="885px"
+                            />
+                        </div>
+                    </div>
+                }
+                {(canvases.length > 0 && !p5Minimized) &&
+                    <div className="flex-child">
+                        <span className="span-container">
+                            {codeMinimized &&
+                                <button className="button-container" onClick={codeMinClicked}>{"=>"}</button>
+                            }
+                            <div style={{ display: 'block', margin: '0 auto' }}>
+                                {addClicked ? (
+                                    <input
+                                        style={{ borderRadius: "8px" }}
+                                        type="text"
+                                        placeholder="Enter Canvas Name"
+                                        value={canvasName}
+                                        onChange={handleCanvasNameChange}
+                                        onKeyDown={submitName}
+                                    />
+                                ) : (
+                                    <button className="button-container" style={{ marginRight: "5px auto" }} onClick={addCanvas}>Add Canvas</button>
+                                )}
+                            </div>
+                        </span>
+                        {canvases.map((id) => (
+                            <Canvas key={id} id={id} onDelete={handleCanvasDelete} />
+                        ))}
+                    </div>
+                }
             </div>
-            {canvases.length > 0 &&
-                <div className="flex-child">
-                    {canvases.map((id) => (
-                        <Canvas key={id} id={id} onDelete={handleCanvasDelete} onMaximize={handleMaximizeCanvas} />
-                    ))}
-                </div>
-            }
-        </div>
+        </>
     );
 }
 

@@ -16,6 +16,7 @@ code {
 .flex-container {
   display: flex;
   height: 100vh;
+  padding: 5px;
 }
 
 .flex-child {
@@ -26,13 +27,9 @@ code {
   flex-direction: column;
 }
 
-.flex-child:first-child {
-  margin-right: 5px;
-}
-
 .center-content {
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .button-container {
@@ -55,23 +52,15 @@ code {
   overflow: hidden;
   border: 1px solid gray;
   margin-top: -12px;
+  margin-bottom: 10px;
 }
 
 .span-container {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
-.canvas-maximized {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  /* Adjust the z-index as needed */
+.codeMirror {
+  height: 860px;
 }

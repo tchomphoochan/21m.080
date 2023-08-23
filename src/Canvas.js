@@ -7,8 +7,6 @@ function Canvas(props) {
     useEffect(() => {
         const sketch = (p) => {
             let div;
-            let x = 100;
-            let y = 100;
 
             p.setup = function () {
                 div = document.getElementById(props.id);
@@ -27,10 +25,10 @@ function Canvas(props) {
         window[eval(props.id)] = new p5(sketch);
     }, [props.id]);
 
-    const maxClicked = () => {
-        setIsMaximized(!isMaximized);
-        props.onMaximize(props.id);
-    };
+    // const maxClicked = () => {
+    //     setIsMaximized(!isMaximized);
+    //     props.onMaximize(props.id);
+    // };
 
     const delClicked = () => {
         props.onDelete(props.id);
@@ -38,12 +36,14 @@ function Canvas(props) {
 
     return (
         <>
-            <span className="span-container">
+            <span className="span-container" style={{ marginTop: "-14px" }}>
                 <p>{props.id}</p>
-                <button className="button-container" onClick={maxClicked}>
-                    {isMaximized ? 'restore' : 'max'}
-                </button>
-                <button className="button-container" onClick={delClicked}>del</button>
+                <span>
+                    {/* <button className="button-container" >
+                        {isMaximized ? 'restore' : '+'}
+                    </button> */}
+                    <button className="button-container" onClick={delClicked}>x</button>
+                </span>
             </span>
             <div id={props.id} className='p5Div'></div>
         </>
