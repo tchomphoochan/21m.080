@@ -461,7 +461,7 @@ var Oscilloscope = Oscilloscope || function(_target) {
     this.wave.setAttribute('d', path);
 
     if (this.running) {
-    	console.log(path)
+    	// console.log(path)
         window.requestAnimationFrame(this.drawWave);
     }
 }.bind(this);
