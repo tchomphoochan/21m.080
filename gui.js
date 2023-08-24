@@ -329,7 +329,7 @@ const gui_sketch = function(my) {
         return true
       }
     }
-    console.log('NO CHANGE xxxxxx')
+    //console.log('NO CHANGE xxxxxx')
     return false
   }
 
@@ -676,7 +676,8 @@ const gui_sketch = function(my) {
           my.pop();
           
           // MAP TO CONTROLS
-          eval(elements[i].mapto +'= ' + elements[i].value + ';');
+          //eval(elements[i].mapto +'= ' + elements[i].value + ';'); //old
+          eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
       }  
     // END KNOB
     // DRAW SLIDER
@@ -771,7 +772,7 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        eval(elements[i].mapto +'= ' + elements[i].value + ';');
+        eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
       }
     // END SLIDER
     // DRAW TOGGLE BUTTON
@@ -802,7 +803,7 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        eval(elements[i].mapto +'= ' + elements[i].value + ';');
+        eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
       }
     // END TOGGLE
     // DRAW MOMENTARY BUTTON
@@ -833,7 +834,7 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        eval(elements[i].mapto +'= ' + elements[i].value + ';');
+        eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
       }
     // END MOMENTARY
     // DRAW RADIO BUTTON
@@ -888,7 +889,7 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        eval(elements[i].mapto +'= ' + elements[i].value + ';');
+        eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
       }
     }  
   } //redraw
