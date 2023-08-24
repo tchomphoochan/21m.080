@@ -367,8 +367,8 @@ OSCILLOSCOPE
 
 ****************************************/
 
-var Oscilloscope = Oscilloscope || function(_target, context) {
-    var _drawWave, _bufferLength, _dataArray;
+var Oscilloscope = Oscilloscope || function(_target) {
+    //var _drawWave, _bufferLength, _dataArray;
 
     //this.target = document.querySelector(target);
     this.target = document.getElementById(_target)
@@ -400,37 +400,72 @@ var Oscilloscope = Oscilloscope || function(_target, context) {
     // Is the oscilloscope analyser-node connected to the audio-context' destination
     this.hasAudio = false;
 
+     // Create the oscilloscope analyser-node
     this.analyserNode = this.audioContext.createAnalyser();
-
-    this.analyserNode.fftSize = 128;
-    _bufferLength = this.analyserNode.frequencyBinCount;
-    _dataArray = new Uint8Array(_bufferLength);
+    this.analyserNode.fftSize = 128; // Default fftSize
+    this.bufferLength = this.analyserNode.frequencyBinCount;
+    this.dataArray = new Uint8Array(this.bufferLength);
 
     // Set-up the analyser-node which we're going to use to get the oscillation wave
     this.setFftSize = function(val){
-    	this.analyserNode.fftSize = val;
-    	_bufferLength = this.analyserNode.frequencyBinCount;
-    	_dataArray = new Uint8Array(_bufferLength);
-    }
-  
+    	console.log("setting FFT size to " + val)
+        this.analyserNode.fftSize = val;
+        this.bufferLength = this.analyserNode.frequencyBinCount;
+        this.dataArray = new Uint8Array(this.bufferLength);
+    }.bind(this);
+
     /**
      * Draw the oscillation wave
      */
-    _drawWave = function() {
-        var path = 'M';
+    this.drawWave = function() {
+    var path = 'M';
 
-        this.analyserNode.getByteTimeDomainData(_dataArray);
+    this.analyserNode.getByteTimeDomainData(this.dataArray);
 
-        _dataArray.forEach(function(point, i) {
-            path += (((this.width + (this.width / _bufferLength))/ _bufferLength) * i) + ' ' + ((this.height / 2) * (point / 128.0)) + ', ';
-        }.bind(this));
-
-        this.wave.setAttribute('d', path);
-
-        if (this.running) {
-            window.requestAnimationFrame(_drawWave);
+    // Find the index of the first positive zero-crossing point
+    var firstPositiveZeroCrossing = 0;
+    for (var i = 1; i < this.bufferLength; i++) {
+        if (this.dataArray[i] > 128 && this.dataArray[i - 1] <= 128) {
+            firstPositiveZeroCrossing = i;
+            break;
         }
-    }.bind(this);
+    }
+
+    // Build the path starting from the first positive zero-crossing point
+    // for (var i = firstPositiveZeroCrossing; i < this.bufferLength; i++) {
+    //     path += (((this.width + (this.width / this.bufferLength)) / this.bufferLength) * (i - firstPositiveZeroCrossing)) + ' ' + ((this.height / 2) * (this.dataArray[i] / 128.0)) + ', ';
+    // }
+
+    let x = this.width;
+    let y = this.height / 2;
+
+    for (var i = 0; i < this.bufferLength; i++) {
+    	let curInd = (i+firstPositiveZeroCrossing) % this.bufferLength
+        x = (((this.width + (this.width / this.bufferLength)) / this.bufferLength) * (i));
+        y = ((this.height / 2) * (this.dataArray[curInd] / 128.0));
+
+        // Check if the x-coordinate is beyond the width of the scope
+        if (x > this.width-10) {
+
+            break; // Exit the loop if x exceeds width
+        }
+
+        path += `${x} ${y}, `;
+    }
+
+    x += 1
+    y = this.height / 2;
+
+    path += `${x} ${y}, `;
+
+    this.wave.setAttribute('d', path);
+
+    if (this.running) {
+    	console.log(path)
+        window.requestAnimationFrame(this.drawWave);
+    }
+}.bind(this);
+
 
     /**
      * Start the oscilloscope
@@ -438,7 +473,7 @@ var Oscilloscope = Oscilloscope || function(_target, context) {
     this.start = function() {
         this.running = true;
 
-        window.requestAnimationFrame(_drawWave);
+        window.requestAnimationFrame(this.drawWave);
     }.bind(this);
 };
 
