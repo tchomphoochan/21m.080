@@ -1,21 +1,38 @@
 export const starterCode = [
-	'gui.color1 = color(0,0,255);',
-	'color1(0,0,255);\n',
-
+	'gui.color2 = color(0,200,255);',
+	'color1(0,0,255);',
+	'',
 	'osc = new Tone.Oscillator()',
+	'osc.type = "square5"',
 	'osc.start()',
-	'gain = new Tone.Multiply()\n',
-
-	'volume_knob = gui.addElement({type:"knob",label:"VOL",mapto:"gain.factor"})\n',
-	'gui.removeElement("VOL")\n',
-	'osc.connect( gain )\n',
-	'gain.toDestination()\n',
-	'\n\n',
-
-	'scope = new Oscilloscope( "visual" )',
+	'gain = new Tone.Multiply()',
+	'volume_knob = gui.addElement({type:"knob",label:"VOL",mapto:"gain.factor"})',
+	'osc.connect( gain )',
+	'gain.toDestination()',
+	'env = new Tone.Envelope()',
+	'env.connect( gain.factor )',
+	'',
+	'nextBeat2 = function(){',
+	'  env.triggerAttackRelease(0.1)',
+	'}',
+	'',
+	'seq = setInterval(nextBeat2, 1000)',
+	'clearInterval( seq )',
+	'',
+	'scope = new Oscilloscope( "display-box" )',
+	'env.connect( scope.analyserNode )',
 	'scope.start()',
-	'gain.connect( scope.analyserNode )',
-	'scope.setFftSize( 512)'
+	'scope.setFftSize( 4096*8)',
+	'',
+	'spectrum = new Spectroscope("visual")',
+	'gain.connect( spectrum.analyserNode )',
+	'spectrum.start()',
+	'spectrum.setFftSize( 128*32)',
+	'',
+	'env.attack = .005',
+	'env.decay = 0.01',
+	'env.release = .5',
+	'env.sustain = 1'
 ];
 
 //inputs and outputs are the available midi ports
