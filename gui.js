@@ -329,10 +329,6 @@ const gui_sketch = function(my) {
         return true
       }
     }
-<<<<<<< Updated upstream
-    //console.log('NO CHANGE xxxxxx')
-=======
->>>>>>> Stashed changes
     return false
   }
 
@@ -679,10 +675,8 @@ const gui_sketch = function(my) {
           my.pop();
           
           // MAP TO CONTROLS
-<<<<<<< Updated upstream
           //eval(elements[i].mapto +'= ' + elements[i].value + ';'); //old
           eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
-=======
           try {
             eval(elements[i].mapto +'= ' + elements[i].value + ';');
           } catch (error) {
@@ -692,8 +686,6 @@ const gui_sketch = function(my) {
               console.error("ERROR: invalid 'mapto' variable: "+elements[i].mapto);
             }
           }
-          
->>>>>>> Stashed changes
       }  
     // END KNOB
     // DRAW SLIDER

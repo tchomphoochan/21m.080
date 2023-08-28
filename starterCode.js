@@ -1,8 +1,6 @@
 export const starterCode = [
-<<<<<<< Updated upstream
 	'gui.color2 = color(0,200,255);',
 	'color1(0,0,255);',
-=======
 	'gui.color1 = color(0,0,255);',
 	'color1(0,0,255);\n\n',
 	'osc = context.createOscillator()\nosc.start()\n',
@@ -20,7 +18,6 @@ export const starterCode = [
 	'vcf = new Tone.Filter()',
 	'vca = new Tone.Multiply()',
 	'output = new Tone.Multiply(0.1).toDestination()',
->>>>>>> Stashed changes
 	'',
 	'osc = new Tone.Oscillator()',
 	'osc.type = "square5"',
