@@ -78,13 +78,13 @@ export const Oscilloscope = function(_target) {
     // Find the index of the first positive zero-crossing point
     var firstOverThreshold = 0;
     let _threshold = this.threshold;
-    if(Math.abs(_threshold) <= 1) _threshold  = threshold*128 + 127;
+    if(Math.abs(this.threshold) <= 1) _threshold  = this.threshold*128 + 127;
 
     for (var i = 1; i < this.bufferLength; i++) {
 
         let asign = this.dataArray[i] > _threshold;
         let bsign = this.dataArray[i-1] <= _threshold;
-        if (Math.abs(asign - bsign) == 0) {
+        if (Math.abs(asign + bsign) == 2) {
             firstOverThreshold = i;
             break;
         }
@@ -92,8 +92,9 @@ export const Oscilloscope = function(_target) {
 
     if ( this.enableTrigger == 0) firstOverThreshold = 0;
 
-    let x = this.width;
+    let x = 0;
     let y = this.height / 2;
+    path += `${x} ${y}, `;
 
     const maxValue = Math.max(...this.dataArray);
     const minValue = Math.min(...this.dataArray);
@@ -116,9 +117,9 @@ export const Oscilloscope = function(_target) {
         path += `${x} ${y}, `;
     }
 
+    //draw zero point
     x += 1
     y = this.height / 2;
-
     path += `${x} ${y}, `;
 
     this.wave.setAttribute('d', path);
