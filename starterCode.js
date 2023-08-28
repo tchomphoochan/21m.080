@@ -1,6 +1,26 @@
 export const starterCode = [
+<<<<<<< Updated upstream
 	'gui.color2 = color(0,200,255);',
 	'color1(0,0,255);',
+=======
+	'gui.color1 = color(0,0,255);',
+	'color1(0,0,255);\n\n',
+	'osc = context.createOscillator()\nosc.start()\n',
+	'volume = context.createGain()\n',
+	'volume.gain.value = .1\n',
+	'gui.addElement({type:"knob",label:"VOL",mapto:""})\n',
+	'gui.removeElement("VOL")\n',
+	'osc.connect( volume )\n',
+	'volume.connect( context.destination )\n\n',
+	'\n\n\n\n\n',
+
+
+	'//audio objects',
+	'vco = new Tone.Oscillator().start()',
+	'vcf = new Tone.Filter()',
+	'vca = new Tone.Multiply()',
+	'output = new Tone.Multiply(0.1).toDestination()',
+>>>>>>> Stashed changes
 	'',
 	'osc = new Tone.Oscillator()',
 	'osc.type = "square5"',
