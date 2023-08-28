@@ -4,37 +4,6 @@ let x_size,y_size,edgeGapX,edgeGapY;
 let globalScale = 1;
 
 let fullscreen = false;
-// function fullscreenGUI(){
-//   console.log("FS");
-
-//   if (fullscreen){
-//     //reset
-//     document.getElementById('gui_div').style.top = "2%";
-//     document.getElementById('gui_div').style.right = "2";
-//     document.getElementById('gui_div').style.width = "49%";
-//     document.getElementById('gui_div').style.height = "32%";
-//     globalScale = 1;
-//     fullscreen = false
-//   } else {
-//     //make fs
-//     document.getElementById('gui_div').style.top = "4%";
-//     document.getElementById('gui_div').style.right = ".5%";
-//     document.getElementById('gui_div').style.width = "99%";
-//     document.getElementById('gui_div').style.height = "96%";
-//     globalScale = 2;
-//     fullscreen = true
-//   }
-//   x_size = document.getElementById('gui_div').offsetWidth;
-//   y_size = document.getElementById('gui_div').offsetHeight;
-//   console.log()
-//   // gui.dimRatio = y_size / x_size;
-//   gui.resizeCanvas(x_size, y_size);
-//   gui.background(100);
-
-//   edgeGapX = x_size * (1-globalScale) * 0.5 ;
-//   edgeGapY = y_size * (1-globalScale) * 0.5 ;
-// }//fullscreen
-
 const gui_sketch = function(my) {
 
   x_size = document.getElementById('gui_div').offsetWidth *.985;
@@ -52,13 +21,10 @@ const gui_sketch = function(my) {
     blackColor = color(0);
     transparentColor = color(0,0);
     my.color1 = color(255,40,0);
-    my.color2 = color(220,229,234);
-    my.color3 = color(170,176,180);
-    bgColorShift = 100;
+    my.color2 = color(170,176,180);
+    my.color3 = color(220,229,234);
 
-    my.background(my.color2)
-    my.background(bgColorShift)
-    bgshift = 3;
+    my.background(my.color3)
     my.noStroke();
     // my.button = createButton('Add Elements');
     // my.button.parent('gui_div'); //'p5 is the name of the div to draw into'
@@ -83,6 +49,7 @@ const gui_sketch = function(my) {
     my.textAlign (CENTER, CENTER);
     buttonPress();  
     // my.fullscreenGUI()
+    redraw();
   }//setup
 
 
@@ -113,20 +80,20 @@ const gui_sketch = function(my) {
   let seqUpdateStarted = false;
   // knob
   let ogY = 0;
-  let yScale = 0.009; // alters sensitivity of turning the knob
+  let sensitivityScale = 0.009; // alters sensitivity of turning the knob
   let ogValue = 0;
 
   let fillervar = 0;  
   let buttonPress = function() {
     // for testing
     console.log('buton pres')
-    // my.addElement({type:"knob",label:"SL1",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true})
+    my.addElement({type:"knob",label:"SL1",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true})
     // my.addElement({type:"knob",label:"SL12",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true,bipolar:true})
     // // my.addElement({type:"knob",label:"SL2",mapto:"fakevar",min:0,max:3,value:2,size:1})
     // // my.addElement({type:"knob",label:"SL3",mapto:"fakevar",min:1,max:2,value:1,size:2})
     // my.addElement({type:"radio",label:"radio",mapto:"fillervar",size:1,radioOptions:['a','b','c','d','e']})
     // my.addElement({type:"slider",label:"sVOL",mapto:"fillervar",size:1})
-    // my.addElement({type:"slider",label:"hor",mapto:"fillervar",size:1,horizontal:true})
+    my.addElement({type:"slider",label:"hor",mapto:"fillervar",size:1,horizontal:true,x:40})
     // // my.addElement({type:"slider",label:"s2VOL",mapto:"fillervar",size:1,bipolar:true})
     // // my.addElement({type:"slider",label:"kVOL2",mapto:"fillervar",size:.5})
     // my.addElement({type:"toggle",label:"togl",mapto:"fillervar",size:1})
@@ -173,20 +140,18 @@ const gui_sketch = function(my) {
 
   my.draw = function() { //drwwwwwww
     let valuesChanged = didValuesChange();
-    my.push();
-    my.fill(color(255,0,55));
-    my.ellipse(55,55,55,55);
-    my.pop();
     // ITERATE THRU ALL ELEMENTS and UPDATE THEM IF NEEDED
     for (let i = 0; i < elements.length; i++) {
     // UPDATE KNOB VALUE
       if (elements[i].type == 'knob' || elements[i].type == 'dial'){
         if (dragging && currElement==i) {
           elements[i].prev = elements[i].value; // store prev val
+          let dx = elements[i].x*globalScale - my.mouseX - ogX; // mouse units
           let dy = elements[i].y*globalScale - my.mouseY - ogY; // mouse units
-          let dyScaled = dy*yScale; // mouse units + scaled for sensitivity
-          let dyConverted = -elements[i].min+dyScaled*(elements[i].max-elements[i].min) + elements[i].min; // convert to 'value' units
-          elements[i].value = dyConverted + ogValue; // convert to value units
+          let dm = Math.sqrt(dx * dx + dy * dy); // diagonal distance
+          let dmScaled = dm * sensitivityScale; // mouse units + scaled for sensitivity
+          let dmConverted = -elements[i].min+dmScaled*(elements[i].max-elements[i].min) + elements[i].min; // convert to 'value' units
+          elements[i].value = dmConverted + ogValue; // convert to value units
           if (elements[i].value >= elements[i].max) {
             elements[i].value = elements[i].max;
           }
@@ -199,9 +164,11 @@ const gui_sketch = function(my) {
       else if (elements[i].type == 'slider' || elements[i].type == 'fader' ){
         if (dragging && currElement==i) {
           elements[i].prev = elements[i].value; // store prev val
-          var dy = elements[i].y*globalScale - my.mouseY - ogY;
-          var dyScaled = dy*(sliderSensitivity/elements[i].size); // scale for sensitivity based on size
-          elements[i].value = dyScaled - ogValue; // update value
+          let dx = elements[i].x*globalScale - my.mouseX - ogX; // mouse units
+          var dy = elements[i].y*globalScale - my.mouseY - ogY; // mouse units
+          let dm = Math.sqrt(dx * dx + dy * dy); // diagonal distance
+          let dmScaled = dm * (sliderSensitivity/elements[i].size); // mouse units + scaled for sensitivity
+          elements[i].value = dmScaled - ogValue; // update value
           if (elements[i].value >= elements[i].max) {
             elements[i].value = elements[i].max;
           }
@@ -237,10 +204,10 @@ const gui_sketch = function(my) {
         my.fill(255);
         my.stroke(elements[i].color);
         my.strokeWeight(2);
-        // let textColor = my.color3;
+        // let textColor = my.color2;
         // if (currElement == i && dragging){
         //   my.stroke(elements[i].color);
-        //   textColor = my.color1;
+        //   textColor = elements[i].color;
         //   my.strokeWeight(3);
         // }
 
@@ -255,7 +222,7 @@ const gui_sketch = function(my) {
           i = whiteKeys[j]-1;
           my.fill(255);
           if (currKey == keys[i]) {
-            my.fill(my.color1);
+            my.fill(elements[i].color);
           }
           xShift = 60*j;
           my.rect(xShift, 60, 60, -140);
@@ -265,7 +232,7 @@ const gui_sketch = function(my) {
           i = blackKeys[j]-1;
           my.fill(0);
           if (currKey == keys[i]) {
-            my.fill(my.color1);
+            my.fill(elements[i].color);
           }
           xShift = 60*(i-j-1);
           my.rect(xShift, 0, 35, -80);
@@ -275,12 +242,12 @@ const gui_sketch = function(my) {
         // draw element
         my.translate(20,100);
         my.push();
-        my.fill(my.color2);
+        my.fill(my.color3);
         my.stroke(elements[i].color);
         let seqBoxSize = 30;
         for (let track =0; track < 4; track++){
           my.push();
-          my.fill(my.color1);
+          my.fill(elements[i].color);
           my.noStroke();
           my.text('TRK',seqBoxSize/2,track*seqBoxSize);
           my.pop();
@@ -305,9 +272,9 @@ const gui_sketch = function(my) {
                     seqUpdateState = 'OFF';
                   }
                 }
-                my.fill(my.color2);
+                my.fill(my.color3);
                 if (stepState == 1) {
-                  my.fill(my.color1);
+                  my.fill(elements[i].color);
                 }
               }
             }
@@ -339,6 +306,7 @@ const gui_sketch = function(my) {
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].type == "knob" || elements[i].type == 'dial'){
         if (dist(my.mouseX, my.mouseY, elements[i].x*globalScale, elements[i].y*globalScale) < rKnob*globalScale*elements[i].size) { 
+          ogX = elements[i].x*globalScale - my.mouseX;
           ogY = elements[i].y*globalScale - my.mouseY;
           ogValue = elements[i].value;
           currElement = i;
@@ -346,8 +314,15 @@ const gui_sketch = function(my) {
         }
       } 
       else if (elements[i].type == "slider" || elements[i].type == 'fader'){
-        if (Math.abs(elements[i].x*globalScale - my.mouseX) <= (sliderWidth*2*globalScale*elements[i].size/2)){
-          if (Math.abs(elements[i].y*globalScale - my.mouseY) <= (sliderLength*globalScale*elements[i].size/2+10)){
+        let horizontalDim = sliderWidth*2*globalScale*elements[i].size/2;
+        let verticalDim = sliderLength*globalScale*elements[i].size/2+10;
+        if (elements[i].horizontal == true){
+          horizontalDim = sliderLength*globalScale*elements[i].size/2+10;
+          verticalDim = sliderWidth*2*globalScale*elements[i].size/2;
+        }
+        if (Math.abs(elements[i].x*globalScale - my.mouseX) <= (horizontalDim)){
+          if (Math.abs(elements[i].y*globalScale - my.mouseY) <= (verticalDim)){
+            ogX = elements[i].x*globalScale - my.mouseX;
             ogY = elements[i].y*globalScale - my.mouseY;
             ogValue = -elements[i].value;
             currElement = i;
@@ -421,9 +396,7 @@ const gui_sketch = function(my) {
       horzDivisions.push(currHorzDiv);
     }
   }
-  // my.my.color1 = function(val) {
-  //   my.color1 = color(val)
-  // }
+  
   let elements = [];
 
   let UserElement = function(type,label,mapto,x,y,min,max,value,prev,size,color,showLabel,showValue, bipolar, radioOptions,horizontal) {
@@ -445,11 +418,11 @@ const gui_sketch = function(my) {
     this.radioOptions = radioOptions; // array
     this.horizontal = horizontal; // bool: for slider or radio buttons
 
-    this.color = my.color1;
+    this.color = color;
 
     this.position = function(x,y){
-      this.x = my.scaleX(x);
-      this.y = my.scaleY(y);
+      this.x = my.scaleX( Math.min((Math.max(0,x)),100) );
+      this.y = my.scaleY( Math.min((Math.max(0,y)),100) );
       redraw();
     }
   }
@@ -479,6 +452,7 @@ const gui_sketch = function(my) {
         if (radioOptions != undefined) {elements[i].radioOptions = radioOptions;}
         if (horizontal != undefined) {elements[i].horizontal = horizontal;}
         elements[i].prev = undefined;
+        redraw();
         break
       }
       else {
@@ -492,9 +466,8 @@ const gui_sketch = function(my) {
       if (x == undefined) {
         x = x0 + elements.length*xGap;
         x = Math.min(x,100);
-        x = my.scaleX(x);
       }
-      if (y == undefined) { y = my.scaleY(y0);}
+      if (y == undefined) { y = y0;}
       if (min == undefined) {min=0;}
       if (max == undefined) {max=1;}
       if (value == undefined) {value=(max-min)/2;}
@@ -520,7 +493,7 @@ const gui_sketch = function(my) {
         // 8 x 4track
         value = [[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]];
       }
-      elements.push(new UserElement(type,label,mapto,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal));
+      elements.push(new UserElement(type,label,mapto,my.scaleX(x),my.scaleY(y),min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal));
       console.log(elements);
     }
 
@@ -535,8 +508,29 @@ const gui_sketch = function(my) {
         elements.splice(i,1);
       }
     }
+    redraw();
   }//removeElement
 
+  my.removeElements = function() {
+    elements = []
+    redraw();
+  }//removeElements
+
+  my.elementGrid = function(type,xcount,ycount) {
+    let x0 = 50;
+    let y0 = 50;
+    for (let i=0; i < xcount; i++){
+      for (let j=0; j < ycount; j++){
+        let label = "grid"+elements.length+"_"+(i*j+j);
+        let value = Math.random()*2
+        console.log('label: '+label)
+        my.addElement({x:x0+i*24,y:y0+j*24,type:type,label:label,mapto:"fakevar",min:0,max:2,value:value,size:.3,showLabel:false,showValue:false})
+
+      }
+    }
+    // eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
+    // eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
+  }
   my.scaleX = function(val){
     if( val < 0 ) val = 0;
     else if ( val>100 ) val = 100;
@@ -549,18 +543,12 @@ const gui_sketch = function(my) {
   }
 
   function redraw() { //rdrwwwwwww
-    my.background(my.color2);
-
-    my.push();
-    my.fill(color(0,255,0));
-    my.ellipse(55,55,55,55);
-    my.pop();
+    my.background(my.color3);
 
     my.scale(globalScale);
-
     // draw grid
     my.push();
-    my.fill(my.color3);
+    my.fill(my.color2);
     my.noStroke();
     my.textSize(7);
     my.textStyle(NORMAL);
@@ -578,15 +566,7 @@ const gui_sketch = function(my) {
 
     //divisions
     my.push();
-    // my.rect(0,0,6,y_size);
-    // my.rect(0,0,x_size,6);
-    my.stroke(my.color3);
-    // for (let i=0; i < vertDivisions.length; i++){
-    //     my.line(vertDivisions[i],0,vertDivisions[i],y_size);
-    // }
-    // for (let i=0; i < horzDivisions.length; i++){
-    //     my.line(0, horzDivisions[i], x_size, horzDivisions[i]);
-    // }
+    my.stroke(my.color2);
     for (let i=0; i < lines.length; i++){
       let a = lines[i][0];
       let b = lines[i][1];
@@ -609,12 +589,12 @@ const gui_sketch = function(my) {
           let sz = elements[i].size;
           // background circle
           my.strokeWeight(6);
-          my.fill(my.color2);  
-          my.stroke(my.color2);
+          my.fill(my.color3);  
+          my.stroke(my.color3);
           my.ellipse(0, 0, 2.2*rKnob*sz);
           // full arc
           my.strokeCap(SQUARE);
-          my.stroke(my.color3);
+          my.stroke(my.color2);
           my.fill(transparentColor);  
           my.arc(0, 0, 2*rKnob*sz, 2*rKnob*sz,120,60);
           // active arc
@@ -638,7 +618,7 @@ const gui_sketch = function(my) {
           // dial lines
           if (elements[i].bipolar == true){
             my.push();
-            my.fill(my.color2);
+            my.fill(my.color3);
             my.noStroke();
             my.rect(-1.5,0,3,-rKnob*1.1);
             my.pop();
@@ -646,7 +626,7 @@ const gui_sketch = function(my) {
           my.strokeCap(ROUND);
           my.rotate(valueInDegrees);
           my.push();
-          my.stroke(my.color2);
+          my.stroke(my.color3);
           my.strokeWeight(12);
           my.line(0, 0, rKnob*sz, 0);
           my.pop();
@@ -655,7 +635,7 @@ const gui_sketch = function(my) {
           
           // LABEL
           my.push();
-          my.fill(my.color3);
+          my.fill(my.color2);
           my.noStroke();
           if (elements[i].showValue == true) {
             let roundto = 0;
@@ -675,17 +655,7 @@ const gui_sketch = function(my) {
           my.pop();
           
           // MAP TO CONTROLS
-          //eval(elements[i].mapto +'= ' + elements[i].value + ';'); //old
-          eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
-          try {
-            eval(elements[i].mapto +'= ' + elements[i].value + ';');
-          } catch (error) {
-            if (elements[i].mapto == ""){
-              console.error("ERROR: 'mapto' variable is empty");
-            } else {
-              console.error("ERROR: invalid 'mapto' variable: "+elements[i].mapto);
-            }
-          }
+          mapToControls(elements[i].mapto, elements[i].value);
       }  
     // END KNOB
     // DRAW SLIDER
@@ -701,10 +671,10 @@ const gui_sketch = function(my) {
         my.strokeCap(SQUARE);
         my.noStroke();
         // background box
-        my.fill(my.color2);
+        my.fill(my.color3);
         my.rect(0, 0, 15*sz*2, sliderLength*sz*1.4);
         // full line
-        my.fill(my.color3);
+        my.fill(my.color2);
         my.rect(0, 0,sliderWidth*sz, sliderLength*sz);
 
         // active line
@@ -721,12 +691,12 @@ const gui_sketch = function(my) {
         
         // middle line
         my.strokeWeight(2*sz);
-        my.stroke(my.color2);
+        my.stroke(my.color3);
         my.line(0,.9*sliderLength*sz/2, 0,-.9*sliderLength*sz/2);
 
         if (elements[i].bipolar == true){
           my.push();
-          my.fill(my.color2)
+          my.fill(my.color3)
           my.noStroke();
           my.rect(0,0,sliderWidth*1.1,2)
           my.pop();
@@ -734,8 +704,8 @@ const gui_sketch = function(my) {
         // control point
         my.push();
         let sliderKnobSize = 8*sz
-        my.fill(my.color1);
-        my.stroke(my.color2);
+        my.fill(elements[i].color);
+        my.stroke(my.color3);
         my.rect(
           0, 
           .95*(sliderLength*sz/2) -.95*convertedVal,
@@ -744,7 +714,7 @@ const gui_sketch = function(my) {
         my.pop();
 
         // LABEL
-        my.fill(my.color3);
+        my.fill(my.color2);
         my.noStroke();
         if (elements[i].horizontal == true){
           my.rotate(-90)
@@ -780,7 +750,7 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
+        mapToControls(elements[i].mapto, elements[i].value);
       }
     // END SLIDER
     // DRAW TOGGLE BUTTON
@@ -789,18 +759,18 @@ const gui_sketch = function(my) {
         let sz = elements[i].size;
         my.translate(elements[i].x, elements[i].y);
         // background circle
-        my.fill(my.color2);  
+        my.fill(my.color3);  
         my.ellipse(0, 0, 2.2*rBtn*sz);
         // setting up color variables
         my.stroke(elements[i].color);
         my.strokeWeight(4);
-        let textColor = my.color1;
+        let textColor = elements[i].color;
         if (elements[i].value == 0) { // OFF STATE
-          my.stroke(my.color3);
+          my.stroke(my.color2);
           my.strokeWeight(2);
-          textColor = my.color3;
+          textColor = my.color2;
         }
-        my.fill(my.color2);
+        my.fill(my.color3);
         my.ellipse(0, 0, sz*rBtn*2, sz*rBtn*2);
         my.fill(textColor);
         my.noStroke();
@@ -811,7 +781,7 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
+        mapToControls(elements[i].mapto, elements[i].value);
       }
     // END TOGGLE
     // DRAW MOMENTARY BUTTON
@@ -820,16 +790,16 @@ const gui_sketch = function(my) {
         let sz = elements[i].size;
         my.translate(elements[i].x, elements[i].y);
         // background circle
-        my.fill(my.color2);  
+        my.fill(my.color3);  
         my.ellipse(0, 0, 2.2*rBtn*sz);
         // setting up color variables
-        my.fill(my.color2);
-        my.stroke(my.color3);
+        my.fill(my.color3);
+        my.stroke(my.color2);
         my.strokeWeight(2);
-        let textColor = my.color3;
+        let textColor = my.color2;
         if (elements[i].value == 1){ // ON STATE
           my.stroke(elements[i].color);
-          textColor = my.color1;
+          textColor = elements[i].color;
           my.strokeWeight(4);
         }
         my.ellipse(0, 0, sz*rBtn*2, sz*rBtn*2);
@@ -842,7 +812,7 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
+        mapToControls(elements[i].mapto, elements[i].value);
       }
     // END MOMENTARY
     // DRAW RADIO BUTTON
@@ -852,8 +822,8 @@ const gui_sketch = function(my) {
         let rBoxSz = radioBox * sz
         my.translate(elements[i].x, elements[i].y);
         // boxes
-        my.fill(my.color3);
-        my.stroke(my.color2);
+        my.fill(my.color2);
+        my.stroke(my.color3);
         my.strokeWeight(2);
         let numBoxes = elements[i].radioOptions.length
         let yBoxInit = - Math.floor(numBoxes/2); // y scale for where to start drawing
@@ -863,7 +833,7 @@ const gui_sketch = function(my) {
         // background circle
         my.push();
         my.rectMode(CENTER);
-        my.fill(my.color2);  
+        my.fill(my.color3);  
         my.noStroke();
         my.rect(0, 0, rBoxSz+10*sz,rBoxSz*numBoxes+10*sz);
         my.pop();
@@ -874,7 +844,7 @@ const gui_sketch = function(my) {
         }
         my.textSize(11);
         my.noStroke();
-        my.fill(my.color2);
+        my.fill(my.color3);
         if (elements[i].showLabel == true) {
           yBox = yBoxInit + 0.5; // reset to original value, add offset to center text
           for (let j=0; j < numBoxes; j++){
@@ -885,19 +855,19 @@ const gui_sketch = function(my) {
         // FILL IN ACTIVE BUTTON
         let active = elements[i].value - 1; // adjust for 0-indexing
         yBox = yBoxInit + active;
-        my.fill(my.color1);
-        my.stroke(my.color2);
+        my.fill(elements[i].color);
+        my.stroke(my.color3);
         my.strokeWeight(2);
         my.rect(-rBoxSz/2,yBox*rBoxSz,rBoxSz,rBoxSz);
         my.noStroke();
-        my.fill(my.color2);
+        my.fill(my.color3);
         if (elements[i].showLabel == true) {
           let txt = elements[i].radioOptions[active];
           my.text(txt, 0,(yBox+.5)*rBoxSz);
         }
         my.pop();
         // MAP TO CONTROLS
-        eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
+        mapToControls(elements[i].mapto, elements[i].value);
       }
     }  
   } //redraw
@@ -912,7 +882,7 @@ const gui_sketch = function(my) {
     y2 = my.scaleY(y2)
     //my.line(x1,y1,x2,y2)
     if (color == undefined){
-      color = my.color3;
+      color = my.color2;
     }
     //lines.push([x1,y1,x2,y2,stroke,color])
 
@@ -927,16 +897,15 @@ const gui_sketch = function(my) {
     let size = stroke
 
     elements.push(new UserElement(type,label,'mapto',x,y,0,0,0,0,size,0,0,0,0,0));
-
     redraw()
-
     return elements[elements.length - 1];
-  }
+  } //line2
+
   my.lineX = function(x,color) {
     x = my.scaleX(x)
     my.line(x,0,x,y_size)
     if (color === undefined){
-      color = my.color3;
+      color = my.color2;
     }
     lines.push([x,0,x,y_size,color])
     redraw()
@@ -946,7 +915,7 @@ const gui_sketch = function(my) {
     y = my.scaleY(y)
     my.line(0,y,x_size,y)
     if (color == undefined){
-      color = my.color3;
+      color = my.color2;
     }
     lines.push([0,y,x_size,y,color])
     redraw()
@@ -957,6 +926,20 @@ const gui_sketch = function(my) {
     my.strokeWeight( elements[i].size )
     my.line(elements[i].x[0],elements[i].y[0],elements[i].x[1],elements[i].y[1])
   }
+
+
+  function mapToControls(mapto, value) {
+    try {
+      // eval(mapto + '.rampTo(value, 0.1)');
+      eval(mapto +'= ' + value + ';'); //old
+    } catch (error) {
+      if (mapto == ""){
+        console.error("ERROR: 'mapto' variable is empty");
+      } else {
+        console.error("ERROR: invalid 'mapto' variable: "+mapto);
+      }
+    }
+  } 
 
   my.fullscreenGUI = function(){
     console.log("FS");
@@ -989,6 +972,27 @@ const gui_sketch = function(my) {
     edgeGapX = x_size * (1-globalScale) * 0.5 ;
     edgeGapY = y_size * (1-globalScale) * 0.5 ;
   }//fullscreen
+
+
+  let Keyboard = function(label,mapto,x,y,width,height,keys,prev,color,showLabel) {
+    this.label = label; // str: name and unique ID
+    this.mapto = mapto; // str: variable it is controlling
+
+    this.x = x; // #: pos
+    this.y = y; // #: pos
+    this.width = width; // #: w 
+    this.height = height; // #: h
+    this.keys = keys; // #: current value
+    this.prev = prev; // #:cprevious value
+    this.color = color; // #
+    this.showLabel = showLabel; // bool
+
+    this.position = function(x,y){
+      this.x = my.scaleX(x);
+      this.y = my.scaleY(y);
+      redraw();
+    }
+  }
 }
 
 
