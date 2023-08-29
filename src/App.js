@@ -1,6 +1,8 @@
-import React from 'react';
-import Editor from './Editor.js'
-
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Editor from './Editor.js';
+import Navbar from './Navbar.js';
+import NotFound from "./pages/NotFound.js";
 
 // import { midi, onMIDISuccess, onMIDIFailure, setMidiInput, setMidiOutput, getMidiIO,
 // 	handleMidiInput, outputMidiID, midiMap, ccMap, stopMap, mute, muted, toggleMute } from "./midiCoder/midi_control.js";
@@ -10,9 +12,26 @@ import Editor from './Editor.js'
 // import {floor, ceil, peak, cos, round, trunc, abs} from './midiCoder/midi_math.js';
 
 function App() {
+  const [page, setPage] = useState('Home');
+
+  useEffect(() => {
+
+  }, []);
+
+  // window.addEventListener('beforeunload', () => {
+  //   localStorage.setItem("projects", JSON.stringify(projects));
+  //   localStorage.setItem("currProject", JSON.stringify(currProject));
+  // });
 
   return (
-    <Editor />
+    <div className="outer-container">
+      <Navbar page={page} setPage={setPage} />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Editor canvases={["Canvas1", "Canvas2", "Canvas3"]} />} />
+        </Routes>
+      </Router>
+    </div>
   );
 }
 export default App;

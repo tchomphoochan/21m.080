@@ -21,32 +21,27 @@ function Canvas(props) {
                 p.resizeCanvas(div.offsetWidth, div.offsetHeight);
             };
         };
+        window[props.id] = new p5(sketch, props.id);
 
-        window[eval(props.id)] = new p5(sketch);
     }, [props.id]);
 
-    // const maxClicked = () => {
-    //     setIsMaximized(!isMaximized);
-    //     props.onMaximize(props.id);
-    // };
-
-    const delClicked = () => {
-        props.onDelete(props.id);
+    const maxClicked = () => {
+        setIsMaximized(!isMaximized);
+        props.onMaximize(props.id);
     };
 
     return (
-        <>
-            <span className="span-container" style={{ marginTop: "-14px" }}>
-                <p>{props.id}</p>
+        <span className="p5-container">
+            <span className="span-container" >
+                <div>{props.id}</div>
                 <span>
-                    {/* <button className="button-container" >
-                        {isMaximized ? 'restore' : '+'}
-                    </button> */}
-                    <button className="button-container" onClick={delClicked}>x</button>
+                    <button className="button-container" onClick={maxClicked}>
+                        {isMaximized ? '-' : '+'}
+                    </button>
                 </span>
             </span>
-            <div id={props.id} className='p5Div'></div>
-        </>
+            <div id={props.id} className='canvas-container'></div>
+        </span>
     );
 
 }

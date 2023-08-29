@@ -1,4 +1,4 @@
-//2
+//2:35
 import { useState, useEffect, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -44,7 +44,7 @@ var curLineNum = 0;
 const stateFields = { history: historyField };
 
 
-function Editor() {
+function Editor(props) {
     window.setupClock();
     // eval('import * as midiControl from "./midiCoder/midi_control.js";    import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from "./midiCoder/seq_control.js"; import { makingIf, startTern } from "./midiCoder/algorithm_control.js";    import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"; import {floor, ceil, peak, cos, round, trunc, abs} from "./midiCoder/midi_math.js";');
     // eval('console.log(Seq)');
@@ -52,30 +52,34 @@ function Editor() {
 
     window.p5 = p5;
 
-    //Save history in browser
-    const serializedState = localStorage.getItem('myEditorState');
-    const value = localStorage.getItem('myValue') || '//Start coding here!';
-    const storedCanvases = localStorage.getItem('canvases');
-
+    // Save history in browser
+    const serializedState = localStorage.getItem('${props.page}EditorState');
+    const value = localStorage.getItem('${props.page}Value') || '//Start coding here!';
+    //const storedCanvases = localStorage.getItem('canvases');
 
     const [code, setCode] = useState(value); //full string of user code
     const [vars, setVars] = useState({}); //current audioNodes
     const [liveMode, setLiveMode] = useState(false);
     const [middleButton, setMiddleButton] = useState("button-container");
-    const [canvases, setCanvases] = useState([]);
-    const [addClicked, setAddClicked] = useState(false);
-    const [canvasName, setCanvasName] = useState('');
+
+    const canvases = props.canvases;
     const [codeMinimized, setCodeMinimized] = useState(false);
-    const [p5Minimized, setP5Minimized] = useState(true);
+    const [p5Minimized, setP5Minimized] = useState(false);
+    const [maximized, setMaximized] = useState('');
 
     useEffect(() => {
-        //localStorage.setItem('canvases', '');
-        const storedCanvases = localStorage.getItem('canvases');
-        if (storedCanvases) {
-            const prevCanvases = JSON.parse(storedCanvases);
-            setCanvases(prevCanvases);
-            setP5Minimized(false);
-        }
+        // projectName = props.currProject.name;
+        // value = props.currProject.value;
+        // serializedState = props.currProject.state;
+        // localStorage.setItem('canvases', '');
+        // const storedCanvases = localStorage.getItem('canvases');
+        // if (storedCanvases) {
+        //     const prevCanvases = JSON.parse(storedCanvases);
+        //     setCanvases(prevCanvases);
+        //     setP5Minimized(false);
+        // }
+        // const codeMirror = document.getElementById("codemirror");
+        // const codeBox = codeMirror.querySelector("div");
     }, []);
 
     function removeComments() {
@@ -180,11 +184,11 @@ function Editor() {
 
     //save history in browser and update code value
     const handleCodeChange = (value, viewUpdate) => {
-        localStorage.setItem('myValue', value);
+        localStorage.setItem('${props.page}Value', value);
         setCode(value);
 
         const state = viewUpdate.state.toJSON(stateFields);
-        localStorage.setItem('myEditorState', JSON.stringify(state));
+        localStorage.setItem('${props.page}EditorState', JSON.stringify(state));
     };
 
     //Handle Live Mode Key Funcs
@@ -253,34 +257,6 @@ function Editor() {
         setVars({});
     }
 
-    const addCanvas = () => {
-        setAddClicked(true);
-    }
-
-    const handleCanvasNameChange = (event) => {
-        setCanvasName(event.target.value);
-    };
-
-    const submitName = (event) => {
-        if (event.key === 'Enter') {
-            setCanvases((prevCanvases) => {
-                const updatedCanvases = [...prevCanvases, canvasName];
-                localStorage.setItem('canvases', JSON.stringify(updatedCanvases));
-                return updatedCanvases;
-            });
-            setCanvasName('');
-            setAddClicked(false);
-        }
-    };
-
-    const handleCanvasDelete = (id) => {
-        setCanvases((prevCanvases) => {
-            const updatedCanvases = prevCanvases.filter((canvas) => canvas !== id);
-            localStorage.setItem('canvases', JSON.stringify(updatedCanvases));
-            return updatedCanvases;
-        });
-    };
-
     const codeMinClicked = () => {
         setCodeMinimized(!codeMinimized);
     }
@@ -289,97 +265,77 @@ function Editor() {
         setP5Minimized(!p5Minimized);
     }
 
-    // const handleMaximizeCanvas = (canvasId) => {
-    //     setMaximized((prevMaximized) => [...prevMaximized, canvasId]);
-    // };
+    const handleMaximizeCanvas = (canvasId) => {
+        if (maximized === canvasId) {
+            setMaximized('');
+        }
+        else {
+            setMaximized(canvasId);
+        }
+    };
+
 
 
     return (
-        <>
-            <div className="flex-container">
-                {!codeMinimized &&
-                    <div className="flex-child">
-                        <span className="span-container">
-                            <span >
-                                <button className="button-container" onClick={playClicked}>Play</button>
-                                <button className={middleButton} onClick={liveClicked}>Live</button>
-                                <button className="button-container" onClick={stopClicked}>Stop</button>
-                            </span>
-                            {canvases.length === 0 && (
-                                addClicked ? (
-                                    <input
-                                        style={{ borderRadius: '8px' }}
-                                        type="text"
-                                        placeholder="Enter Canvas Name"
-                                        value={canvasName}
-                                        onChange={handleCanvasNameChange}
-                                        onKeyDown={submitName}
-                                    />
-                                ) : (
-                                    <button className="button-container" onClick={addCanvas}>
-                                        Add Canvas
-                                    </button>
-                                )
-                            )}
-                            {canvases.length > 0 &&
-                                <span>
-                                    <button className="button-container" onClick={codeMinClicked}>-</button>
-                                    <button className="button-container" onClick={canvasMinClicked}>{p5Minimized ? '<=' : '+'}</button>
-                                </span>
-                            }
+        <div id="main" className="flex-container">
+            {!codeMinimized &&
+                <div className="flex-child">
+                    <span className="span-container">
+                        <span >
+                            <button className="button-container" onClick={playClicked}>Play</button>
+                            <button className={middleButton} onClick={liveClicked}>Live</button>
+                            <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
-                        <div id="codebox" style={{ display: "flex", flex: 1, flexDirection: "column" }}>
-                            <CodeMirror
-                                id="codemirror"
-                                value={value}
-                                initialState={serializedState
+                        <span>
+                            {!p5Minimized &&
+                                <button className="button-container" onClick={codeMinClicked}>-</button>
+                            }
+                            <button className="button-container" onClick={canvasMinClicked}>{p5Minimized ? '<=' : '+'}</button>
+                        </span>
+
+                    </span>
+                    <div>
+                        <CodeMirror
+                            id="codemirror"
+                            value={value}
+                            initialState={
+                                serializedState
                                     ? {
                                         json: JSON.parse(serializedState || ''),
                                         fields: stateFields,
                                     }
                                     : undefined
-                                }
-                                options={{
-                                    mode: 'javascript',
-                                }}
-                                extensions={[javascript({ jsx: true })]}
-                                onChange={handleCodeChange}
-                                onKeyDown={handleKeyDown}
-                                //onClick={handleClick}
-                                onStatistics={handleStatistics}
-                                height="885px"
-                            />
-                        </div>
-                    </div>
-                }
-                {(canvases.length > 0 && !p5Minimized) &&
-                    <div className="flex-child">
-                        <span className="span-container">
-                            {codeMinimized &&
-                                <button className="button-container" onClick={codeMinClicked}>{"=>"}</button>
                             }
-                            <div style={{ display: 'block', margin: '0 auto' }}>
-                                {addClicked ? (
-                                    <input
-                                        style={{ borderRadius: "8px" }}
-                                        type="text"
-                                        placeholder="Enter Canvas Name"
-                                        value={canvasName}
-                                        onChange={handleCanvasNameChange}
-                                        onKeyDown={submitName}
-                                    />
-                                ) : (
-                                    <button className="button-container" style={{ marginRight: "5px auto" }} onClick={addCanvas}>Add Canvas</button>
-                                )}
-                            </div>
-                        </span>
-                        {canvases.map((id) => (
-                            <Canvas key={id} id={id} onDelete={handleCanvasDelete} />
-                        ))}
+                            options={{
+                                mode: 'javascript',
+                            }}
+                            extensions={[javascript({ jsx: true })]}
+                            onChange={handleCodeChange}
+                            onKeyDown={handleKeyDown}
+                            //onClick={handleClick}
+                            onStatistics={handleStatistics}
+                            height="860px"
+                        />
                     </div>
-                }
-            </div>
-        </>
+                </div>
+            }
+            {!p5Minimized &&
+                <div className="flex-child">
+                    <span className="span-container">
+                        {codeMinimized &&
+                            <button className="button-container" onClick={codeMinClicked}>{"=>"}</button>
+                        }
+                        {/* <div style={{ display: 'block', margin: '0 auto' }}>
+                            </div> */}
+                    </span>
+                    {canvases.map((id) => (
+                        (!maximized || maximized === id) && (
+                            <Canvas key={id} id={id} onMaximize={handleMaximizeCanvas} />
+                        )
+                    ))}
+                </div>
+            }
+        </div>
     );
 }
 
