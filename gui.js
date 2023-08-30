@@ -1124,6 +1124,13 @@ const gui_sketch = function(my) {
     redraw();
     return elements[elements.length - 1];
   }//addKeyboard
+
+  my.scaleOutput = function(input,inLow,inHigh,outLow,outHigh,curve){
+    console.log(input, outLow, outHigh, curve);
+    let val = (input-inLow) * (1/(inHigh-inLow));
+    val = Math.pow(val, curve);
+    return val*(outHigh-outLow) + outLow;
+  }
 }
 
 
