@@ -90,7 +90,7 @@ const gui_sketch = function(my) {
     // for testing
     console.log('buton pres')
   
-    my.addKeyboard({label:"K1",mapto:"fakevar",x:5,y:50,width:400,height:100,keys:16})
+    // my.addKeyboard({label:"K1",mapto:"fakevar",x:5,y:50,width:400,height:100,keys:16})
 
     // my.addElement({type:"knob",label:"SL1",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true})
     // my.addElement({type:"knob",label:"SL12",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true,bipolar:true})
