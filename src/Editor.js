@@ -1,5 +1,5 @@
-//10:45
-import { useState, useEffect, useRef } from 'react';
+//12:22
+import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
 import { javascript } from '@codemirror/lang-javascript';
@@ -47,7 +47,7 @@ const midiSeq = require('./midiCoder/seq_control.js');
 const stateFields = { history: historyField };
 
 
-function Editor() {
+function Editor(props) {
     //window.setupClock();
     // eval('import * as midiControl from "./midiCoder/midi_control.js";    import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from "./midiCoder/seq_control.js"; import { makingIf, startTern } from "./midiCoder/algorithm_control.js";    import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"; import {floor, ceil, peak, cos, round, trunc, abs} from "./midiCoder/midi_math.js";');
     // eval('console.log(Seq)');
@@ -130,7 +130,6 @@ function Editor() {
         }
 
         walk.recursive(ast, null, visitors);
-        // console.log(document.querySelector('container'));
 
         try {
             eval(string);
@@ -191,6 +190,7 @@ function Editor() {
     function evaluateLine() {
         try {
             var line = code.split('\n')[curLineNum - 1];
+            console.log(line);
             traverse(line);
         } catch (error) {
             console.log(error);
@@ -209,10 +209,11 @@ function Editor() {
             var start = linepos + 1;
             linepos = curLineNum;
             line = lines[linepos];
-            while (line !== undefined && line.replace(/\s/g, "") != '') {
+            while (line !== undefined && line.replace(/\s/g, "") !== '') {
                 linepos += 1;
                 line = lines[linepos];
             }
+            console.log(lines.slice(start, linepos).join('\n'))
             traverse(lines.slice(start, linepos).join('\n'));
         } catch (error) {
             console.log(error);
@@ -235,16 +236,17 @@ function Editor() {
     //Handle Live Mode Key Funcs
     const handleKeyDown = (event) => {
         if (liveMode) {
-            if ((event.ctrlKey || event.metaKey)) {
-                if (event.key === 'Enter') {
-                    evaluateLine();
-                }
-                else if (event.key === '-') {
-                    stopClicked();
-                }
-            }
-            else if (event.altKey && event.key === 'Enter') {
+            if (event.altKey && event.shiftKey && event.key == 'Enter') {
+                // if (prevLineNum !== curLineNum) {
+                //     setRemoveEnter(true);
+                // }
                 evaluateBlock();
+            }
+            // else if (event.ctrlKey) {
+            //     setPrevLineNum(curLineNum);
+            // }
+            else if (event.altKey && event.key === 'Enter') {
+                evaluateLine();
             }
         }
     };
@@ -265,7 +267,7 @@ function Editor() {
     // }
 
     const handleStatistics = (data) => {
-        curLineNum = data.line.number - 1;
+        curLineNum = data.line.number;
     }
 
     //Handle Mode Changes + Play & Stop
@@ -332,7 +334,7 @@ function Editor() {
                             <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
                         <span>
-                            <button className="button-container" onClick={refreshClicked}>Refresh</button>
+                            <button className="button-container" onClick={refreshClicked}>Starter Code</button>
                             {!p5Minimized &&
                                 <button className="button-container" onClick={codeMinClicked}>-</button>
                             }

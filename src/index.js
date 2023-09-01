@@ -4,11 +4,6 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css';
 import App from './App';
 
-<<<<<<< HEAD
-=======
-//mport midiMain from './midiCoder/midi_main';
-
->>>>>>> 5a237ad08023d3c15ef10906dfe9476492a0e76f
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
