@@ -34,11 +34,13 @@ function Canvas(props) {
         <span className="p5-container">
             <span className="span-container" >
                 <div>{props.id}</div>
-                <span>
-                    <button className="button-container" onClick={maxClicked}>
-                        {isMaximized ? '-' : '+'}
-                    </button>
-                </span>
+                {props.maxOption &&
+                    <span>
+                        <button className="button-container" onClick={maxClicked}>
+                            {isMaximized ? '-' : '+'}
+                        </button>
+                    </span>
+                }
             </span>
             <div id={props.id} className='canvas-container'></div>
         </span>

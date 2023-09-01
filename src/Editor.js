@@ -1,10 +1,11 @@
-//2:35
+//10:45
 import { useState, useEffect, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
 import { javascript } from '@codemirror/lang-javascript';
 
 import p5 from 'p5';
+import * as Tone from 'tone';
 import Canvas from "./Canvas.js";
 import * as midiMain from './midiCoder/midi_main.js';
 
@@ -38,11 +39,8 @@ Object.keys(midiMath).forEach((key) => {
 
 // window.Seq = Seq;
 
-var curLineNum = 0;
-
 //Save history in browser
 const stateFields = { history: historyField };
-
 
 function Editor(props) {
     window.setupClock();
@@ -51,16 +49,19 @@ function Editor(props) {
     const imports = 'import { midi, onMIDISuccess, onMIDIFailure, setMidiInput, setMidiOutput, getMidiIO, handleMidiInput, outputMidiID, midiMap, ccMap, stopMap, mute, muted, toggleMute } from "./midiCoder/midi_control.js"; import * as midiControl from "./midiCoder/midi_control.js";    import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from "./midiCoder/seq_control.js"; import { makingIf, startTern } from "./midiCoder/algorithm_control.js";    import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"; import {floor, ceil, peak, cos, round, trunc, abs} from "./midiCoder/midi_math.js";'; // Add your required imports here
 
     window.p5 = p5;
+    window.Tone = Tone;
+    var curLineNum = 0;
 
     // Save history in browser
-    const serializedState = localStorage.getItem('${props.page}EditorState');
-    const value = localStorage.getItem('${props.page}Value') || '//Start coding here!';
-    //const storedCanvases = localStorage.getItem('canvases');
+    const serializedState = localStorage.getItem(`${props.page}EditorState`);
+    const value = localStorage.getItem(`${props.page}Value`) || props.starterCode;
 
+    const [height, setHeight] = useState(false);
     const [code, setCode] = useState(value); //full string of user code
     const [vars, setVars] = useState({}); //current audioNodes
     const [liveMode, setLiveMode] = useState(false);
     const [middleButton, setMiddleButton] = useState("button-container");
+    const [refresh, setRefresh] = useState(false);
 
     const canvases = props.canvases;
     const [codeMinimized, setCodeMinimized] = useState(false);
@@ -68,18 +69,10 @@ function Editor(props) {
     const [maximized, setMaximized] = useState('');
 
     useEffect(() => {
-        // projectName = props.currProject.name;
-        // value = props.currProject.value;
-        // serializedState = props.currProject.state;
-        // localStorage.setItem('canvases', '');
-        // const storedCanvases = localStorage.getItem('canvases');
-        // if (storedCanvases) {
-        //     const prevCanvases = JSON.parse(storedCanvases);
-        //     setCanvases(prevCanvases);
-        //     setP5Minimized(false);
-        // }
-        // const codeMirror = document.getElementById("codemirror");
-        // const codeBox = codeMirror.querySelector("div");
+        const container = document.getElementById('container');
+        if (container) {
+            setHeight(`${container.clientHeight}px`);
+        }
     }, []);
 
     function removeComments() {
@@ -132,9 +125,13 @@ function Editor(props) {
         }
 
         walk.recursive(ast, null, visitors);
-        console.log(canvases);
         // console.log(document.querySelector('container'));
-        eval(string);
+
+        try {
+            eval(string);
+        } catch (error) {
+            console.log("Error Evaluating Code", error);
+        }
 
         //REMINDER: Issue may arise from scheduled sounds
         for (const varName of varNames) {
@@ -149,13 +146,17 @@ function Editor(props) {
                 //Variable isn't an audioNode
             }
 
-            //Remove all sounds that have been redefined
+            //Remove all sounds that have been redefined and play new if necessary
             if (liveMode) {
+                var isPlaying = true;
                 if (varName in vars) {
                     try {
                         vars[varName].stop();
                     } catch (error) {
-                        //val not playing sound
+                        isPlaying = false;
+                    }
+                    if (isPlaying) {
+                        eval(`${varName}.start()`);
                     }
                 }
             }
@@ -182,34 +183,66 @@ function Editor(props) {
 
     }
 
+    function evaluateLine() {
+        try {
+            var line = code.split('\n')[curLineNum - 1];
+            traverse(line);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    function evaluateBlock() {
+        try {
+            const lines = code.split("\n");
+            var linepos = curLineNum - 1;
+            var line = lines[linepos];
+            while (line !== undefined && line.replace(/\s/g, "") !== '') {
+                linepos -= 1;
+                line = lines[linepos];
+            }
+            var start = linepos + 1;
+            linepos = curLineNum;
+            line = lines[linepos];
+            while (line !== undefined && line.replace(/\s/g, "") != '') {
+                linepos += 1;
+                line = lines[linepos];
+            }
+            traverse(lines.slice(start, linepos).join('\n'));
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
     //save history in browser and update code value
     const handleCodeChange = (value, viewUpdate) => {
-        localStorage.setItem('${props.page}Value', value);
+        if (refresh) {
+            setRefresh(false);
+        }
+        localStorage.setItem(`${props.page}Value`, value);
         setCode(value);
-
+        //viewUpdate.view.dom.clientHeight = document.getElementById('main').clientHeight;
         const state = viewUpdate.state.toJSON(stateFields);
-        localStorage.setItem('${props.page}EditorState', JSON.stringify(state));
+        localStorage.setItem(`${props.page}EditorState`, JSON.stringify(state));
     };
 
     //Handle Live Mode Key Funcs
     const handleKeyDown = (event) => {
-        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-            if (liveMode) {
-                try {
-                    //Add code to get codeBlock instead
-                    traverse(code);
-                } catch (error) {
-                    console.error('Error evaluating code:', error);
+        if (liveMode) {
+            if ((event.ctrlKey || event.metaKey)) {
+                if (event.key === 'Enter') {
+                    evaluateLine();
                 }
+                else if (event.key === '-') {
+                    stopClicked();
+                }
+            }
+            else if (event.altKey && event.key === 'Enter') {
+                evaluateBlock();
             }
         }
     };
-
-    const handleStatistics = (data) => {
-        // console.log(data.line.number);
-        curLineNum = data.line.number;
-    }
-
 
     // const handleClick = (event) => {
     //     evaluateLine();
@@ -225,6 +258,10 @@ function Editor(props) {
     // 	console.error(e);
     // }
     // }
+
+    const handleStatistics = (data) => {
+        curLineNum = data.line.number - 1;
+    }
 
     //Handle Mode Changes + Play & Stop
     const playClicked = () => {
@@ -257,6 +294,11 @@ function Editor(props) {
         setVars({});
     }
 
+    //Handle refresh/max/min buttons
+    const refreshClicked = () => {
+        setRefresh(true);
+        localStorage.setItem(`${props.page}Value`, props.starterCode);
+    }
     const codeMinClicked = () => {
         setCodeMinimized(!codeMinimized);
     }
@@ -274,10 +316,8 @@ function Editor(props) {
         }
     };
 
-
-
     return (
-        <div id="main" className="flex-container">
+        <div className="flex-container">
             {!codeMinimized &&
                 <div className="flex-child">
                     <span className="span-container">
@@ -287,6 +327,7 @@ function Editor(props) {
                             <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
                         <span>
+                            <button className="button-container" onClick={refreshClicked}>Refresh</button>
                             {!p5Minimized &&
                                 <button className="button-container" onClick={codeMinClicked}>-</button>
                             }
@@ -294,28 +335,29 @@ function Editor(props) {
                         </span>
 
                     </span>
-                    <div>
-                        <CodeMirror
-                            id="codemirror"
-                            value={value}
-                            initialState={
-                                serializedState
-                                    ? {
-                                        json: JSON.parse(serializedState || ''),
-                                        fields: stateFields,
-                                    }
-                                    : undefined
-                            }
-                            options={{
-                                mode: 'javascript',
-                            }}
-                            extensions={[javascript({ jsx: true })]}
-                            onChange={handleCodeChange}
-                            onKeyDown={handleKeyDown}
-                            //onClick={handleClick}
-                            onStatistics={handleStatistics}
-                            height="860px"
-                        />
+                    <div id="container" style={{ flex: 1 }}>
+                        {height !== false &&
+                            <CodeMirror
+                                id="codemirror"
+                                value={refresh ? props.starterCode : value}
+                                initialState={
+                                    serializedState
+                                        ? {
+                                            json: JSON.parse(serializedState || ''),
+                                            fields: stateFields,
+                                        }
+                                        : undefined
+                                }
+                                options={{
+                                    mode: 'javascript',
+                                }}
+                                extensions={[javascript({ jsx: true })]}
+                                onChange={handleCodeChange}
+                                onKeyDown={handleKeyDown}
+                                onStatistics={handleStatistics}
+                                height={height}
+                            />
+                        }
                     </div>
                 </div>
             }
@@ -330,7 +372,7 @@ function Editor(props) {
                     </span>
                     {canvases.map((id) => (
                         (!maximized || maximized === id) && (
-                            <Canvas key={id} id={id} onMaximize={handleMaximizeCanvas} />
+                            <Canvas key={id} id={id} onMaximize={handleMaximizeCanvas} maxOption={canvases.length > 1} />
                         )
                     ))}
                 </div>
