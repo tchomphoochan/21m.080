@@ -4,26 +4,9 @@ import { Link } from 'react-router-dom';
 function Dropdown(props) {
     const [dropDown, setDropDown] = useState(false);
 
-    // useEffect(() => {
-    //     Object.keys(props.options).map((option) => {
-    //         console.log(`/${option}`);
-    //     })
-    // }, []);
-
     const toggleDropdown = () => {
         setDropDown(!dropDown);
     }
-
-    // document.addEventListener('click', function (event) {
-    //     const dropdownButton = document.getElementById('dropdown-button');
-    //     const dropdownMenu = document.getElementById('dropdown-menu');
-    //     if ((dropdownMenu !== null && !dropdownMenu.contains(event.target)) && event.target !== dropdownButton) {
-    //         if(dropDown){
-
-    //         }
-    //         setDropDown(false);
-    //     }
-    // });
 
     return (
         <span className="dropdown">

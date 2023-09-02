@@ -23,25 +23,33 @@ function App() {
   ];
   const assignmentFiles = [];
 
+  const homeStarterCode = `/*
+  Alt-Enter: Evaluate Line in Live Mode
+  Alt-Shift-Enter: Evaluate Block in Live Mode
+*/`;
+
   useEffect(() => {
     const importFiles = async (files, folder) => {
       const fetchedAssignments = {};
 
       for (const fileName of files) {
         try {
-          const descriptionRes = await fetch(`${process.env.PUBLIC_URL}/${folder}/${fileName}.txt`);
-          const starterCodeRes = await fetch(`${process.env.PUBLIC_URL}/${folder}/${fileName}.js`);
+          const introRes = await fetch(`${process.env.PUBLIC_URL}/${folder}/${fileName}/Intro.txt`);
+          const starterCodeRes = await fetch(`${process.env.PUBLIC_URL}/${folder}/${fileName}/StarterCode.js`);
+          const descriptionRes = await fetch(`${process.env.PUBLIC_URL}/${folder}/${fileName}/Description.txt`);
 
-          if (!descriptionRes.ok || !starterCodeRes.ok) {
+          if (!introRes.ok || !starterCodeRes.ok || !descriptionRes.ok) {
             throw new Error('Fetching files failed');
           }
 
-          const description = await descriptionRes.text();
+          const intro = await introRes.text();
           const starterCode = await starterCodeRes.text();
+          const description = await descriptionRes.text();
 
           fetchedAssignments[fileName] = {
-            description,
+            intro,
             starterCode,
+            description,
             canvases: [fileName],
           };
         } catch (error) {
@@ -64,12 +72,12 @@ function App() {
     <div className="outer-container">
       <Navbar assignments={assignments} examples={examples} page={page} setPage={setPage} />
       <Routes>
-        <Route path="/" element={<Editor page={page} starterCode={"//Start Coding Here!"} canvases={["Canvas1", "Canvas2", "Canvas3"]} />} />
+        <Route path="/" element={<Editor page={page} starterCode={homeStarterCode} canvases={["Canvas1", "Canvas2", "Canvas3"]} />} />
         {Object.entries(assignments).map(([title, props]) => (
-          <Route path={`/${title}`} element={<Template title={title} description={props.description} starterCode={props.starterCode} canvases={props.canvases} />} />
+          <Route path={`/${title}`} element={<Template title={title} intro={props.intro} starterCode={props.starterCode} description={props.description} canvases={props.canvases} />} />
         ))}
         {Object.entries(examples).map(([title, props]) => (
-          <Route path={`/${title}`} element={<Template title={title} description={props.description} starterCode={props.starterCode} canvases={props.canvases} />} />
+          <Route path={`/${title}`} element={<Template title={title} intro={props.intro} starterCode={props.starterCode} description={props.description} canvases={props.canvases} />} />
         ))}
       </Routes>
     </div>

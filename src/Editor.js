@@ -93,7 +93,13 @@ function Editor(props) {
         let cleanedCode = removeComments();
         let acorn = require('acorn');
         let walk = require('acorn-walk');
-        let ast = acorn.parse(string, { ecmaVersion: 'latest' });
+        let ast = null;
+
+        try {
+            ast = acorn.parse(string, { ecmaVersion: 'latest' });
+        } catch (error) {
+            console.log("Error parsing code: ", error);
+        }
 
         let incr = 0; //tracks index while editing string
         // let p5Instances = {};
@@ -129,7 +135,11 @@ function Editor(props) {
             },
         }
 
-        walk.recursive(ast, null, visitors);
+        try {
+            walk.recursive(ast, null, visitors);
+        } catch (error) {
+            console.log("Error parsing code: ", error);
+        }
 
         try {
             eval(string);
@@ -190,7 +200,6 @@ function Editor(props) {
     function evaluateLine() {
         try {
             var line = code.split('\n')[curLineNum - 1];
-            console.log(line);
             traverse(line);
         } catch (error) {
             console.log(error);
@@ -213,7 +222,6 @@ function Editor(props) {
                 linepos += 1;
                 line = lines[linepos];
             }
-            console.log(lines.slice(start, linepos).join('\n'))
             traverse(lines.slice(start, linepos).join('\n'));
         } catch (error) {
             console.log(error);
@@ -236,7 +244,7 @@ function Editor(props) {
     //Handle Live Mode Key Funcs
     const handleKeyDown = (event) => {
         if (liveMode) {
-            if (event.altKey && event.shiftKey && event.key == 'Enter') {
+            if (event.altKey && event.shiftKey && event.key === 'Enter') {
                 // if (prevLineNum !== curLineNum) {
                 //     setRemoveEnter(true);
                 // }
