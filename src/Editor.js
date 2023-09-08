@@ -6,8 +6,8 @@ import { javascript } from '@codemirror/lang-javascript';
 
 import p5 from 'p5';
 import * as Tone from 'tone';
-//import Canvas from "./Canvas.js";
-import Canvas from "./gui.js";
+import Canvas from "./Canvas.js";
+//import Canvas from "./gui.js";
 
 const midiMain = require('./midiCoder/midi_main.js');
 const midiSeq = require('./midiCoder/seq_control.js');
@@ -65,8 +65,8 @@ function Editor(props) {
     const [height, setHeight] = useState(false);
     const [code, setCode] = useState(value); //full string of user code
     const [vars, setVars] = useState({}); //current audioNodes
-    const [liveMode, setLiveMode] = useState(false);
-    const [middleButton, setMiddleButton] = useState("button-container");
+    const [liveMode, setLiveMode] = useState(true); //live mode is on by default
+    const [middleButton, setMiddleButton] = useState("button-container middle-clicked");
     const [refresh, setRefresh] = useState(false);
 
     const canvases = props.canvases;

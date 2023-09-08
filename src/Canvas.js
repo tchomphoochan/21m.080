@@ -28,7 +28,7 @@ function Canvas(props) {
         //     };
         // };
         //console.log(document.getElementById(props.id)
-        //window[props.id] = new p5(gui_sketch, 'Canvas1');
+        window[props.id] = new p5(gui_sketch, props.id);
 
     }, [props.id]);
 
