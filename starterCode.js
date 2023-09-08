@@ -1,16 +1,19 @@
 export const starterCode = [
-	'gui.color2 = color(0,200,255);',
-	'gui.color1 = color(0,0,255)\n\n',
+	'gui.setBackgroundColor(0,0,0);',
+	'gui.setColor1(0,0,255);\n\n',
 
-	'gui.elementGrid("knob",3,4)\n',
+	'gui.Knob({label:"knob"})\n',
+	'\n',
+	'key1 = gui.addKeyboard({label:"K1",mapto:"fakevar",x:50,y:25,width:400,height:100,keys:16})\n',
+	
+	
+	'\n\n\n',
+    
 
 	'osc = context.createOscillator()\nosc.start()\n',
 
 	'volume = context.createGain()\n',
 	'volume.gain.value = .1\n',
-
-	'knob1 = gui.addElement({type:"knob",label:"VOL",mapto:""})\n',
-	'knob1.x = 50',
 
 	'gui.removeElement("VOL")\n',
 

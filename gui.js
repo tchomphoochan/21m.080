@@ -1,78 +1,58 @@
 //example of P5.js code in my mode
 //https://youtu.be/Su792jEauZg
-let x_size,y_size,edgeGapX,edgeGapY;
+let x_size,y_size;
 let globalScale = 1;
-
 let fullscreen = false;
-const gui_sketch = function(my) {
 
-  x_size = document.getElementById('gui_div').offsetWidth *.985;
-  y_size = document.getElementById('gui_div').offsetHeight *.99;
+const gui_sketch = function(my) {
+  // constraining apsect ratio to 2:1 (w:h)
+  x_size = document.getElementById('gui_div').offsetWidth;
+  y_size = document.getElementById('gui_div').offsetHeight;
+  let originalSize = y_size;
 
   my.setup = function() {
     my.createCanvas(x_size, y_size);
-    my.dimRatio = y_size / x_size;
-    
+
     //slow down draw rate
     my.frameRate(30)
 
     // COLOR VARS
-    whiteColor = color(255);
-    blackColor = color(0);
-    transparentColor = color(0,0);
-    my.color1 = color(255,40,0);
-    my.color2 = color(170,176,180);
-    my.color3 = color(220,229,234);
+    my.color1 = new guiColor(color(255,40,0)); // main color
+    my.color2 = color(170,176,180); // secondary color
+    my.color3 = color(220,229,234); // background
+    my.color4 = color(30); // text
 
+    // DEFAULT STYLING
     my.background(my.color3)
     my.noStroke();
-    // my.button = createButton('Add Elements');
-    // my.button.parent('gui_div'); //'p5 is the name of the div to draw into'
-    // my.button.position(10, 14);
-    // my.button.size(10, 14);
-    // my.button.mousePressed(buttonPress);
-
-    // my.startSeq = createButton('PLAY seq');
-    // my.startSeq.parent('gui_div'); //'p5 is the name of the div to draw into'
-    // my.startSeq.position(10, 40);
-    // my.startSeq.mousePressed(
-    //   function() {seq = setInterval( mySeq, 400 )}
-    // );
-    // my.stopSeq = createButton('STOP seq');
-    // my.stopSeq.parent('gui_div'); //'p5 is the name of the div to draw into'
-    // my.stopSeq.position(10, 60);
-    // my.stopSeq.mousePressed(
-    //   function() {clearInterval(seq)}
-    // );
     my.angleMode(DEGREES);
     my.textStyle(BOLD);
     my.textAlign (CENTER, CENTER);
-    buttonPress();  
-    // my.fullscreenGUI()
-    redraw();
+
+    buttonPress(); // for testing 
+    
+    // INITIALIZE DRAWING
+    setNewDimensions();
+    my.redrawGUI();
   }//setup
 
-
   let dragging = false;
-  let forceDraw = false;
   let currElement = 0;
   let currKey = 'none';
+  let keys = [  '49','50','51','52','53','54','55','56','57','48','189','187'] // 1 thru 0 row of keys
 
-  let createHorzDivision, createVertDivision, currVertDiv, currHorzDiv;
-  let vertDivisions = [];
-  let horzDivisions = [];
   let lines = [];
   
   // UI ELEMENTS DEFAULT VALUES
-  let SCALE = 1;
-  let x0 = 15;
+  let masterSensitivity = 1;
+  let x0 = 10;
   let y0 = 50;
   let rBtn = 40; // button size
   let rKnob = 40; // knob size
   // slider
   let sliderWidth = 10;
   let sliderLength=100;
-  let sliderSensitivity = .008;
+  let sliderSensitivity = .008*masterSensitivity;
   // radio
   let radioBox = 30;
   let seqBoxSize = 30;
@@ -80,30 +60,26 @@ const gui_sketch = function(my) {
   let seqUpdateStarted = false;
   // knob
   let ogY = 0;
-  let sensitivityScale = 0.006; // alters sensitivity of turning the knob
+  let sensitivityScale = 0.006*masterSensitivity; // alters sensitivity of turning the knob
   let ogValue = 0;
   // keybaord
   let keypattern = [0,1,0,1,0,0,1,0,1,0,1,0];
-
+  let keyOn = (false,null); // state of any key being pressed and element index of keyboard that was pressed
+ 
   let fillervar = 0;  
   let buttonPress = function() {
     // for testing
-    console.log('buton pres')
   
-    // my.addKeyboard({label:"K1",mapto:"fakevar",x:5,y:50,width:400,height:100,keys:16})
+    my.addKeyboard({label:"K1",mapto:"fakevar",x:5,y:50,width:40,height:40,keys:24})
+    // my.RadioButtons({label:"radio",mapto:"fillervar",size:1,radioOptions:['a','b',"WAV"],horizontal:true})
+    // my.RadioButtons({label:"radio2",mapto:"fillervar",x:50,size:1,radioOptions:['a','b','c','d','e'],horizontal:false})
 
-    // my.addElement({type:"knob",label:"SL1",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true})
-    // my.addElement({type:"knob",label:"SL12",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true,bipolar:true})
-    // // my.addElement({type:"knob",label:"SL2",mapto:"fakevar",min:0,max:3,value:2,size:1})
-    // // my.addElement({type:"knob",label:"SL3",mapto:"fakevar",min:1,max:2,value:1,size:2})
-    // my.addElement({type:"radio",label:"radio",mapto:"fillervar",size:1,radioOptions:['a','b','c','d','e'],horizontal:true})
-    // my.addElement({type:"slider",label:"sVOL",mapto:"fillervar",size:1})
-    // my.addElement({type:"slider",label:"hor",mapto:"fillervar",size:1,horizontal:true,x:40,y:10})
-    // my.addElement({type:"slider",label:"ver",mapto:"fillervar",size:1,horizontal:false,x:30})
-    // // my.addElement({type:"slider",label:"s2VOL",mapto:"fillervar",size:1,bipolar:true})
-    // // my.addElement({type:"slider",label:"kVOL2",mapto:"fillervar",size:.5})
-    // my.addElement({type:"toggle",label:"togl",mapto:"fillervar",size:1})
-    // my.addElement({type:"momentary",label:"momn",mapto:"fillervar",size:1})
+  // ALL ELEMS
+    // my.Knob({label:"SL1",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true})
+    // my.RadioButtons({label:"radio",mapto:"fillervar",size:1,radioOptions:['a','b','c','d','e'],horizontal:false})
+    // my.Slider({label:"sVOL",mapto:"fillervar",size:1})
+    // my.Toggle({label:"togl",mapto:"fillervar",size:1})
+    // my.Momentary({label:"momn",mapto:"fillervar",size:1})
   }
 
   my.keyPressed = function() {currKey = keyCode;}
@@ -202,78 +178,18 @@ const gui_sketch = function(my) {
 
     // UPDATE KEYBOARD VALUES
       else if (elements[i].type == 'keyboard'){
-        // draw element
-        my.push();
-        my.fill(255);
-        my.stroke(elements[i].color);
-        my.strokeWeight(2);
-        // let textColor = my.color2;
-        // if (currElement == i && dragging){
-        //   my.stroke(elements[i].color);
-        //   textColor = elements[i].color;
-        //   my.strokeWeight(3);
-        // }
-
-        my.translate(elements[i].x, elements[i].y);
-        let keys = [  '49','50','51','52','53','54','55','56','57','48','189','187'] // 1 thru 0 row of keys
-        
-        let blackKeyOffset = [1,2,4,5,6];
-        let whiteKeyWidth = elements[i].width / elements[i].keys;
-
-        let k = 0
-        // WHITE KEYS
-        let wCount = 0;
-        for (let j = 0; j < elements[i].keys; j++) {
-          if (k >= 12) {k = k - 12};
-          if (keypattern[k] == 0) {
-            console.log('white')
-            my.fill(255);
-            if (currKey == keys[j]) {
-              my.fill(elements[i].color);
-            }
-            let xShift = whiteKeyWidth*wCount;
-            wCount++;
-            my.rect(xShift, 0, whiteKeyWidth, elements[i].height);
-          } 
-          k++;
-        }
-        // BLACK KEYS
-        let bCount = 0;
-        let bOctave = 0;
-        for (let j = 0; j < elements[i].keys; j++) {
-          if (k >= 12) {k = k - 12};
-          if (keypattern[k] == 1) {
-            console.log('black')
-            my.fill(0);
-            if (currKey == keys[j]) {
-              my.fill(elements[i].color);
-            }
-            b = blackKeyOffset[bCount];
-            bCount++;
-            
-            if (bCount >= 5) {
-              bOctave++;
-              bCount = bOctave *7;
-            }
-            
-            let xShift = whiteKeyWidth*(b-1) + whiteKeyWidth*.7;
-            my.rect(xShift, 0, whiteKeyWidth*.6, elements[i].height*.6);
-          }
-          k++;
-        }
-        my.ellipse(0,0,10)
-
+        let k = 0;
       }
       else if (elements[i].type == 'sequencer'){
         // draw element
         my.translate(20,100);
         my.push();
         my.fill(my.color3);
-        my.stroke(elements[i].color);
+        my.stroke(currentColor);
         let seqBoxSize = 30;
         for (let track =0; track < 4; track++){
           my.push();
-          my.fill(elements[i].color);
+          my.fill(my.color4);
           my.noStroke();
           my.text('TRK',seqBoxSize/2,track*seqBoxSize);
           my.pop();
@@ -300,7 +216,7 @@ const gui_sketch = function(my) {
                 }
                 my.fill(my.color3);
                 if (stepState == 1) {
-                  my.fill(elements[i].color);
+                  my.fill(currentColor);
                 }
               }
             }
@@ -313,7 +229,7 @@ const gui_sketch = function(my) {
         // draw element
       } 
     }
-    if (valuesChanged == true) {redraw();}
+    if (valuesChanged == true) {my.redrawGUI();}
   }// draw
   function didValuesChange() {
     for (let i = 0; i < elements.length; i++) {
@@ -326,7 +242,6 @@ const gui_sketch = function(my) {
   }
 
   my.mousePressed = function() {
-    console.log('click');
     currElement = "none";
     dragging = true; // start dragging
     for (let i = 0; i < elements.length; i++) {
@@ -336,6 +251,7 @@ const gui_sketch = function(my) {
           ogY = elements[i].y*globalScale - my.mouseY;
           ogValue = elements[i].value;
           currElement = i;
+          elements[i].callback;
           break
         }
       } 
@@ -352,6 +268,7 @@ const gui_sketch = function(my) {
             ogY = elements[i].y*globalScale - my.mouseY;
             ogValue = -elements[i].value;
             currElement = i;
+            elements[i].callback;
             break
           }
         }
@@ -360,75 +277,141 @@ const gui_sketch = function(my) {
         if (dist(my.mouseX, my.mouseY, elements[i].x*globalScale, elements[i].y*globalScale) < rBtn*globalScale*elements[i].size) { 
           elements[i].value = 1 - elements[i].value;
           currElement = i;
+          elements[i].callback;
           break
         }
       }
       else if (elements[i].type == "momentary"){
         if (dist(my.mouseX, my.mouseY, elements[i].x*globalScale, elements[i].y*globalScale) < rBtn*globalScale*elements[i].size) { 
           currElement = i;
+          elements[i].callback;
           break
         }
       }
       else if (elements[i].type == "radio"){
         let scaling = globalScale*elements[i].size
-        if (Math.abs(elements[i].x*globalScale - my.mouseX) <= (radioBox*scaling/2)){
-          let numBoxes = elements[i].radioOptions.length;
-          let boxID = 1;
-          let mousePosY = my.mouseY - elements[i].y*globalScale;
-          let lowerBound = -radioBox*scaling*(numBoxes/2);
-          let upperBound = lowerBound + radioBox*scaling;
-          for (let j=0; j < numBoxes; j++){
-            if (upperBound >= mousePosY && mousePosY >= lowerBound){
-              elements[i].value = boxID;
-              break
+        
+        let numBoxes = elements[i].radioOptions.length;
+        let boxID = 1;
+
+        if (elements[i].horizontal == true){
+          if (Math.abs(elements[i].y*globalScale - my.mouseY) <= (radioBox*scaling/2)){
+            let mousePosX = my.mouseX - elements[i].x*globalScale;
+            let leftBound = -radioBox*scaling*(numBoxes/2);
+            let rightBound = leftBound + radioBox*scaling;
+            for (let j=0; j < numBoxes; j++){
+              if (leftBound <= mousePosX && mousePosX <= rightBound){
+                elements[i].value = boxID;
+                elements[i].callback;
+                break
+              }
+              boxID += 1;
+              leftBound += radioBox*scaling;
+              rightBound += radioBox*scaling;
             }
-            boxID += 1;
-            upperBound += radioBox*scaling;
-            lowerBound += radioBox*scaling;
-          }
+          } 
         } 
+        else {
+          if (Math.abs(elements[i].x*globalScale - my.mouseX) <= (radioBox*scaling/2)){
+            let mousePosY = my.mouseY - elements[i].y*globalScale;
+            let lowerBound = -radioBox*scaling*(numBoxes/2);
+            let upperBound = lowerBound + radioBox*scaling;
+            for (let j=0; j < numBoxes; j++){
+              if (upperBound >= mousePosY && mousePosY >= lowerBound){
+                elements[i].value = boxID;
+                elements[i].callback;
+                break
+              }
+              boxID += 1;
+              upperBound += radioBox*scaling;
+              lowerBound += radioBox*scaling;
+            }
+          } 
+        }
       }
-      else if (elements[i].type == "sequencer"){
-        if (my.mouseX >= (elements[i].x) && my.mouseX <= (seqBoxSize*9 + elements[i].x)){
-          if (my.mouseY >= (elements[i].y) && my.mouseX <= (seqBoxSize*4 + elements[i].y)){
+      else if (elements[i].type == "keyboard"){
+        if (my.mouseX >= (elements[i].x) && my.mouseX <= (elements[i].width + elements[i].x)){
+          // console.log('keyboard within x')
+          if (my.mouseY >= (elements[i].y) && my.mouseY <= (elements[i].height + elements[i].y)){
+            // INSIDE KEYBOARD
+            elements[i].value = whichKeyIsPressed(i); // returns index of key (0 - numKeys)
+            console.log("KEY PRESS, key="+elements[i].value);
+            currKey = keys[elements[i].value];
+            keyOn = (true,i);
             currElement = i;
             break
           }
         }
       }
-    }// for loop
-    // grid edges
-    if (my.mouseX <= 6){
-      createVertDivision = true;
-      console.log('v');
-    } else if (my.mouseY <= 6){
-      console.log('h');
-      createHorzDivision = true;
     }
-    console.log('curE: '+currElement);
   }// mousePressed
     
-  
+  function whichKeyIsPressed(index) { // returns index of key (0 - numKeys)
+    let i = index;
+    let blackKeyPressed = false; // so that pressing a black key doesnt also press the white key "underneath"
+    let whiteKeyWidth = elements[i].wkWidth;
+    // BLACK KEYS
+    let blackKeyOffset = [1,2,4,5,6];
+    k = 0;
+    let bCount = 0; // how many black keys have been drawn
+    for (let j = 0; j < elements[i].keys; j++) {
+      if (k >= 12) {k = k - 12};
+      if (keypattern[k] == 1) {
+        // check black key
+        bCount++;
+        offsetIndex = (bCount-1) % 5
+        let bOctave = Math.floor(bCount/6)
+        whiteKeyOffset = blackKeyOffset[offsetIndex] + bOctave*7 - 1;
+        let xShift = whiteKeyWidth*(whiteKeyOffset) + whiteKeyWidth*.7;
+        if ((elements[i].x+xShift) <= my.mouseX && my.mouseX <= (elements[i].x+xShift+whiteKeyWidth*.6)) {
+          if ((elements[i].y) <= my.mouseY && my.mouseY <= (elements[i].y+elements[i].height*.6)) {
+            blackKeyPressed = true;
+            return j;
+          }
+        }
+      }
+      k++;
+    }
+    // WHITE KEYS
+    let wCount = 0;
+    for (let j = 0; j < elements[i].keys; j++) {
+      if (k >= 12) {k = k - 12};
+      if (keypattern[k] == 0) {
+        let xShift = whiteKeyWidth*wCount;
+        wCount++;
+        if ((elements[i].x+xShift) <= my.mouseX && my.mouseX <= (elements[i].x+xShift+whiteKeyWidth)) {
+          if ((elements[i].y) <= my.mouseY && my.mouseY <= (elements[i].y+elements[i].height)) {
+            if (blackKeyPressed == false){
+              return j;
+            }
+          }
+        }
+      } 
+      k++;
+    }
+  }
+
   my.mouseReleased = function() {
-    // console.log('\nmouse released');
-    // console.log(createVertDivision);
     // Stop dragging
     dragging = false;
-    if (createVertDivision == true) {
-      createVertDivision = false;
-      vertDivisions.push(currVertDiv);
-    } else if (createHorzDivision == true) {
-      createHorzDivision = false;
-      horzDivisions.push(currHorzDiv);
+    if (keyOn[0] == true) {
+      elements[keyOn[1]].value = null; // turn off key
+      keyOn = (false,null)
     }
   }
   
   let elements = [];
 
-  let UserElement = function(type,label,mapto,x,y,min,max,value,prev,size,color,showLabel,showValue, bipolar, radioOptions,horizontal) {
+  let UserElement = function(type,label,mapto,callback,x,y,min=0,max=1,value=(max-min)/2,prev=value,size=1,color=my.color1,showLabel=true,showValue=true,bipolar=false, radioOptions="",horizontal=false) {
     this.type = type; // str: type of element
     this.label = label; // str: name and unique ID
+
     this.mapto = mapto; // str: variable it is controlling
+    if (typeof callback == "function"){
+      this.callback = callback(); // function
+    } else {
+      this.callback = callback; // function
+    }
 
     this.x = x; // #: pos
     this.y = y; // #: pos
@@ -437,65 +420,29 @@ const gui_sketch = function(my) {
     this.value = value; // #: current value
     this.prev = prev; // #:cprevious value
     this.size = size; // #
+    this.color = color; // p5 color() object
     this.showLabel = showLabel; // bool
     this.showValue = showValue; // bool
+    
     this.bipolar = bipolar; // bool
-
     this.radioOptions = radioOptions; // array
     this.horizontal = horizontal; // bool: for slider or radio buttons
-
-    this.color = color;
-    
-    /// METHOD VERSION
-    // this.type = function(type){
-    //   this.type = type; // str: type of element
-    // }
-    // this.label = function(label){
-    //   this.label = label; // str: name and unique ID
-    // }
-    // this.mapto = function(mapto){
-    //   this.mapto = mapto; // str: variable it is controlling
-    // }
-    
-    // this.x = function(x){
-    //   this.x = my.ScaleX(x);
-    // }
-    // this.y = function(y){
-    //   this.y = my.ScaleY(y);
-    // }
-
-    // this.min = min; // #: units of what its mapped to
-    // this.max = max; // #; units of what its mapped to
-    // this.value = value; // #: current value
-    // this.prev = prev; // #:cprevious value
-    // this.size = size; // #
-    // this.showLabel = showLabel; // bool
-    // this.showValue = showValue; // bool
-    // this.bipolar = bipolar; // bool
-
-    // this.radioOptions = radioOptions; // array
-    // this.horizontal = horizontal; // bool: for slider or radio buttons
-
-    // this.color = color;
 
     this.position = function(x,y){
       this.x = my.scaleX(x);
       this.y = my.scaleY(y);
-      redraw();
+      my.redrawGUI();
     }
   }
   
-  my.addElement = function({type,label,mapto, x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
-    // console.log(elements);
-    // forceDraw = true; // so that the canvas will update even tho we are not clicking it
-    // NEW OR UPDATE EXISTING?
+
+  my.addElement = function(type,label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal) {
+    console.log(callback)
     let update = false;
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].label == label) {
-        console.log('UPDATE element');
         update = true;
         // UPDATE VALS
-        if (type != undefined) {elements[i].type = type;}
         if (mapto != undefined) {elements[i].mapto = mapto;}
         if (x != undefined) {elements[i].x = my.scaleX(x);}
         if (y != undefined) {elements[i].y = my.scaleX(y);}
@@ -510,55 +457,42 @@ const gui_sketch = function(my) {
         if (radioOptions != undefined) {elements[i].radioOptions = radioOptions;}
         if (horizontal != undefined) {elements[i].horizontal = horizontal;}
         elements[i].prev = undefined;
-        redraw();
+        my.redrawGUI();
         break
       }
-      else {
-        console.log('NEW element');
-      }
     }
-
-    if (update == false){
-      let xGap = 15;
-      // default default values
-      if (x == undefined) {
-        x = x0 + elements.length*xGap;
-        x = Math.min(x,100);
+    if (label==undefined){
+      console.error("label parameter is undefined")
+    } else {
+      if (update == false){
+        if (x == undefined) {x = x0 + (elements.length%5)*20;}
+        if (y == undefined) { y = y0;}
+        elements.push(new UserElement(type,label,mapto,callback,my.scaleX(x),my.scaleY(y),min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal));
       }
-      if (y == undefined) { y = y0;}
-      if (min == undefined) {min=0;}
-      if (max == undefined) {max=1;}
-      if (value == undefined) {value=(max-min)/2;}
-      prev = value;
-      if (prev == undefined) {prev="";}
-      if (size == undefined) {size=1;}
-      if (color == undefined) {color = my.color1;}
-      if (showLabel == undefined) {showLabel=true;}
-      if (showValue == undefined) {showValue=true;}
-      if (bipolar == undefined) {bipolar=false;}
-      if (radioOptions == undefined) {radioOptions=["!!!"];}
-      if (horizontal == undefined) {horizontal=false;}
-
-      if (type == 'toggle') {
-        value = 0;
-      }
-      else if (type == 'radio') {
-        min = 1;
-        max = radioOptions.length;
-        value = 1;
-      }
-      else if (type == 'sequencer') {
-        // 8 x 4track
-        value = [[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]];
-      }
-      elements.push(new UserElement(type,label,mapto,my.scaleX(x),my.scaleY(y),min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal));
-      console.log(elements);
+      my.redrawGUI();
+      console.log( elements[elements.length - 1] );
+      return elements[elements.length - 1];
     }
-
-    redraw();
-
-    return elements[elements.length - 1];
   }//addElement
+
+  my.Knob = function({label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+    my.addElement("knob",label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  }
+  my.Slider = function({label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+    my.addElement("slider",label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  }
+  my.Toggle = function({label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+    if (value == undefined) {value=0;}
+    my.addElement("toggle",label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  }
+  my.Momentary = function({label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+    if (value == undefined) {value=0;}
+    my.addElement("momentary",label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  }
+  my.RadioButtons = function({label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+    if (value == undefined) {value=1;}
+    my.addElement("radio",label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  }
 
   my.removeElement = function(label) {
     for (let i = 0; i < elements.length; i++) {
@@ -566,12 +500,12 @@ const gui_sketch = function(my) {
         elements.splice(i,1);
       }
     }
-    redraw();
+    my.redrawGUI();
   }//removeElement
 
   my.removeElements = function() {
     elements = []
-    redraw();
+    my.redrawGUI();
   }//removeElements
 
   my.elementGrid = function(type,xcount,ycount) {
@@ -598,27 +532,34 @@ const gui_sketch = function(my) {
     return (val/100) * y_size;
   }
 
-  function redraw() { //rdrwwwwwww
+  my.redrawGUI = function() { //rdrwwwwwww
     my.background(my.color3);
 
     my.scale(globalScale);
-    // draw grid
-    my.push();
-    my.fill(my.color2);
-    my.noStroke();
-    my.textSize(7);
-    my.textStyle(NORMAL);
-    let yOffset = y_size / (4*globalScale)
-    let xOffset = x_size / (4*globalScale)
-    let vals = [25,50,75,100];
-    my.text(0,5,5)
-    for (let i = 1; i < 5; i++) {
-      my.text(vals[i-1],i*xOffset - i*2,5)
+
+    if (fullscreen == false){
+      // draw grid only on non-fullscreen
+      my.push();
+      my.fill(30,120);
+      my.noStroke();
+      my.textSize(.03*y_size);
+      my.textStyle(NORMAL);
+      let yOffset = y_size / (4*globalScale)
+      let xOffset = x_size / (4*globalScale)
+      let vals = [25,50,75,100];
+      my.text(0,6,6)
+      for (let i = 1; i < 5; i++) {
+        my.text(vals[i-1],x_size*.012 +i*xOffset*.97,6)
+      }
+      my.textAlign (LEFT, CENTER);
+      for (let i = 1; i < 5; i++) {
+        my.text(vals[i-1],1,y_size*.015 +i*yOffset*.97)
+      }
+      my.stroke(my.color2);
+      my.noFill();
+      my.rect(0,0,x_size/globalScale,y_size/globalScale);
+      my.pop();
     }
-    for (let i = 1; i < 5; i++) {
-      my.text(vals[i-1],5,i*yOffset - i)
-    }
-    my.pop();
 
     //divisions
     my.push();
@@ -636,8 +577,15 @@ const gui_sketch = function(my) {
     my.pop();
     
     for (let i = 0; i < elements.length; i++) {
+      // SET CURRENT ELEMENT COLOR
+      let currentColor;
+      try {
+        currentColor = elements[i].color.val;
+      } catch (error) {
+        currentColor = elements[i].color;
+      }
       // DRAW KNOB
-      my.fill(elements[i].color);
+      my.fill(currentColor);
       if (elements[i].type == 'line') my.drawLine(i)
       else if (elements[i].type == 'knob' || elements[i].type == 'dial'){
           my.push();
@@ -651,10 +599,10 @@ const gui_sketch = function(my) {
           // full arc
           my.strokeCap(SQUARE);
           my.stroke(my.color2);
-          my.fill(transparentColor);  
+          my.noFill();  
           my.arc(0, 0, 2*rKnob*sz, 2*rKnob*sz,120,60);
           // active arc
-          my.stroke(elements[i].color);
+          my.stroke(currentColor);
           let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max-elements[i].min) ; // normalize between 0-1
           let valueInDegrees = valueNorm * 300 - 240; // range is -240 to 60 deg
           let bipolarOffset = 0;
@@ -691,7 +639,7 @@ const gui_sketch = function(my) {
           
           // LABEL
           my.push();
-          my.fill(my.color2);
+          my.fill(my.color4);
           my.noStroke();
           if (elements[i].showValue == true) {
             let roundto = 0;
@@ -735,7 +683,7 @@ const gui_sketch = function(my) {
 
         // active line
         my.strokeWeight(sliderWidth*sz);
-        my.stroke(elements[i].color);
+        my.stroke(currentColor);
         let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max-elements[i].min) ; // normalize between 0-1
         let convertedVal = valueNorm * sliderLength*sz;
         let bipolarOffset = 0;
@@ -760,7 +708,7 @@ const gui_sketch = function(my) {
         // control point
         my.push();
         let sliderKnobSize = 8*sz
-        my.fill(elements[i].color);
+        my.fill(currentColor);
         my.stroke(my.color3);
         my.rect(
           0, 
@@ -770,7 +718,7 @@ const gui_sketch = function(my) {
         my.pop();
 
         // LABEL
-        my.fill(my.color2);
+        my.fill(my.color4);
         my.noStroke();
         if (elements[i].horizontal == true){
           my.rotate(-90)
@@ -818,9 +766,9 @@ const gui_sketch = function(my) {
         my.fill(my.color3);  
         my.ellipse(0, 0, 2.2*rBtn*sz);
         // setting up color variables
-        my.stroke(elements[i].color);
+        my.stroke(currentColor);
         my.strokeWeight(4);
-        let textColor = elements[i].color;
+        let textColor = currentColor;
         if (elements[i].value == 0) { // OFF STATE
           my.stroke(my.color2);
           my.strokeWeight(2);
@@ -854,8 +802,8 @@ const gui_sketch = function(my) {
         my.strokeWeight(2);
         let textColor = my.color2;
         if (elements[i].value == 1){ // ON STATE
-          my.stroke(elements[i].color);
-          textColor = elements[i].color;
+          my.stroke(currentColor);
+          textColor = currentColor;
           my.strokeWeight(4);
         }
         my.ellipse(0, 0, sz*rBtn*2, sz*rBtn*2);
@@ -925,7 +873,7 @@ const gui_sketch = function(my) {
         // FILL IN ACTIVE BUTTON
         let active = elements[i].value - 1; // adjust for 0-indexing
         yBox = yBoxInit + active;
-        my.fill(elements[i].color);
+        my.fill(currentColor);
         my.stroke(my.color3);
         my.strokeWeight(2);
         let x = -rBoxSz/2;
@@ -950,6 +898,59 @@ const gui_sketch = function(my) {
         my.pop();
         // MAP TO CONTROLS
         mapToControls(elements[i].mapto, elements[i].value);
+      }
+    // END RADIO
+    // DRAW KEYBOARD
+      else if (elements[i].type == 'keyboard'){
+        // draw element
+        my.push();
+        my.fill(255);
+        my.stroke(0);
+        my.strokeWeight(2);
+        my.translate(elements[i].x, elements[i].y);
+        let whiteKeyWidth = elements[i].wkWidth;
+
+        k = 0;
+        // WHITE KEYS
+        let wCount = 0;
+        for (let j = 0; j < elements[i].keys; j++) {
+          if (k >= 12) {k = k - 12};
+          if (keypattern[k] == 0) {
+            my.fill(255);
+            if (currKey == keys[j]) {
+              my.fill(currentColor);
+            }
+            let xShift = whiteKeyWidth*wCount;
+            wCount++;
+            my.rect(xShift, 0, whiteKeyWidth, elements[i].height);
+          } 
+          k++;
+        }
+        // BLACK KEYS
+        let blackKeyOffset = [1,2,4,5,6];
+        k = 0;
+        let bCount = 0; // how many black keys have been drawn
+        for (let j = 0; j < elements[i].keys; j++) {
+          if (k >= 12) {k = k - 12};
+          if (keypattern[k] == 1) {
+            // draw black key
+            bCount++;
+            // SET EITHER BLACK OR ACTIVE COLOR
+            my.fill(0); 
+            if (currKey == keys[j]) {
+              my.fill(currentColor);
+            }
+            // DRAW KEY RECTANGLE
+            offsetIndex = (bCount-1) % 5
+            let bOctave = Math.floor(bCount/6)
+            whiteKeyOffset = blackKeyOffset[offsetIndex] + bOctave*7 - 1;
+            let xShift = whiteKeyWidth*(whiteKeyOffset) + whiteKeyWidth*.7;
+            my.rect(xShift, 0, whiteKeyWidth*.6, elements[i].height*.6);
+          }
+          k++;
+        }
+        my.ellipse(0,0,6)
+        my.pop();
       }
     }  
   } //redraw
@@ -979,7 +980,7 @@ const gui_sketch = function(my) {
     let size = stroke
 
     elements.push(new UserElement(type,label,'mapto',x,y,0,0,0,0,size,0,0,0,0,0));
-    redraw()
+    my.redrawGUI()
     return elements[elements.length - 1];
   } //line2
 
@@ -990,7 +991,7 @@ const gui_sketch = function(my) {
       color = my.color2;
     }
     lines.push([x,0,x,y_size,color])
-    redraw()
+    my.redrawGUI()
   }
 
   my.lineY = function(y,color) {
@@ -1000,11 +1001,17 @@ const gui_sketch = function(my) {
       color = my.color2;
     }
     lines.push([0,y,x_size,y,color])
-    redraw()
+    my.redrawGUI()
   }
 
   my.drawLine = function(i){
-    my.stroke( elements[i].color )
+    // SET COLOR
+    try {
+      let currentColor = elements[i].color.val;
+    } catch (error) {
+      let currentColor = elements[i].color;
+    }
+    my.stroke( currentColor )
     my.strokeWeight( elements[i].size )
     my.line(elements[i].x[0],elements[i].y[0],elements[i].x[1],elements[i].y[1])
   }
@@ -1016,7 +1023,6 @@ const gui_sketch = function(my) {
       eval(mapto +'= ' + value + ';'); //old
     } catch (error) {
       if (mapto == ""){
-        console.error("ERROR: 'mapto' variable is empty");
       } else {
         console.error("ERROR: invalid 'mapto' variable: "+mapto);
       }
@@ -1024,15 +1030,12 @@ const gui_sketch = function(my) {
   } 
 
   my.fullscreenGUI = function(){
-    console.log("FS");
-
     if (fullscreen){
       //reset
       document.getElementById('gui_div').style.top = "2%";
       document.getElementById('gui_div').style.right = "2";
       document.getElementById('gui_div').style.width = "49%";
       document.getElementById('gui_div').style.height = "32%";
-      globalScale = 1;
       fullscreen = false
     } else {
       //make fs
@@ -1040,74 +1043,92 @@ const gui_sketch = function(my) {
       document.getElementById('gui_div').style.right = ".5%";
       document.getElementById('gui_div').style.width = "99%";
       document.getElementById('gui_div').style.height = "96%";
-      globalScale = 2;
+      document.getElementById('gui_div').style.background = "white";
       fullscreen = true
     }
-    x_size = document.getElementById('gui_div').offsetWidth;
-    y_size = document.getElementById('gui_div').offsetHeight;
-    console.log()
-    // gui.dimRatio = y_size / x_size;
-    my.resizeCanvas(x_size, y_size);
-    //my.background(100);
-    redraw();
-
-    edgeGapX = x_size * (1-globalScale) * 0.5 ;
-    edgeGapY = y_size * (1-globalScale) * 0.5 ;
+    setNewDimensions();
   }//fullscreen
 
+  window.addEventListener('resize', function(event) {
+    setNewDimensions();
+  }, true); 
 
+  function setNewDimensions() {
+    // keeps aspect ratio at 2:1 and determines if height or width is constraining dimension in div
+    x_size = document.getElementById('gui_div').offsetWidth;
+    y_size = document.getElementById('gui_div').offsetHeight;
+    if (2*y_size > x_size) {
+      x_size = document.getElementById('gui_div').offsetWidth;
+      y_size = .5 * x_size;
+    } else {
+      x_size = 2 * y_size;
+    }
+    let newSize = y_size;
+    let deltaSize = newSize / originalSize;
+    my.resizeCanvas(x_size, y_size);
+    globalScale = deltaSize;
+    my.redrawGUI();
+  }
 
-
-  let Keyboard = function(label,type,mapto,x,y,width,height,keys,color,showLabel) {
+  let Keyboard = function(label,type,mapto,x,y,value,width,height,keys,color,showLabel,wkWidth) {
     this.label = label; // str: name and unique ID
     this.type = type; // str: name and unique ID
     this.mapto = mapto; // str: variable it is controlling
 
-    this.x = x; // #: pos
-    this.y = y; // #: pos
+    this.x = x; // #: pos left
+    this.y = y; // #: pos top
+    this.value = value; // str: current key pressed
     this.width = width; // #: w 
     this.height = height; // #: h
     this.keys = keys; // #: current value
     this.color = color; // #
     this.showLabel = showLabel; // bool
+    this.wkWidth = wkWidth; // bool
 
     this.position = function(x,y){
       this.x = my.scaleX(x);
       this.y = my.scaleY(y);
-      redraw();
+      my.redrawGUI();
     }
   }
 
   my.addKeyboard = function({label,type,mapto,x,y,width,height,keys,color,showLabel}) {
     // NEW OR UPDATE EXISTING?
     let update = false;
-    // for (let i = 0; i < elements.length; i++) {
-    //   if (elements[i].label == label) {
-    //     console.log('UPDATE element');
-    //     update = true;
-    //     // UPDATE VALS
-    //     if (type != undefined) {elements[i].type = type;}
-    //     if (mapto != undefined) {elements[i].mapto = mapto;}
-    //     if (x != undefined) {elements[i].x = my.scaleX(x);}
-    //     if (y != undefined) {elements[i].y = my.scaleX(y);}
-    //     if (min != undefined) {elements[i].min = min;}
-    //     if (max != undefined) {elements[i].max = max;}
-    //     if (value != undefined) {elements[i].value = value;}
-    //     if (size != undefined) {elements[i].size = size;}
-    //     if (color != undefined) {elements[i].color = color;}
-    //     if (showLabel != undefined) {elements[i].showLabel = showLabel;}
-    //     if (showValue != undefined) {elements[i].showValue = showValue;}
-    //     if (bipolar != undefined) {elements[i].bipolar = bipolar;}
-    //     if (radioOptions != undefined) {elements[i].radioOptions = radioOptions;}
-    //     if (horizontal != undefined) {elements[i].horizontal = horizontal;}
-    //     elements[i].prev = undefined;
-    //     redraw();
-    //     break
-    //   }
-    //   else {
-    //     console.log('NEW keyboard');
-    //   }
-    // }
+
+    for (let i = 0; i < elements.length; i++) {
+      if (elements[i].label == label) {
+        console.log('UPDATE keyboard');
+        update = true;
+        // UPDATE VALS
+        if (mapto != undefined) {elements[i].mapto = mapto;}
+        if (x != undefined) {elements[i].x = my.scaleX(x);}
+        if (y != undefined) {elements[i].y = my.scaleX(y);}
+        if (width != undefined) {elements[i].width = my.scaleX(width);}
+        if (height != undefined) {elements[i].height = my.scaleY(height);}
+        if (keys != undefined) {
+          elements[i].keys = keys;
+          let numWhiteKeys = 0;
+          let k = 0;
+          for (let j=0; j < keys; j++) {
+            if (k >= 12) {k = k - 12};
+            if (keypattern[k] == 0) {
+              numWhiteKeys++;
+            }
+            k++
+          }
+          elements[i].wkWidth = width / numWhiteKeys;
+        }
+        if (color != undefined) {elements[i].color = color;}
+        if (showLabel != undefined) {elements[i].showLabel = showLabel;}
+        my.redrawGUI();
+        break
+      }
+      else {
+        console.log('NEW keyboard');
+      }
+    }
+
     if (update == false){
       // default default values
       type = "keyboard";
@@ -1118,12 +1139,82 @@ const gui_sketch = function(my) {
       if (height == undefined) {height=100;}
       if (color == undefined) {color=my.color1;}
       if (showLabel == undefined) {showLabel=false;}
-      elements.push(new Keyboard(label,type,mapto,my.scaleX(x),my.scaleY(y),width,height,keys,color,showLabel));
+      let numWhiteKeys = 0;
+      let k = 0;
+      for (let j=0; j < keys; j++) {
+        if (k >= 12) {k = k - 12};
+        if (keypattern[k] == 0) {
+          numWhiteKeys++;
+        }
+        k++
+      }
+      let wkWidth = my.scaleX(width) / numWhiteKeys;
+      let value = null;
+      elements.push(new Keyboard(label,type,mapto,my.scaleX(x),my.scaleY(y),value,my.scaleX(width),my.scaleY(height),keys,color,showLabel,wkWidth));
     }
 
-    redraw();
+    console.log(elements[elements.length - 1]);
+    my.redrawGUI();
     return elements[elements.length - 1];
   }//addKeyboard
+
+  my.sensitivity = function(masterSensitivity=1){
+    // 1 is default, <1 makes it less sensitive, >1 more sensitive
+    sliderSensitivity = .008*masterSensitivity;
+    sensitivityScale = .006*masterSensitivity; 
+  }
+
+
+
+  let guiColor = function(val) {
+    // color Object so it can be referenced and then update on all elements
+    this.val = val; 
+  }
+  my.setColor1 = function(r,g,b,a){
+    if (g==undefined){
+      my.color1.val = color(r);
+    }
+    else if (a==undefined){
+      my.color1.val = color(r,g,b);
+    } else {
+      my.color1.val = color(r,g,b,a);
+    }
+    my.redrawGUI();
+  }
+  my.setColor2 = function(r,g,b,a){
+    if (g==undefined){
+      my.color2 = color(r);
+    }
+    else if (a==undefined){
+      my.color2 = color(r,g,b);
+    } else {
+      my.color2 = color(r,g,b,a);
+    }
+    my.redrawGUI();
+  }
+  my.setBackgroundColor = function(r,g,b,a){
+    if (g==undefined){
+      my.color3 = color(r);
+    }
+    else if (a==undefined){
+      my.color3 = color(r,g,b);
+    } else {
+      my.color3 = color(r,g,b,a);
+    }
+    my.redrawGUI();
+  }
+  my.setTextColor = function(r,g,b,a){
+    if (g==undefined){
+      my.color4 = color(r);
+    }
+    else if (a==undefined){
+      my.color4 = color(r,g,b);
+    } else {
+      my.color4 = color(r,g,b,a);
+    }
+    my.redrawGUI();
+  }
+
 
   my.scaleOutput = function(input,inLow,inHigh,outLow,outHigh,curve){
     console.log(input, outLow, outHigh, curve);
