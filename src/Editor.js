@@ -6,7 +6,8 @@ import { javascript } from '@codemirror/lang-javascript';
 
 import p5 from 'p5';
 import * as Tone from 'tone';
-import Canvas from "./Canvas.js";
+//import Canvas from "./Canvas.js";
+import Canvas from "./gui.js";
 
 const midiMain = require('./midiCoder/midi_main.js');
 const midiSeq = require('./midiCoder/seq_control.js');

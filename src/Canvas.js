@@ -1,27 +1,34 @@
 import { useState, useEffect } from 'react';
 import p5 from 'p5';
+import gui_sketch from './gui';
+
+let x_size,y_size,edgeGapX,edgeGapY;
+let globalScale = 1;
+
+let fullscreen = false;
 
 function Canvas(props) {
     const [isMaximized, setIsMaximized] = useState(false);
 
     useEffect(() => {
-        const sketch = (p) => {
-            let div;
+        // const sketch = (p) => {
+        //     let div;
 
-            p.setup = function () {
-                div = document.getElementById(props.id);
-                p.createCanvas(div.offsetWidth, div.offsetHeight);
-            };
+        //     p.setup = function () {
+        //         div = document.getElementById(props.id);
+        //         p.createCanvas(div.offsetWidth, div.offsetHeight);
+        //     };
 
-            p.draw = function () {
-                // Your drawing code here
-            };
+        //     p.draw = function () {
+        //         // Your drawing code here
+        //     };
 
-            p.windowResized = function () {
-                p.resizeCanvas(div.offsetWidth, div.offsetHeight);
-            };
-        };
-        window[props.id] = new p5(sketch, props.id);
+        //     p.windowResized = function () {
+        //         p.resizeCanvas(div.offsetWidth, div.offsetHeight);
+        //     };
+        // };
+        //console.log(document.getElementById(props.id)
+        //window[props.id] = new p5(gui_sketch, 'Canvas1');
 
     }, [props.id]);
 

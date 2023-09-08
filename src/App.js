@@ -72,7 +72,7 @@ function App() {
     <div className="outer-container">
       <Navbar assignments={assignments} examples={examples} page={page} setPage={setPage} />
       <Routes>
-        <Route path="/" element={<Editor page={page} starterCode={homeStarterCode} canvases={["Canvas1", "Canvas2", "Canvas3"]} />} />
+        <Route path="/" element={<Editor page={page} starterCode={homeStarterCode} canvases={["Canvas1", "Canvas1", "Canvas1"]} />} />
         {Object.entries(assignments).map(([title, props]) => (
           <Route path={`/${title}`} element={<Template title={title} intro={props.intro} starterCode={props.starterCode} description={props.description} canvases={props.canvases} />} />
         ))}
