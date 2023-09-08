@@ -7,6 +7,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import p5 from 'p5';
 import * as Tone from 'tone';
 import Canvas from "./Canvas.js";
+import { Oscilloscope, Spectroscope } from './oscilloscope';
 //import Canvas from "./gui.js";
 
 const midiMain = require('./midiCoder/midi_main.js');
@@ -56,6 +57,8 @@ function Editor(props) {
 
     window.p5 = p5;
     window.Tone = Tone;
+    window.Oscilloscope = Oscilloscope;
+    window.Spectroscope = Spectroscope;
     var curLineNum = 0;
 
     // Save history in browser
