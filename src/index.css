@@ -19,7 +19,6 @@ code {
 .outer-container {
   padding: 5px;
   height: calc(100vh - 10px);
-  ;
   display: flex;
   flex-direction: column;
 }
@@ -99,6 +98,18 @@ code {
 
 .text-button.home-link {
   margin-right: 5px;
+}
+
+.contents-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: auto;
+  border: 1px solid gray;
+}
+
+.center-self {
+  align-self: center;
 }
 
 .dropdown {

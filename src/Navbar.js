@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import Dropdown from "./Dropdown.js";
 
 function Navbar(props) {
     return (
@@ -11,8 +10,11 @@ function Navbar(props) {
                         Home
                     </Link>
                 }
-                <Dropdown title={"Assignments"} options={props.assignments} page={props.page} setPage={props.setPage} />
-                <Dropdown title={"Examples"} options={props.examples} page={props.page} setPage={props.setPage} />
+                {props.page !== "TableOfContents" &&
+                    <Link to="/TableOfContents" className="text-button home-link" onClick={() => props.setPage('TableOfContents')}>
+                        Table Of Contents
+                    </Link>
+                }
             </span>
         </span>
     );

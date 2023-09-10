@@ -1,4 +1,4 @@
-//12:22
+//2
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -64,8 +64,8 @@ function Editor(props) {
     const [height, setHeight] = useState(false);
     const [code, setCode] = useState(value); //full string of user code
     const [vars, setVars] = useState({}); //current audioNodes
-    const [liveMode, setLiveMode] = useState(false);
-    const [middleButton, setMiddleButton] = useState("button-container");
+    const [liveMode, setLiveMode] = useState(true);
+    const [middleButton, setMiddleButton] = useState("button-container middle-clicked");
     const [refresh, setRefresh] = useState(false);
 
     const canvases = props.canvases;

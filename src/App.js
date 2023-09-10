@@ -3,6 +3,7 @@ import { useLocation, BrowserRouter as Router, Routes, Route } from 'react-route
 import Editor from './Editor.js';
 import Navbar from './Navbar.js';
 import Template from './pages/Template.js';
+import TableOfContents from './pages/TableOfContents.js';
 
 // import { midi, onMIDISuccess, onMIDIFailure, setMidiInput, setMidiOutput, getMidiIO,
 // 	handleMidiInput, outputMidiID, midiMap, ccMap, stopMap, mute, muted, toggleMute } from "./midiCoder/midi_control.js";
@@ -70,9 +71,10 @@ function App() {
 
   return (
     <div className="outer-container">
-      <Navbar assignments={assignments} examples={examples} page={page} setPage={setPage} />
+      <Navbar page={page} setPage={setPage} />
       <Routes>
         <Route path="/" element={<Editor page={page} starterCode={homeStarterCode} canvases={["Canvas1", "Canvas2", "Canvas3"]} />} />
+        <Route path="/TableOfContents" element={<TableOfContents assignments={assignments} examples={examples} setPage={setPage} />} />
         {Object.entries(assignments).map(([title, props]) => (
           <Route path={`/${title}`} element={<Template title={title} intro={props.intro} starterCode={props.starterCode} description={props.description} canvases={props.canvases} />} />
         ))}
