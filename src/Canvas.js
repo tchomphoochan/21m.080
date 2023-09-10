@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
 import p5 from 'p5';
+import gui_sketch from './gui';
+
+let x_size,y_size,edgeGapX,edgeGapY;
+let globalScale = 1;
+
+let fullscreen = false;
 
 function Canvas(props) {
     const [isMaximized, setIsMaximized] = useState(false);
@@ -21,6 +27,7 @@ function Canvas(props) {
                 p.resizeCanvas(div.offsetWidth, div.offsetHeight);
             };
         };
+        //console.log(document.getElementById(props.id))
         window[props.id] = new p5(sketch, props.id);
 
     }, [props.id]);

@@ -7,6 +7,8 @@ import { javascript } from '@codemirror/lang-javascript';
 import p5 from 'p5';
 import * as Tone from 'tone';
 import Canvas from "./Canvas.js";
+import { Oscilloscope, Spectroscope } from './oscilloscope';
+//import Canvas from "./gui.js";
 
 const midiMain = require('./midiCoder/midi_main.js');
 const midiSeq = require('./midiCoder/seq_control.js');
@@ -55,6 +57,8 @@ function Editor(props) {
 
     window.p5 = p5;
     window.Tone = Tone;
+    window.Oscilloscope = Oscilloscope;
+    window.Spectroscope = Spectroscope;
     var curLineNum = 0;
 
     // Save history in browser
@@ -64,7 +68,7 @@ function Editor(props) {
     const [height, setHeight] = useState(false);
     const [code, setCode] = useState(value); //full string of user code
     const [vars, setVars] = useState({}); //current audioNodes
-    const [liveMode, setLiveMode] = useState(true);
+    const [liveMode, setLiveMode] = useState(true); //live mode is on by default
     const [middleButton, setMiddleButton] = useState("button-container middle-clicked");
     const [refresh, setRefresh] = useState(false);
 
