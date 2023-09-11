@@ -6,11 +6,11 @@ const Template = (props) => {
         <>
             <div className="description-container">
                 <div className="title">{props.title}</div>
-                <div dangerouslySetInnerHTML={{ __html: props.intro_html }} />
+                <div dangerouslySetInnerHTML={{ __html: props.intro }} />
             </div>
             <Editor page={props.page} starterCode={props.starterCode} canvases={props.canvases} />
             <div className="description-container">
-                <div dangerouslySetInnerHTML={{ __html: props.description_html }} />
+                <div dangerouslySetInnerHTML={{ __html: props.description }} />
             </div> 
         </>
     );

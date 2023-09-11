@@ -45,16 +45,16 @@ function App() {
             throw new Error('Fetching files failed');
           }
 
-          const intro = await introRes.text();
-          const intro_html = marked(intro);
+          const intro_raw = await introRes.text();
+          const intro = marked(intro_raw);
           const starterCode = await starterCodeRes.text();
-          const description = await descriptionRes.text();
-          const description_html = marked(description);
+          const description_raw = await descriptionRes.text();
+          const description = marked(description_raw);
 
           fetchedAssignments[fileName] = {
-            intro_html,
+            intro,
             starterCode,
-            description_html,
+            description,
             canvases: [fileName],
           };
         } catch (error) {
