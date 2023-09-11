@@ -22,7 +22,9 @@ function App() {
   const exampleFiles = [
     'Oscillator',
   ];
-  const assignmentFiles = [];
+  const assignmentFiles = [
+    'Lab1',
+  ];
 
   const homeStarterCode = `/*
   Alt-Enter: Evaluate Line in Live Mode
