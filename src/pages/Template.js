@@ -1,6 +1,6 @@
 // import { useState, useEffect } from "react";
 import Editor from '../Editor.js';
-import './Template.css';
+// import './Template.css';
 
 const Template = (props) => {
     return (
