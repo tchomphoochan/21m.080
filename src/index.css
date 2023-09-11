@@ -39,6 +39,10 @@ code {
   flex-shrink: auto;
 }
 
+.container{
+  height: auto;
+}
+
 .center-content {
   align-items: center;
   justify-content: flex-end;
@@ -78,6 +82,12 @@ code {
   align-items: center;
   justify-content: space-between;
   margin-right: 4px;
+}
+
+.intro-container {
+  border: 1px solid gray;
+  padding: 5px;
+  overflow: auto;
 }
 
 .description-container {
