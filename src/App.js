@@ -4,6 +4,7 @@ import Editor from './Editor.js';
 import Navbar from './Navbar.js';
 import Template from './pages/Template.js';
 import TableOfContents from './pages/TableOfContents.js';
+import { marked } from 'marked';
 
 // import { midi, onMIDISuccess, onMIDIFailure, setMidiInput, setMidiOutput, getMidiIO,
 // 	handleMidiInput, outputMidiID, midiMap, ccMap, stopMap, mute, muted, toggleMute } from "./midiCoder/midi_control.js";
@@ -18,6 +19,7 @@ function App() {
   const [page, setPage] = useState(initialPage || 'Home');
   const [assignments, setAssignments] = useState({});
   const [examples, setExamples] = useState({});
+  const [markdownContent, setMarkdownContent] = useState("");
 
   const exampleFiles = [
     'Oscillator',
@@ -44,13 +46,15 @@ function App() {
           }
 
           const intro = await introRes.text();
+          const intro_html = marked(intro);
           const starterCode = await starterCodeRes.text();
           const description = await descriptionRes.text();
+          const description_html = marked(description);
 
           fetchedAssignments[fileName] = {
-            intro,
+            intro_html,
             starterCode,
-            description,
+            description_html,
             canvases: [fileName],
           };
         } catch (error) {

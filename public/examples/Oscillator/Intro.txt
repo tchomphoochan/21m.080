@@ -1,1 +1,3 @@
-This is the into for Oscillator.
+Creates an audio oscillator  
+
+
