@@ -4,7 +4,8 @@ export const starterCode = [
 
 	'gui.Knob({label:"knob"})\n',
 	'\n',
-	'key1 = gui.addKeyboard({label:"K1",mapto:"fakevar",x:50,y:25,width:400,height:100,keys:16})\n',
+	'key1 = gui.addKeyboard({label:"K1",mapto:"fakevar",x:10,y:25,width:30,height:60,keys:16})\n',
+	'key2 = gui.addKeyboard({label:"K2",mapto:"fakevar",x:50,y:25,width:30,height:60,keys:16})\n',
 	
 	
 	'\n\n\n',
