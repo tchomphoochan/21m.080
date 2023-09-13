@@ -1,1 +1,4 @@
-This is the into for Oscillator.
+Oscillator()
+Creates an audio oscillator
+
+API: https://tonejs.github.io/docs/14.7.77/Oscillator.html

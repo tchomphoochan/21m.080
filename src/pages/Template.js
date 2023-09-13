@@ -1,19 +1,21 @@
 // import { useState, useEffect } from "react";
 import Editor from '../Editor.js';
+// import './Template.css';
 
 const Template = (props) => {
     return (
         <>
-            <div className="description-container">
+            <div className="intro-container">
                 <div className="title">{props.title}</div>
-                <div style={{ overflowWrap: "break-word" }}>{props.intro}</div>
+                <div dangerouslySetInnerHTML={{ __html: props.intro }} />
             </div>
             <Editor page={props.page} starterCode={props.starterCode} canvases={props.canvases} />
             <div className="description-container">
-                <div style={{ overflowWrap: "break-word" }}>{props.description}</div>
-            </div>
+                <div dangerouslySetInnerHTML={{ __html: props.description }} />
+            </div> 
         </>
     );
 };
+
 
 export default Template;

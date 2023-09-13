@@ -70,6 +70,10 @@ export const Oscilloscope = function(_target) {
         this.dataArray = new Uint8Array(this.bufferLength);
     }.bind(this);
 
+    // this.display = function(destination){
+    //     eval(destination + '.connect(' + )
+    // }
+
     /**
      * Draw the oscillation wave
      */
