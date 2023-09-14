@@ -40,14 +40,14 @@ export const Oscilloscope = function(_target) {
     this.audioContext = Tone.context.rawContext;
 
     // Indicates if the oscilloscope is running
-    this.running = false;
+    this.running = true;
 
     // Is the oscilloscope analyser-node connected to the audio-context' destination
     this.hasAudio = false;
 
      // Create the oscilloscope analyser-node
     this.analyserNode = this.audioContext.createAnalyser();
-    this.analyserNode.fftSize = 1024; // Default fftSize
+    this.analyserNode.fftSize = 512; // Default fftSize
     this.bufferLength = this.analyserNode.frequencyBinCount;
     this.dataArray = new Uint8Array(this.bufferLength);
     this.yScaling = 1; //
@@ -55,7 +55,11 @@ export const Oscilloscope = function(_target) {
     this.enableTrigger = 1;
     this.threshold = 128;
 
-
+    //ToDo: get constructor to automatically start the scope
+    this.constructor = function(){
+        this.start();
+        console.log('scope started');
+    }
 
     // Set-up the analyser-node which we're going to use to get the oscillation wave
     this.setFftSize = function(val){
@@ -226,10 +230,13 @@ export const Spectroscope = function(_target) {
     this.analyserNode.fftSize = 4096; // Default fftSize
     this.bufferLength = this.analyserNode.frequencyBinCount;
     this.dataArray = new Uint8Array(this.bufferLength);
-    this.yScaling = 1; //
+    this.yScaling = 1;
+    this.maxFrequency = 24000;
+    this.minFrequency = 0;
     this.xScaling = 2;
     this.enableTrigger = 0;
     this.threshold = 128;
+    this.binWidth = 24000 / this.analyserNode.frequencyBinCount;
 
     // Set-up the analyser-node which we're going to use to get the oscillation wave
     this.setFftSize = function(val){
@@ -242,6 +249,7 @@ export const Spectroscope = function(_target) {
         this.analyserNode.fftSize = val;
         this.bufferLength = this.analyserNode.frequencyBinCount;
         this.dataArray = new Uint8Array(this.bufferLength);
+        this.binWidth = 24000 / this.bufferLength;
     }.bind(this);
 
     /**
@@ -251,23 +259,6 @@ export const Spectroscope = function(_target) {
     var path = 'M';
 
     this.analyserNode.getByteFrequencyData(this.dataArray);
-
-    // Find the index of the first positive zero-crossing point
-    var firstOverThreshold = 0;
-    let _threshold = this.threshold;
-    if(Math.abs(_threshold) <= 1) _threshold  = this.threshold*128 + 127;
-    
-    for (var i = 1; i < this.bufferLength; i++) {
-
-        let asign = this.dataArray[i] > _threshold;
-        let bsign = this.dataArray[i-1] <= _threshold;
-        if (Math.abs(asign - bsign) == 0) {
-            firstOverThreshold = i;
-            break;
-        }
-    }
-
-    if ( this.enableTrigger == 0) firstOverThreshold = 0;
 
     let x = this.width;
     let y = this.height / 2;
@@ -280,15 +271,26 @@ export const Spectroscope = function(_target) {
     // if(maxValue > this.yScaling) this.yScaling = maxValue;
     // if(Math.abs(minValue) > this.yScaling) this.yScaling = Math.abs(minValue);
 
-    for (var i = 0; i < this.bufferLength-firstOverThreshold; i++) {
-        let val = (255-this.dataArray[i+firstOverThreshold]) * (1/this.yScaling);
+    x = 0
+    y = this.height;
+
+    path += `${x} ${y}, `;
+    for (var i = 0 ; i < this.bufferLength; i++) {
+
+        let freqDivider = 24000 / (this.maxFrequency-this.minFrequency)
+        let freqOffset = this.minFrequency / this.binWidth
+
+        //To do: get minFrequency working
+        //console.log(this.binWidth, freqOffset, freqDivider)
+
+        let val = (255-this.dataArray[i+freqOffset]) * (1/this.yScaling);
         x = (((this.width + (this.width / this.bufferLength)) / this.bufferLength) * (i));
-        x = x * this.xScaling;
+        x = x * freqDivider;
         y = ((this.height / 2) * (val / 128.0));
 
 
         // Check if the x-coordinate is beyond the width of the scope
-        if (x > this.width-10) break; // Exit the loop if x exceeds width
+        if (x > this.width) break; // Exit the loop if x exceeds width
 
         path += `${x} ${y}, `;
     }
