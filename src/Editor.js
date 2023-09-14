@@ -1,4 +1,4 @@
-//2
+//4
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -284,6 +284,8 @@ function Editor(props) {
 
     //Handle Mode Changes + Play & Stop
     const playClicked = () => {
+        setLiveMode(false);
+        setMiddleButton("button-container");
         stopClicked();
         traverse(code);
 
@@ -300,8 +302,6 @@ function Editor(props) {
 
     }
     const stopClicked = () => {
-        setLiveMode(false);
-        setMiddleButton("button-container");
         for (const key in vars) {
             let variable = vars[key];
             try {

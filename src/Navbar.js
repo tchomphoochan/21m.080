@@ -11,7 +11,7 @@ function Navbar(props) {
                     </Link>
                 }
                 {props.page !== "TableOfContents" &&
-                    <Link to="/TableOfContents" className="text-button home-link" onClick={() => props.setPage('TableOfContents')}>
+                    <Link to="/TableOfContents" className="text-button" onClick={() => props.setPage('TableOfContents')}>
                         Table Of Contents
                     </Link>
                 }

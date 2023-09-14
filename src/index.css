@@ -104,10 +104,18 @@ code {
   font-size: 16px;
   cursor: pointer;
   word-wrap: break-word;
+  margin-left: 5px;
+  margin-right: 5px;
+  transition: transform 0.3s;
 }
 
-.text-button.home-link {
-  margin-right: 5px;
+.text-button.list {
+  margin-bottom: 10px;
+  transform-origin: left;
+}
+
+.text-button:hover {
+  transform: scale(1.1);
 }
 
 .contents-container {
@@ -120,20 +128,6 @@ code {
 
 .center-self {
   align-self: center;
-}
-
-.dropdown {
-  position: relative;
-  display: flex;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  z-index: 1000;
-  list-style: none;
-  padding: 0;
-  margin: 0;
 }
 
 .title {
