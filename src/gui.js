@@ -15,8 +15,8 @@ const gui_sketch = function(my) {
   let y_size = 300;
 
   my.fitDrawing = function(div){
-    x_size = document.getElementById(div).offsetWidth *.985;
-    y_size = document.getElementById(div).offsetHeight *.985;
+    x_size = document.getElementById(div).offsetWidth// *.985;
+    y_size = document.getElementById(div).offsetHeight// *.985;
     my.scaleOutput()
   }
 
@@ -43,8 +43,8 @@ const gui_sketch = function(my) {
   let transparentColor = my.color(0,0,0);
 
   // COLOR VARS
-  my.color1 = my.color(255,40,255);
-  my.color2 = my.color(170,176,180);
+  my.color1 = my.color(66,129,245);
+  my.color2 = my.color(66,129,245);
   my.color3 = my.color(220,229,234);
 
   let dragging = false;

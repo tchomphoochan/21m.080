@@ -47,7 +47,7 @@ export const Oscilloscope = function(_target) {
 
      // Create the oscilloscope analyser-node
     this.analyserNode = this.audioContext.createAnalyser();
-    this.analyserNode.fftSize = 512; // Default fftSize
+    this.analyserNode.fftSize = 2048; // Default fftSize
     this.bufferLength = this.analyserNode.frequencyBinCount;
     this.dataArray = new Uint8Array(this.bufferLength);
     this.yScaling = 1; //
