@@ -7,6 +7,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import p5 from 'p5';
 import * as Tone from 'tone';
 import Canvas from "./Canvas.js";
+import gui_sketch from './gui';
 import { Oscilloscope, Spectroscope } from './oscilloscope';
 //import Canvas from "./gui.js";
 
@@ -59,6 +60,7 @@ function Editor(props) {
     window.Tone = Tone;
     window.Oscilloscope = Oscilloscope;
     window.Spectroscope = Spectroscope;
+    window.gui_sketch = gui_sketch;
     var curLineNum = 0;
 
     // Save history in browser

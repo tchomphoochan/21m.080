@@ -14,6 +14,12 @@ const gui_sketch = function(my) {
   let x_size = 400;
   let y_size = 300;
 
+  my.fitDrawing = function(div){
+    x_size = document.getElementById(div).offsetWidth *.985;
+    y_size = document.getElementById(div).offsetHeight *.985;
+    my.scaleOutput()
+  }
+
   my.scaleOutput = function() {
     my.createCanvas(x_size, y_size);
     my.dimRatio = y_size / x_size;
@@ -23,24 +29,7 @@ const gui_sketch = function(my) {
 
     my.background(220,229,234)
     my.noStroke();
-    // my.button = createButton('Add Elements');
-    // my.button.parent('gui_div'); //'p5 is the name of the div to draw into'
-    // my.button.position(10, 14);
-    // my.button.size(10, 14);
-    // my.button.mousePressed(buttonPress);
-
-    // my.startSeq = createButton('PLAY seq');
-    // my.startSeq.parent('gui_div'); //'p5 is the name of the div to draw into'
-    // my.startSeq.position(10, 40);
-    // my.startSeq.mousePressed(
-    //   function() {seq = setInterval( mySeq, 400 )}
-    // );
-    // my.stopSeq = createButton('STOP seq');
-    // my.stopSeq.parent('gui_div'); //'p5 is the name of the div to draw into'
-    // my.stopSeq.position(10, 60);
-    // my.stopSeq.mousePressed(
-    //   function() {clearInterval(seq)}
-    // );
+    
     my.angleMode(my.DEGREES);
     my.textStyle(my.BOLD);
     my.textAlign (my.CENTER, my.CENTER);
@@ -54,9 +43,9 @@ const gui_sketch = function(my) {
   let transparentColor = my.color(0,0,0);
 
   // COLOR VARS
-  let color1 = my.color(255,40,0);
-  let color2 = my.color(170,176,180);
-  let color3 = my.color(220,229,234);
+  my.color1 = my.color(255,40,255);
+  my.color2 = my.color(170,176,180);
+  my.color3 = my.color(220,229,234);
 
   let dragging = false;
   let forceDraw = false;
@@ -94,22 +83,7 @@ const gui_sketch = function(my) {
   let fillervar = 0;  
   let buttonPress = function() {
     // for testing
-    console.log('buton pres')
-  
-    // my.addKeyboard({label:"K1",mapto:"fakevar",x:5,y:50,width:400,height:100,keys:16})
-
-    // my.addElement({type:"knob",label:"SL1",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true})
-    // my.addElement({type:"knob",label:"SL12",mapto:"fakevar",min:0,max:2,value:1,size:1,showLabel:true,showValue:true,bipolar:true})
-    // // my.addElement({type:"knob",label:"SL2",mapto:"fakevar",min:0,max:3,value:2,size:1})
-    // // my.addElement({type:"knob",label:"SL3",mapto:"fakevar",min:1,max:2,value:1,size:2})
-    // my.addElement({type:"radio",label:"radio",mapto:"fillervar",size:1,radioOptions:['a','b','c','d','e'],horizontal:true})
-    // my.addElement({type:"slider",label:"sVOL",mapto:"fillervar",size:1})
-    // my.addElement({type:"slider",label:"hor",mapto:"fillervar",size:1,horizontal:true,x:40,y:10})
-    // my.addElement({type:"slider",label:"ver",mapto:"fillervar",size:1,horizontal:false,x:30})
-    // // my.addElement({type:"slider",label:"s2VOL",mapto:"fillervar",size:1,bipolar:true})
-    // // my.addElement({type:"slider",label:"kVOL2",mapto:"fillervar",size:.5})
-    // my.addElement({type:"toggle",label:"togl",mapto:"fillervar",size:1})
-    // my.addElement({type:"momentary",label:"momn",mapto:"fillervar",size:1})
+    //console.log('buton pres')
   }
 
   my.keyPressed = function() {currKey = my.keyCode;}
@@ -232,7 +206,7 @@ const gui_sketch = function(my) {
         for (let j = 0; j < elements[i].keys; j++) {
           if (k >= 12) {k = k - 12};
           if (keypattern[k] == 0) {
-            console.log('white')
+            //console.log('white')
             my.fill(255);
             if (currKey == keys[j]) {
               my.fill(elements[i].color);
@@ -249,7 +223,7 @@ const gui_sketch = function(my) {
         for (let j = 0; j < elements[i].keys; j++) {
           if (k >= 12) {k = k - 12};
           if (keypattern[k] == 1) {
-            console.log('black')
+            //console.log('black')
             my.fill(0);
             if (currKey == keys[j]) {
               my.fill(elements[i].color);
@@ -274,7 +248,7 @@ const gui_sketch = function(my) {
         // draw element
         my.translate(20,100);
         my.push();
-        my.fill(color3);
+        my.fill(my.color3);
         my.stroke(elements[i].color);
         let seqBoxSize = 30;
         for (let track =0; track < 4; track++){
@@ -289,7 +263,7 @@ const gui_sketch = function(my) {
             if (dragging == true){
               let stepState = elements[i].value[track][step];
               if ((my.mouseX > x && my.mouseX < x+seqBoxSize) && (my.mouseY > y && my.mouseY < y+seqBoxSize)){
-                console.log(elements[i].value)
+                //console.log(elements[i].value)
                 if (seqUpdateStarted) {
                   let newval = 1;
                   if (seqUpdateState == 'OFF'){
@@ -304,7 +278,7 @@ const gui_sketch = function(my) {
                     seqUpdateState = 'OFF';
                   }
                 }
-                my.fill(color3);
+                my.fill(my.color3);
                 if (stepState == 1) {
                   my.fill(elements[i].color);
                 }
@@ -332,7 +306,7 @@ const gui_sketch = function(my) {
   }
 
   my.mousePressed = function() {
-    console.log('click');
+    //console.log('click');
     currElement = "none";
     dragging = true; // start dragging
     for (let i = 0; i < elements.length; i++) {
@@ -406,12 +380,12 @@ const gui_sketch = function(my) {
     // grid edges
     if (my.mouseX <= 6){
       createVertDivision = true;
-      console.log('v');
+      //console.log('v');
     } else if (my.mouseY <= 6){
-      console.log('h');
+      //console.log('h');
       createHorzDivision = true;
     }
-    console.log('curE: '+currElement);
+    //console.log('curE: '+currElement);
   }// mousePressed
     
   
@@ -498,7 +472,7 @@ const gui_sketch = function(my) {
     let update = false;
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].label == label) {
-        console.log('UPDATE element');
+        //console.log('UPDATE element');
         update = true;
         // UPDATE VALS
         if (type != undefined) {elements[i].type = type;}
@@ -520,7 +494,7 @@ const gui_sketch = function(my) {
         break
       }
       else {
-        console.log('NEW element');
+        //console.log('NEW element');
       }
     }
 
@@ -538,7 +512,7 @@ const gui_sketch = function(my) {
       prev = value;
       if (prev == undefined) {prev="";}
       if (size == undefined) {size=1;}
-      if (color == undefined) {color = color1;}
+      if (color == undefined) {color = my.color1;}
       if (showLabel == undefined) {showLabel=true;}
       if (showValue == undefined) {showValue=true;}
       if (bipolar == undefined) {bipolar=false;}
@@ -558,7 +532,7 @@ const gui_sketch = function(my) {
         value = [[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]];
       }
       elements.push(new UserElement(type,label,mapto,my.scaleX(x),my.scaleY(y),min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal));
-      console.log(elements);
+      //console.log(elements);
     }
 
     redraw();
@@ -587,7 +561,7 @@ const gui_sketch = function(my) {
       for (let j=0; j < ycount; j++){
         let label = "grid"+elements.length+"_"+(i*j+j);
         let value = Math.random()*2
-        console.log('label: '+label)
+        //console.log('label: '+label)
         my.addElement({x:x0+i*24,y:y0+j*24,type:type,label:label,mapto:"fakevar",min:0,max:2,value:value,size:.3,showLabel:false,showValue:false})
 
       }
@@ -605,12 +579,12 @@ const gui_sketch = function(my) {
   }
 
   function redraw() { //rdrwwwwwww
-    my.background(color3);
+    my.background(my.color3);
 
     my.scale(globalScale);
     // draw grid
     my.push();
-    my.fill(color2);
+    my.fill(my.color2);
     my.noStroke();
     my.textSize(7);
     my.textStyle(my.NORMAL);
@@ -628,7 +602,7 @@ const gui_sketch = function(my) {
 
     //divisions
     my.push();
-    my.stroke(color2);
+    my.stroke(my.color2);
     for (let i=0; i < lines.length; i++){
       let a = lines[i][0];
       let b = lines[i][1];
@@ -651,12 +625,12 @@ const gui_sketch = function(my) {
           let sz = elements[i].size;
           // background circle
           my.strokeWeight(6);
-          my.fill(color3);  
-          my.stroke(color3);
+          my.fill(my.color3);  
+          my.stroke(my.color3);
           my.ellipse(0, 0, 2.2*rKnob*sz);
           // full arc
           my.strokeCap(my.SQUARE);
-          my.stroke(color2);
+          my.stroke(my.color2);
           my.fill(transparentColor);  
           my.arc(0, 0, 2*rKnob*sz, 2*rKnob*sz,120,60);
           // active arc
@@ -680,7 +654,7 @@ const gui_sketch = function(my) {
           // dial lines
           if (elements[i].bipolar == true){
             my.push();
-            my.fill(color3);
+            my.fill(my.color3);
             my.noStroke();
             my.rect(-1.5,0,3,-rKnob*1.1);
             my.pop();
@@ -688,7 +662,7 @@ const gui_sketch = function(my) {
           my.strokeCap(my.ROUND);
           my.rotate(valueInDegrees);
           my.push();
-          my.stroke(color3);
+          my.stroke(my.color3);
           my.strokeWeight(12);
           my.line(0, 0, rKnob*sz, 0);
           my.pop();
@@ -697,7 +671,7 @@ const gui_sketch = function(my) {
           
           // LABEL
           my.push();
-          my.fill(color2);
+          my.fill(my.color2);
           my.noStroke();
           if (elements[i].showValue == true) {
             let roundto = 0;
@@ -733,10 +707,10 @@ const gui_sketch = function(my) {
         my.strokeCap(my.SQUARE);
         my.noStroke();
         // background box
-        my.fill(color3);
+        my.fill(my.color3);
         my.rect(0, 0, 15*sz*2, sliderLength*sz*1.4);
         // full line
-        my.fill(color2);
+        my.fill(my.color2);
         my.rect(0, 0,sliderWidth*sz, sliderLength*sz);
 
         // active line
@@ -753,12 +727,12 @@ const gui_sketch = function(my) {
         
         // middle line
         my.strokeWeight(2*sz);
-        my.stroke(color3);
+        my.stroke(my.color3);
         my.line(0,.9*sliderLength*sz/2, 0,-.9*sliderLength*sz/2);
 
         if (elements[i].bipolar == true){
           my.push();
-          my.fill(color3)
+          my.fill(my.color3)
           my.noStroke();
           my.rect(0,0,sliderWidth*1.1,2)
           my.pop();
@@ -767,7 +741,7 @@ const gui_sketch = function(my) {
         my.push();
         let sliderKnobSize = 8*sz
         my.fill(elements[i].color);
-        my.stroke(color3);
+        my.stroke(my.color3);
         my.rect(
           0, 
           .95*(sliderLength*sz/2) -.95*convertedVal,
@@ -776,7 +750,7 @@ const gui_sketch = function(my) {
         my.pop();
 
         // LABEL
-        my.fill(color2);
+        my.fill(my.color2);
         my.noStroke();
         if (elements[i].horizontal == true){
           my.rotate(-90)
@@ -821,18 +795,18 @@ const gui_sketch = function(my) {
         let sz = elements[i].size;
         my.translate(elements[i].x, elements[i].y);
         // background circle
-        my.fill(color3);  
+        my.fill(my.color3);  
         my.ellipse(0, 0, 2.2*rBtn*sz);
         // setting up color variables
         my.stroke(elements[i].color);
         my.strokeWeight(4);
         let textColor = elements[i].color;
         if (elements[i].value == 0) { // OFF STATE
-          my.stroke(color2);
+          my.stroke(my.color2);
           my.strokeWeight(2);
-          textColor = color2;
+          textColor = my.color2;
         }
-        my.fill(color3);
+        my.fill(my.color3);
         my.ellipse(0, 0, sz*rBtn*2, sz*rBtn*2);
         my.fill(textColor);
         my.noStroke();
@@ -852,13 +826,13 @@ const gui_sketch = function(my) {
         let sz = elements[i].size;
         my.translate(elements[i].x, elements[i].y);
         // background circle
-        my.fill(color3);  
+        my.fill(my.color3);  
         my.ellipse(0, 0, 2.2*rBtn*sz);
         // setting up color variables
-        my.fill(color3);
-        my.stroke(color2);
+        my.fill(my.color3);
+        my.stroke(my.color2);
         my.strokeWeight(2);
-        let textColor = color2;
+        let textColor = my.color2;
         if (elements[i].value == 1){ // ON STATE
           my.stroke(elements[i].color);
           textColor = elements[i].color;
@@ -884,8 +858,8 @@ const gui_sketch = function(my) {
         let rBoxSz = radioBox * sz;
         my.translate(elements[i].x, elements[i].y);
         // boxes
-        my.fill(color2);
-        my.stroke(color3);
+        my.fill(my.color2);
+        my.stroke(my.color3);
         my.strokeWeight(2);
         let numBoxes = elements[i].radioOptions.length
         let yBoxInit = - Math.floor(numBoxes/2); // y scale for where to start drawing
@@ -895,7 +869,7 @@ const gui_sketch = function(my) {
         // background rect
         my.push();
         my.rectMode(my.CENTER);
-        my.fill(color3);  
+        my.fill(my.color3);  
         my.noStroke();
         my.rect(0, 0, rBoxSz+10*sz,rBoxSz*numBoxes+10*sz);
         my.pop();
@@ -914,7 +888,7 @@ const gui_sketch = function(my) {
         // BOX LABELS
         my.textSize(11);
         my.noStroke();
-        my.fill(color3);
+        my.fill(my.color3);
         if (elements[i].showLabel == true) {
           yBox = yBoxInit + 0.5; // reset to original value, add offset to center text
           for (let j=0; j < numBoxes; j++){
@@ -932,7 +906,7 @@ const gui_sketch = function(my) {
         let active = elements[i].value - 1; // adjust for 0-indexing
         yBox = yBoxInit + active;
         my.fill(elements[i].color);
-        my.stroke(color3);
+        my.stroke(my.color3);
         my.strokeWeight(2);
         let x = -rBoxSz/2;
         let y = yBox*rBoxSz;
@@ -942,7 +916,7 @@ const gui_sketch = function(my) {
         }
         my.rect(x,y,rBoxSz,rBoxSz);
         my.noStroke();
-        my.fill(color3);
+        my.fill(my.color3);
         if (elements[i].showLabel == true) {
           let txt = elements[i].radioOptions[active];
           let x = 0;
@@ -970,7 +944,7 @@ const gui_sketch = function(my) {
     y2 = my.scaleY(y2)
     //my.line(x1,y1,x2,y2)
     if (color == undefined){
-      color = color2;
+      color = my.color2;
     }
     //lines.push([x1,y1,x2,y2,stroke,color])
 
@@ -993,7 +967,7 @@ const gui_sketch = function(my) {
     x = my.scaleX(x)
     my.line(x,0,x,y_size)
     if (color === undefined){
-      color = color2;
+      color = my.color2;
     }
     lines.push([x,0,x,y_size,color])
     redraw()
@@ -1003,7 +977,7 @@ const gui_sketch = function(my) {
     y = my.scaleY(y)
     my.line(0,y,x_size,y)
     if (color == undefined){
-      color = color2;
+      color = my.color2;
     }
     lines.push([0,y,x_size,y,color])
     redraw()
@@ -1018,8 +992,8 @@ const gui_sketch = function(my) {
 
   function mapToControls(mapto, value) {
     try {
-      // eval(mapto + '.rampTo(value, 0.1)');
-      eval(mapto +'= ' + value + ';'); //old
+       eval(mapto + '.rampTo(value, 0.1)');
+      //eval(mapto +'= ' + value + ';'); //old
     } catch (error) {
       if (mapto == ""){
         console.error("ERROR: 'mapto' variable is empty");
@@ -1051,7 +1025,7 @@ const gui_sketch = function(my) {
     }
     x_size = document.getElementById('gui_div').offsetWidth;
     y_size = document.getElementById('gui_div').offsetHeight;
-    console.log()
+    //console.log()
     // gui.dimRatio = y_size / x_size;
     my.resizeCanvas(x_size, y_size);
     //my.background(100);
@@ -1060,9 +1034,6 @@ const gui_sketch = function(my) {
     edgeGapX = x_size * (1-globalScale) * 0.5 ;
     edgeGapY = y_size * (1-globalScale) * 0.5 ;
   }//fullscreen
-
-
-
 
   let Keyboard = function(label,type,mapto,x,y,width,height,keys,color,showLabel) {
     this.label = label; // str: name and unique ID
@@ -1082,7 +1053,7 @@ const gui_sketch = function(my) {
       this.y = my.scaleY(y);
       redraw();
     }
-  }
+  }//Keyboard
 
   my.addKeyboard = function({label,type,mapto,x,y,width,height,keys,color,showLabel}) {
     // NEW OR UPDATE EXISTING?
@@ -1122,7 +1093,7 @@ const gui_sketch = function(my) {
       if (keys == undefined) {keys=12;}
       if (width == undefined) {width=keys*30;}
       if (height == undefined) {height=100;}
-      if (color == undefined) {color=color1;}
+      if (color == undefined) {color=my.color1;}
       if (showLabel == undefined) {showLabel=false;}
       elements.push(new Keyboard(label,type,mapto,my.scaleX(x),my.scaleY(y),width,height,keys,color,showLabel));
     }
@@ -1131,8 +1102,8 @@ const gui_sketch = function(my) {
     return elements[elements.length - 1];
   }//addKeyboard
 
-  my.scaleOutput = function(input,inLow,inHigh,outLow,outHigh,curve){
-    console.log(input, outLow, outHigh, curve);
+  my.scaleValue = function(input,inLow,inHigh,outLow,outHigh,curve){
+    //console.log(input, outLow, outHigh, curve);
     let val = (input-inLow) * (1/(inHigh-inLow));
     val = Math.pow(val, curve);
     return val*(outHigh-outLow) + outLow;
