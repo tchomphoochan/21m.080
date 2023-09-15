@@ -4,7 +4,7 @@ import Editor from './Editor.js';
 import Navbar from './Navbar.js';
 import Template from './pages/Template.js';
 import TableOfContents from './pages/TableOfContents.js';
-//import { marked } from 'marked';
+import { marked } from 'marked';
 
 // import { midi, onMIDISuccess, onMIDIFailure, setMidiInput, setMidiOutput, getMidiIO,
 // 	handleMidiInput, outputMidiID, midiMap, ccMap, stopMap, mute, muted, toggleMute } from "./midiCoder/midi_control.js";
@@ -22,7 +22,7 @@ function App() {
   const [markdownContent, setMarkdownContent] = useState("");
 
   const exampleFiles = [
-    'Oscillator',
+    'Oscillator','Filter','Multiply'
   ];
   const assignmentFiles = [
     'Lab1',
@@ -47,11 +47,11 @@ function App() {
             throw new Error('Fetching files failed');
           }
 
-          const intro = await introRes.text();
-          // const intro = marked(intro_raw);
+          let intro = await introRes.text();
+          intro = marked(intro);
           const starterCode = await starterCodeRes.text();
-          const description = await descriptionRes.text();
-          //const description = marked(description_raw);
+          let description = await descriptionRes.text();
+          description = marked(description);
 
           fetchedAssignments[fileName] = {
             intro,
