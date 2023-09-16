@@ -19,6 +19,7 @@ function App() {
   const [page, setPage] = useState(initialPage || 'Home');
   const [assignments, setAssignments] = useState({});
   const [examples, setExamples] = useState({});
+  const [references, setReferences] = useState({});
   const [markdownContent, setMarkdownContent] = useState("");
 
   const exampleFiles = [
@@ -26,6 +27,9 @@ function App() {
   ];
   const assignmentFiles = [
     'Lab1',
+  ];
+  const referenceFiles = [
+    'Oscillator','Filter','Multiply'
   ];
 
   const homeStarterCode = `/*
@@ -69,9 +73,11 @@ function App() {
     (async () => {
       const assignments = await importFiles(assignmentFiles, 'assignments');
       const examples = await importFiles(exampleFiles, 'examples');
+      const references = await importFiles(referenceFiles, 'references');
 
       setAssignments(assignments);
       setExamples(examples);
+      setReferences(references);
     })();
   }, []);
 
@@ -80,11 +86,14 @@ function App() {
       <Navbar page={page} setPage={setPage} />
       <Routes>
         <Route path="/" element={<Editor page={page} starterCode={homeStarterCode} canvases={["Canvas1", "Canvas2", "Canvas3"]} />} />
-        <Route path="/TableOfContents" element={<TableOfContents assignments={assignments} examples={examples} setPage={setPage} />} />
+        <Route path="/TableOfContents" element={<TableOfContents assignments={assignments} examples={examples} references={references} setPage={setPage} />} />
         {Object.entries(assignments).map(([title, props]) => (
           <Route path={`/${title}`} element={<Template title={title} intro={props.intro} starterCode={props.starterCode} description={props.description} canvases={props.canvases} />} />
         ))}
         {Object.entries(examples).map(([title, props]) => (
+          <Route path={`/${title}`} element={<Template title={title} intro={props.intro} starterCode={props.starterCode} description={props.description} canvases={props.canvases} />} />
+        ))}
+        {Object.entries(references).map(([title, props]) => (
           <Route path={`/${title}`} element={<Template title={title} intro={props.intro} starterCode={props.starterCode} description={props.description} canvases={props.canvases} />} />
         ))}
       </Routes>

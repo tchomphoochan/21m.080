@@ -26,6 +26,16 @@ const TableOfContents = (props) => {
                         ))}
                     </div>
                 </div>
+                <div className="flex-child ">
+                    <div className="contents-container">
+                        <div className="title center-self">References</div>
+                        {Object.keys(props.references).map((option) => (
+                            <Link to={`/${option}`} className="text-button list" onClick={() => props.setPage(option)}>
+                                {option}
+                            </Link>
+                        ))}
+                    </div>
+                </div>
             </div>
         </>
     );
