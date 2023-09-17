@@ -2,6 +2,7 @@
   "name": "codemirror2",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://ianhattwick.com/m080",
   "dependencies": {
     "@codemirror/commands": "^6.2.4",
     "@codemirror/lang-javascript": "^6.1.9",
