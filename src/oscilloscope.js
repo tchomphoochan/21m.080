@@ -234,8 +234,6 @@ export const Spectroscope = function(_target) {
     this.maxFrequency = 24000;
     this.minFrequency = 0;
     this.xScaling = 2;
-    this.enableTrigger = 0;
-    this.threshold = 128;
     this.binWidth = 24000 / this.analyserNode.frequencyBinCount;
 
     // Set-up the analyser-node which we're going to use to get the oscillation wave
