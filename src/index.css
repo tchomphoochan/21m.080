@@ -24,12 +24,14 @@ code {
 }
 
 .flex-container {
+  height: auto;
   display: flex;
   flex: 1;
-  flex-shrink: auto;
+  flex-shrink: 0;
 }
 
 .flex-child {
+  height: auto;
   min-width: 0;
   width: 100%;
   border: 5px solid rgb(255, 255, 255);
@@ -39,8 +41,12 @@ code {
   flex-shrink: auto;
 }
 
-.container{
+#container{
   height: auto;
+  min-height: 150px;
+  flex-grow: 1;
+  flex-shrink: 0;
+  overflow: visible; /* Makes the div scrollable if the content overflows */
 }
 
 .center-content {

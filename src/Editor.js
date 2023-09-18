@@ -356,7 +356,7 @@ function Editor(props) {
                         </span>
 
                     </span>
-                    <div id="container" style={{ flex: 1 }}>
+                    <div id="container" >
                         {height !== false &&
                             <CodeMirror
                                 id="codemirror"
