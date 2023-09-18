@@ -129,11 +129,14 @@ export const Oscilloscope = function(_target) {
     }
 
     //draw zero point
-    x += 1
-    y = this.height / 2;
-    path += `${x} ${y}, `;
+    // x += 1
+    // y = this.height / 2;
+    // path += `${x} ${y}, `;
 
     this.wave.setAttribute('d', path);
+    this.wave.setAttribute('stroke', 'black');
+    this.wave.setAttribute('stroke-width', '2');
+    this.wave.setAttribute('fill', 'none');
 
     if (this.running) {
         //console.log(this.dataArray)
@@ -299,6 +302,9 @@ export const Spectroscope = function(_target) {
     path += `${x} ${y}, `;
 
     this.wave.setAttribute('d', path);
+    this.wave.setAttribute('stroke', 'black');
+    //this.wave.setAttribute('stroke-width', '2');
+    //this.wave.setAttribute('fill', 'none');
 
     if (this.running) {
         //console.log(this.dataArray)
