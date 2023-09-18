@@ -29,7 +29,7 @@ function App() {
     'Lab1',
   ];
   const referenceFiles = [
-    'Oscillator','Filter','Multiply', 'Noise', 'Oscilloscope', 'Spectroscope'
+    'Oscillator','Filter','Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope'
   ];
 
   const homeStarterCode = `/*
@@ -78,6 +78,7 @@ function App() {
       setAssignments(assignments);
       setExamples(examples);
       setReferences(references);
+      console.log(references);
     })();
   }, []);
 
