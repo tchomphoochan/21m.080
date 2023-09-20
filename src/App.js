@@ -23,13 +23,13 @@ function App() {
   const [markdownContent, setMarkdownContent] = useState("");
 
   const exampleFiles = [
-    'FirstSteps','FourierTheorem','SubtractiveSynth'
+    'FirstSteps','FourierTheorem','SubtractiveSynth', 'Aliasing',
   ];
   const assignmentFiles = [
     'Lab1',
   ];
   const referenceFiles = [
-    'Oscillator','Filter','Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope'
+    'Oscillator','Filter','Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope', 'Player'
   ];
 
   const homeStarterCode = `/*
@@ -78,7 +78,7 @@ function App() {
       setAssignments(assignments);
       setExamples(examples);
       setReferences(references);
-      console.log(references);
+      //console.log(references);
     })();
   }, []);
 
