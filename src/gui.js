@@ -86,19 +86,13 @@ const gui_sketch = function(my) {
       if (elements[i].type == 'knob' || elements[i].type == 'dial'){
         if (dragging && currElement==i) {
           elements[i].prev = elements[i].value; // store prev val
-          let dx = elements[i].x*globalScale - my.mouseX - ogX; // mouse units
+          let dx = (elements[i].x*globalScale - my.mouseX - ogX) * -1; // mouse units
           let dy = elements[i].y*globalScale - my.mouseY - ogY; // mouse units
-          let dxScaled = -dx * sensitivityScale; // mouse units + scaled for sensitivity
-          let dyScaled = dy * sensitivityScale; // mouse units + scaled for sensitivity
-          let dxConverted = dxScaled*(elements[i].max-elements[i].min) -elements[i].min + elements[i].min; // convert to 'value' units
-          let dyConverted = dyScaled*(elements[i].max-elements[i].min) -elements[i].min + elements[i].min; // convert to 'value' units
-          elements[i].value = dxConverted + dyConverted + ogValue; // convert to value units
-          if (elements[i].value >= elements[i].max) {
-            elements[i].value = elements[i].max;
-          }
-          else if (elements[i].value <= elements[i].min) {
-            elements[i].value = elements[i].min;
-          }
+          let dxSum = dx**2 * Math.sign(dx)  + dy**2 * Math.sign(dy) 
+          let dxAmplitude = Math.sqrt(Math.abs(dxSum)) * Math.sign(dxSum);
+          let temp = dxAmplitude * sensitivityScale + ogValue
+          //clip to 0-1
+          elements[i].value = temp>1 ? 1 : temp<0 ? 0 : temp
         }
       } 
     // UPDATE SLIDER VALUE
@@ -109,13 +103,11 @@ const gui_sketch = function(my) {
           var dy = elements[i].y*globalScale - my.mouseY - ogY; // mouse units
           let dxScaled = -dx * (sliderSensitivity/elements[i].size); // mouse units + scaled for sensitivity
           let dyScaled = dy * (sliderSensitivity/elements[i].size); // mouse units + scaled for sensitivity
+          
           elements[i].value = dxScaled + dyScaled - ogValue; // update value
-          if (elements[i].value >= elements[i].max) {
-            elements[i].value = elements[i].max;
-          }
-          else if (elements[i].value <= elements[i].min) {
-            elements[i].value = elements[i].min;
-          }
+
+          //clip to 0-1
+          elements[i].value = elements[i].value>1 ? 1 : elements[i].value<0 ? 0 : elements[i].value
         }
       } 
     
@@ -229,8 +221,11 @@ const gui_sketch = function(my) {
           my.arc(0, 0, 2*rKnob*sz, 2*rKnob*sz,120,60);
           // active arc
           my.stroke(currentColor);
+          //keep value from 0-1 here
           let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max-elements[i].min) ; // normalize between 0-1
-          let valueInDegrees = valueNorm * 300 - 240; // range is -240 to 60 deg
+          //console.log(valueNorm)
+          //let valueInDegrees = valueNorm * 300 - 240; // range is -240 to 60 deg
+          let valueInDegrees = elements[i].value * 300 - 240; // range is -240 to 60 deg
           let bipolarOffset = 0;
           let start = 120;
           let end = valueInDegrees+.01
@@ -244,7 +239,6 @@ const gui_sketch = function(my) {
           }
           my.arc(0, 0, 2*rKnob*sz, 2*rKnob*sz,start,end);
           
-
           // dial lines
           if (elements[i].bipolar == true){
             my.push();
@@ -263,21 +257,24 @@ const gui_sketch = function(my) {
           my.line(0, 0, rKnob*sz, 0);
           my.pop();
           
+          //calc current value
+          let scaledValue = scaleOutput( elements[i].value, 0, 1, elements[i].min, elements[i].max, elements[i].curve)
           // LABEL
           my.push();
           my.fill(my.color4);
           my.noStroke();
           if (elements[i].showValue == true) {
             let roundto = 0;
-            if (elements[i].max <= .1) {
+            if (elements[i].max-elements[i].min <= .1) {
               roundto = 3
-            } else if (elements[i].max <= 1) {
+            } else if (elements[i].max-elements[i].min <= 1) {
               roundto = 2
-            } else if (elements[i].max <= 10) {
+            } else if (elements[i].max-elements[i].min <= 10) {
               roundto = 1
             }
+            scaledValue = my.round(scaledValue,roundto)
             my.textSize(13);
-            my.text(my.round(elements[i].value,roundto), elements[i].x, elements[i].y+rKnob*sz-2);
+            my.text( scaledValue, elements[i].x, elements[i].y+rKnob*sz-2);
           }
           if (elements[i].showLabel == true) {
             my.text(elements[i].label, elements[i].x, elements[i].y+rKnob*sz+13);
@@ -285,7 +282,7 @@ const gui_sketch = function(my) {
           my.pop();
           
           // MAP TO CONTROLS
-          mapToControls(elements[i].mapto, elements[i].value);
+          mapToControls(elements[i].mapto, scaledValue);
       }  
     // END KNOB
     // DRAW SLIDER
@@ -310,8 +307,7 @@ const gui_sketch = function(my) {
         // active line
         my.strokeWeight(sliderWidth*sz);
         my.stroke(currentColor);
-        let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max-elements[i].min) ; // normalize between 0-1
-        let convertedVal = valueNorm * sliderLength*sz;
+        let convertedVal = elements[i].value * sliderLength*sz
         let bipolarOffset = 0;
 
         if (elements[i].bipolar == true){
@@ -328,7 +324,7 @@ const gui_sketch = function(my) {
           my.push();
           my.fill(my.color3)
           my.noStroke();
-          my.rect(0,0,sliderWidth*1.1,2)
+          my.rect(0,0,sliderWidth*1*sz,2)
           my.pop();
         }
         // control point
@@ -339,7 +335,7 @@ const gui_sketch = function(my) {
         my.rect(
           0, 
           .95*(sliderLength*sz/2) -.95*convertedVal,
-          sliderWidth*2, 
+          sliderWidth*1.5*sz, 
           sliderKnobSize);
         my.pop();
 
@@ -360,6 +356,10 @@ const gui_sketch = function(my) {
             my.text(txt, labelX, labelY);
           }
         }
+
+        //calc current value
+        let scaledValue = scaleOutput( elements[i].value, 0, 1, elements[i].min, elements[i].max, elements[i].curve)
+
         if (elements[i].showValue == true) {
           let roundto = 0;
           if (elements[i].max <= .1) {
@@ -369,18 +369,20 @@ const gui_sketch = function(my) {
           } else if (elements[i].max <= 10) {
             roundto = 1
           }
+          scaledValue = my.round(scaledValue, roundto)
+
           my.textSize((5+sz)*2); // scales text based on num of char
           let labelX = 0;
           let labelY = sliderLength*sz/2+10;
           if (elements[i].horizontal == true){
-            my.text(my.round(elements[i].value,roundto), labelY+5,labelX);
+            my.text( scaledValue, labelY+5,labelX);
           } else {
-            my.text(my.round(elements[i].value,roundto), labelX,labelY);
+            my.text( scaledValue, labelX,labelY);
           }
         }
         my.pop();
         // MAP TO CONTROLS
-        mapToControls(elements[i].mapto, elements[i].value);
+        mapToControls(elements[i].mapto, scaledValue);
       }
     // END SLIDER
     // DRAW TOGGLE BUTTON
@@ -586,13 +588,29 @@ const gui_sketch = function(my) {
   } //redraw
 
   function mapToControls(mapto, value) {
-    try {
-      // eval(mapto + '.rampTo(value, 0.1)');
-      eval(mapto +'= ' + value + ';'); //old
-    } catch (error) {
-      if (mapto == ""){
-      } else {
-        console.error("ERROR: invalid 'mapto' variable: "+mapto);
+    //look for method to map to
+    if( mapto.charAt(mapto.length-1) === ')' ){
+      try {
+        mapto = mapto.slice(0,-1)
+        eval(mapto + value + ', .1)');
+        //console.log(mapto + (value) + ')')
+      //eval(mapto +'= ' + value + ';'); //old
+      } catch (error) {
+        if (mapto == ""){
+        } else {
+          console.error("ERROR: invalid 'mapto' variable: "+ mapto);
+        }
+      }
+    } 
+    else{ //map to as attribute
+      try {
+        eval(mapto + '= ' + value + ';'); //old
+        //console.log(mapto + '= ' + value + ';')
+      } catch (error) {
+        if (mapto == ""){
+        } else {
+          console.error("ERROR: invalid 'mapto' variable: "+ mapto);
+        }
       }
     }
   } 
@@ -806,7 +824,7 @@ const gui_sketch = function(my) {
 //******** Element Custom Objects ********//
   let elements = [];
 
-  let UserElement = function(type,label,mapto,callback,x,y,min=0,max=1,value=(max-min)/2,prev=value,size=1,color=my.color1,showLabel=true,showValue=true,bipolar=false, radioOptions="",horizontal=false) {
+  let UserElement = function(type,label,mapto,callback,x,y,min=0,max=1,curve=1,value=.5,prev=value,size=1,color=my.color1,showLabel=true,showValue=true,bipolar=false, radioOptions="",horizontal=false) {
     this.type = type; // str: type of element
     this.label = label; // str: name and unique ID
 
@@ -821,6 +839,7 @@ const gui_sketch = function(my) {
     this.y = y; // #: pos
     this.min = min; // #: units of what its mapped to
     this.max = max; // #; units of what its mapped to
+    this.curve = curve; // #; units of what its mapped to
     this.value = value; // #: current value
     this.prev = prev; // #:cprevious value
     this.size = size; // #
@@ -839,7 +858,7 @@ const gui_sketch = function(my) {
     }
   }
   
-  my.addElement = function(type,label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal) {
+  my.addElement = function(type,label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal) {
     let update = false;
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].label == label) {
@@ -850,6 +869,7 @@ const gui_sketch = function(my) {
         if (y != undefined) {elements[i].y = my.scaleX(y);}
         if (min != undefined) {elements[i].min = min;}
         if (max != undefined) {elements[i].max = max;}
+        if (curve != undefined) {elements[i].curve = curve;}
         if (value != undefined) {elements[i].value = value;}
         if (size != undefined) {elements[i].size = size;}
         if (color != undefined) {elements[i].color = color;}
@@ -869,30 +889,40 @@ const gui_sketch = function(my) {
       if (update == false){
         if (x == undefined) {x = x0 + (elements.length%5)*20;}
         if (y == undefined) { y = y0;}
-        elements.push(new UserElement(type,label,mapto,callback,my.scaleX(x),my.scaleY(y),min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal));
+        elements.push(new UserElement(type,label,mapto,callback,my.scaleX(x),my.scaleY(y),min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal));
       }
       my.redrawGUI();
       return elements[elements.length - 1];
     }
   }//addElement
 
-  my.Knob = function({label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
-    my.addElement("knob",label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  my.Knob = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+    my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
-  my.Slider = function({label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
-    my.addElement("slider",label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  my.Dial = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+    my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
-  my.Toggle = function({label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+  my.Slider = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+    my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  }
+  my.Fader = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+    my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  }
+  my.Toggle = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
     if (value == undefined) {value=0;}
-    my.addElement("toggle",label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    my.addElement("toggle",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
-  my.Momentary = function({label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+  my.Momentary = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
     if (value == undefined) {value=0;}
-    my.addElement("momentary",label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
-  my.RadioButtons = function({label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+  my.Button = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+    if (value == undefined) {value=0;}
+    my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  }
+  my.RadioButtons = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
     if (value == undefined) {value=1;}
-    my.addElement("radio",label,mapto,callback,x,y,min,max,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
 
 //******** Element Helper Functions ********//
@@ -1185,8 +1215,8 @@ const gui_sketch = function(my) {
   }
 
 //******** OTHER ********//
-  my.scaleOutput = function(input,inLow,inHigh,outLow,outHigh,curve){
-    console.log(input, outLow, outHigh, curve);
+  const scaleOutput = function(input,inLow,inHigh,outLow,outHigh,curve){
+    if( curve === undefined ) curve = 1;
     let val = (input-inLow) * (1/(inHigh-inLow));
     val = Math.pow(val, curve);
     return val*(outHigh-outLow) + outLow;
