@@ -1,11 +1,16 @@
-let vco = new Tone.Oscillator(440)
-let output = new Tone.Multiply(0.05).toDestination()
-vco.connect( output )
-vco.start()
-vco.frequency.value = 220
-vco.type = "square"
+let vco = new Tone.Oscillator(440).start()
+let output = new Tone.Multiply(0.02).toDestination()
+vco.connect( output ), vco.frequency.value = 220, vco.type = "square"
 
-let scope = new Oscilloscope('Oscillator')
-vco.connect( scope.analyserNode )
-scope.start()
-scope.setFftSize( 1024*2 )
+const gui = new p5(gui_sketch, Knob)
+let vco_freq = gui.Knob({
+  label:'frequency', 
+  mapto:'vco.frequency',
+  min: 100,
+  max: 400,
+  curve: 2,
+  size: 1.5
+})
+
+vco_freq.position(50,50)
+vco_freq.size = 1
