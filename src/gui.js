@@ -8,8 +8,12 @@ let fullscreen = false;
 
 const gui_sketch = function(my) {
   // constraining apsect ratio to 2:1 (w:h)
-  my.createCanvas(200, 200);
+  my.createCanvas(20, 20);
   let divID = my.canvas.parentElement.id;
+  let myID = document.getElementById(my.canvas.parentElement.id);
+  my.resizeCanvas(myID.width,myID.height)
+
+  //console.log(myID,myID.clientWidth,myID.clientHeight)
 
   let x_size = document.getElementById(divID).offsetWidth// *.985;
   let y_size = document.getElementById(divID).offsetHeight// *.985;
@@ -349,11 +353,11 @@ const gui_sketch = function(my) {
           let txt = elements[i].label;
           my.textSize((2+sz)*4); // scales text based on num of char
           let labelX = 0;
-          let labelY = -sliderLength*sz/2-10;
+          let labelY = sliderLength*sz/2+10;
           if (elements[i].horizontal == true){
-            my.text(txt, labelY - 5, labelX);
+            my.text(txt, labelY + 25, labelX);
           } else {
-            my.text(txt, labelX, labelY);
+            my.text(txt, labelX, labelY + 15);
           }
         }
 
@@ -589,6 +593,11 @@ const gui_sketch = function(my) {
 
   function mapToControls(mapto, value) {
     //look for method to map to
+    if(mapto === undefined) {
+      console.log('no mapto defined')
+      return
+    }
+    /*** still thinking about the best way of implementing
     if( mapto.charAt(mapto.length-1) === ')' ){
       try {
         mapto = mapto.slice(0,-1)
@@ -613,6 +622,9 @@ const gui_sketch = function(my) {
         }
       }
     }
+    ****/
+    try { eval(mapto + '.rampTo(' + value + ', .1)');}
+    catch (e) { console.log('invalid mapto', e)}
   } 
 
 //******** MOUSE CLICKS AND KEY PRESSES ********//
@@ -860,29 +872,29 @@ const gui_sketch = function(my) {
   
   my.addElement = function(type,label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal) {
     let update = false;
-    for (let i = 0; i < elements.length; i++) {
-      if (elements[i].label == label) {
-        update = true;
-        // UPDATE VALS
-        if (mapto != undefined) {elements[i].mapto = mapto;}
-        if (x != undefined) {elements[i].x = my.scaleX(x);}
-        if (y != undefined) {elements[i].y = my.scaleX(y);}
-        if (min != undefined) {elements[i].min = min;}
-        if (max != undefined) {elements[i].max = max;}
-        if (curve != undefined) {elements[i].curve = curve;}
-        if (value != undefined) {elements[i].value = value;}
-        if (size != undefined) {elements[i].size = size;}
-        if (color != undefined) {elements[i].color = color;}
-        if (showLabel != undefined) {elements[i].showLabel = showLabel;}
-        if (showValue != undefined) {elements[i].showValue = showValue;}
-        if (bipolar != undefined) {elements[i].bipolar = bipolar;}
-        if (radioOptions != undefined) {elements[i].radioOptions = radioOptions;}
-        if (horizontal != undefined) {elements[i].horizontal = horizontal;}
-        elements[i].prev = undefined;
-        my.redrawGUI();
-        break
-      }
-    }
+    // for (let i = 0; i < elements.length; i++) {
+    //   if (elements[i].label == label) {
+    //     update = true;
+    //     // UPDATE VALS
+    //     if (mapto != undefined) {elements[i].mapto = mapto;}
+    //     if (x != undefined) {elements[i].x = my.scaleX(x);}
+    //     if (y != undefined) {elements[i].y = my.scaleX(y);}
+    //     if (min != undefined) {elements[i].min = min;}
+    //     if (max != undefined) {elements[i].max = max;}
+    //     if (curve != undefined) {elements[i].curve = curve;}
+    //     if (value != undefined) {elements[i].value = value;}
+    //     if (size != undefined) {elements[i].size = size;}
+    //     if (color != undefined) {elements[i].color = color;}
+    //     if (showLabel != undefined) {elements[i].showLabel = showLabel;}
+    //     if (showValue != undefined) {elements[i].showValue = showValue;}
+    //     if (bipolar != undefined) {elements[i].bipolar = bipolar;}
+    //     if (radioOptions != undefined) {elements[i].radioOptions = radioOptions;}
+    //     if (horizontal != undefined) {elements[i].horizontal = horizontal;}
+    //     elements[i].prev = undefined;
+    //     my.redrawGUI();
+    //     break
+    //   }
+    // }
     if (label==undefined){
       console.error("label parameter is undefined")
     } else {
@@ -897,32 +909,32 @@ const gui_sketch = function(my) {
   }//addElement
 
   my.Knob = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
-    my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
   my.Dial = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
-    my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
   my.Slider = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
-    my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
   my.Fader = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
-    my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
   my.Toggle = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
     if (value == undefined) {value=0;}
-    my.addElement("toggle",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("toggle",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
   my.Momentary = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
     if (value == undefined) {value=0;}
-    my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
   my.Button = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
     if (value == undefined) {value=0;}
-    my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
   my.RadioButtons = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
     if (value == undefined) {value=1;}
-    my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
   }
 
 //******** Element Helper Functions ********//

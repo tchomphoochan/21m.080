@@ -29,7 +29,7 @@ function App() {
     'Lab1',
   ];
   const referenceFiles = [
-    'Oscillator','Filter','Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope', 'Player'
+    'Oscillator','Filter','Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope', 'Player', 'Knob'
   ];
 
   const homeStarterCode = `/*
