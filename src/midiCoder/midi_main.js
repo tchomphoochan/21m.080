@@ -105,7 +105,14 @@ export function onClock() {
 // 	// }
 // });
 
-navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
+if (navigator.requestMIDIAccess) {
+        navigator.requestMIDIAccess()
+            .then(onMIDISuccess)
+            .catch(onMIDIFailure);
+    } else {
+        console.log("Web MIDI API is not supported in this browser.");
+        // Handle the situation gracefully, e.g., show a notification to the user
+    }
 
 var seqs = []
 
