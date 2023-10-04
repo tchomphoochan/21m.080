@@ -286,7 +286,7 @@ const gui_sketch = function(my) {
           my.pop();
           
           // MAP TO CONTROLS
-          mapToControls(elements[i].mapto, scaledValue);
+          mapToControls(elements[i].mapto, scaledValue, elements[i].callback);
       }  
     // END KNOB
     // DRAW SLIDER
@@ -386,7 +386,7 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        mapToControls(elements[i].mapto, scaledValue);
+        mapToControls(elements[i].mapto, scaledValue, elements[i].callback);
       }
     // END SLIDER
     // DRAW TOGGLE BUTTON
@@ -417,7 +417,7 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        mapToControls(elements[i].mapto, elements[i].value);
+        mapToControls(elements[i].mapto, elements[i].value, elements[i].callback);
       }
     // END TOGGLE
     // DRAW MOMENTARY BUTTON
@@ -448,7 +448,7 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        mapToControls(elements[i].mapto, elements[i].value);
+        mapToControls(elements[i].mapto, elements[i].value, elements[i].callback);
       }
     // END MOMENTARY
     // DRAW RADIO BUTTON
@@ -529,7 +529,7 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        mapToControls(elements[i].mapto, elements[i].value);
+        mapToControls(elements[i].mapto, elements[i].value, elements[i].callback);
       }
     // END RADIO
     // DRAW KEYBOARD
@@ -591,12 +591,26 @@ const gui_sketch = function(my) {
     }  
   } //redraw
 
-  function mapToControls(mapto, value) {
+  function mapToControls(mapto, value, cb) {
     //look for method to map to
+    let defined = 0
+
     if(mapto === undefined) {
-      console.log('no mapto defined')
-      return
+      defined = 1
+    } else{
+      try { eval(mapto + '.rampTo(' + value + ', .1)');}
+      catch (e) { console.log('invalid mapto', e)}
     }
+
+     if(cb === undefined) {
+      defined = 2
+    } else{
+      try { cb(value) }
+      catch (e) { console.log('invalid callback', e)}
+    }
+
+    if( defined == 0){ console.log('no mapto or callback defined')}
+    
     /*** still thinking about the best way of implementing
     if( mapto.charAt(mapto.length-1) === ')' ){
       try {
@@ -623,8 +637,6 @@ const gui_sketch = function(my) {
       }
     }
     ****/
-    try { eval(mapto + '.rampTo(' + value + ', .1)');}
-    catch (e) { console.log('invalid mapto', e)}
   } 
 
 //******** MOUSE CLICKS AND KEY PRESSES ********//
@@ -638,7 +650,7 @@ const gui_sketch = function(my) {
           ogY = elements[i].y*globalScale - my.mouseY;
           ogValue = elements[i].value;
           currElement = i;
-          eval(elements[i].callback);
+          //eval(elements[i].callback);
           break
         }
       } 
@@ -655,7 +667,7 @@ const gui_sketch = function(my) {
             ogY = elements[i].y*globalScale - my.mouseY;
             ogValue = -elements[i].value;
             currElement = i;
-            eval(elements[i].callback);
+            //eval(elements[i].callback);
             break
           }
         }
@@ -664,14 +676,14 @@ const gui_sketch = function(my) {
         if (my.dist(my.mouseX, my.mouseY, elements[i].x*globalScale, elements[i].y*globalScale) < rBtn*globalScale*elements[i].size) { 
           elements[i].value = 1 - elements[i].value;
           currElement = i;
-          eval(elements[i].callback);
+          //eval(elements[i].callback);
           break
         }
       }
       else if (elements[i].type == "momentary"){
         if (my.dist(my.mouseX, my.mouseY, elements[i].x*globalScale, elements[i].y*globalScale) < rBtn*globalScale*elements[i].size) { 
           currElement = i;
-          eval(elements[i].callback);
+          //eval(elements[i].callback);
           break
         }
       }
@@ -689,7 +701,7 @@ const gui_sketch = function(my) {
             for (let j=0; j < numBoxes; j++){
               if (leftBound <= mousePosX && mousePosX <= rightBound){
                 elements[i].value = boxID;
-                eval(elements[i].callback);
+                //eval(elements[i].callback);
                 break
               }
               boxID += 1;
@@ -706,7 +718,7 @@ const gui_sketch = function(my) {
             for (let j=0; j < numBoxes; j++){
               if (upperBound >= mousePosY && mousePosY >= lowerBound){
                 elements[i].value = boxID;
-                eval(elements[i].callback);
+                //eval(elements[i].callback);
                 break
               }
               boxID += 1;
@@ -841,10 +853,11 @@ const gui_sketch = function(my) {
     this.label = label; // str: name and unique ID
 
     this.mapto = mapto; // str: variable it is controlling
-    if (typeof callback == "function"){
-      this.callback = callback(); // function
-    } else {
+
+    if (typeof callback === "function"){
       this.callback = callback; // function
+    } else {
+      //this.callback = callback(x); // function
     }
 
     this.x = x; // #: pos
