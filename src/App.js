@@ -23,7 +23,7 @@ function App() {
   const [markdownContent, setMarkdownContent] = useState("");
 
   const exampleFiles = [
-    'FirstSteps','FourierTheorem','SubtractiveSynth', 'Aliasing',
+    'FirstSteps','FourierTheorem','SubtractiveSynth', 'Aliasing', 'AmplitudeModulation','FrequencyModulation'
   ];
   const assignmentFiles = [
     'Lab1',
