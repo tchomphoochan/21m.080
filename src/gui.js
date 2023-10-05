@@ -606,7 +606,7 @@ const gui_sketch = function(my) {
       defined = 2
     } else{
       try { cb(value) }
-      catch (e) { console.log('invalid callback', e)}
+      catch (e) { console.log('invalid callback', cb, e)}
     }
 
     if( defined == 0){ console.log('no mapto or callback defined')}
