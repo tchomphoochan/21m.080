@@ -8,11 +8,12 @@ let fullscreen = false;
 
 const gui_sketch = function (p) {
   // constraining apsect ratio to 2:1 (w:h)
-  p.createCanvas();
-  let div = p.canvas.parentElement;
-  let width = div.width;
-  let height = div.height;
-  p.elements = {};
+  my.createCanvas(20, 20);
+  let divID = my.canvas.parentElement.id;
+  let myID = document.getElementById(my.canvas.parentElement.id);
+  my.resizeCanvas(myID.width, myID.height)
+
+  //console.log(myID,myID.clientWidth,myID.clientHeight)
 
   p.windowResized = function () {
     let prevWidth = width;
@@ -195,370 +196,370 @@ const gui_sketch = function (p) {
   //     p.pop();
   //   }
 
-  //   //divisions
-  //   p.push();
-  //   p.stroke(p.color2);
-  //   for (let i = 0; i < lines.length; i++) {
-  //     let a = lines[i][0];
-  //     let b = lines[i][1];
-  //     let c = lines[i][2];
-  //     let d = lines[i][3];
-  //     p.push();
-  //     p.stroke(lines[i][4]);
-  //     p.line(a, b, c, d);
-  //     p.pop();
-  //   }
-  //   p.pop();
+  //divisions
+  my.push();
+  my.stroke(my.color2);
+  for (let i = 0; i < lines.length; i++) {
+    let a = lines[i][0];
+    let b = lines[i][1];
+    let c = lines[i][2];
+    let d = lines[i][3];
+    my.push();
+    my.stroke(lines[i][4]);
+    my.line(a, b, c, d);
+    my.pop();
+  }
+  my.pop();
 
-  //   for (let i = 0; i < elements.length; i++) {
-  //     // SET CURRENT ELEMENT COLOR
-  //     let currentColor;
-  //     try {
-  //       currentColor = elements[i].color.val;
-  //     } catch (error) {
-  //       currentColor = elements[i].color;
-  //     }
-  //     // DRAW KNOB
-  //     p.fill(currentColor);
-  //     if (elements[i].type == 'line') p.drawLine(i)
-  //     else if (elements[i].type == 'knob' || elements[i].type == 'dial') {
-  //       p.push();
-  //       p.translate(elements[i].x, elements[i].y);
-  //       let sz = elements[i].size;
-  //       // background circle
-  //       p.strokeWeight(6);
-  //       p.fill(p.color3);
-  //       p.stroke(p.color3);
-  //       p.ellipse(0, 0, 2.2 * rKnob * sz);
-  //       // full arc
-  //       p.strokeCap(p.SQUARE);
-  //       p.stroke(p.color2);
-  //       p.noFill();
-  //       p.arc(0, 0, 2 * rKnob * sz, 2 * rKnob * sz, 120, 60);
-  //       // active arc
-  //       p.stroke(currentColor);
-  //       //keep value from 0-1 here
-  //       let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max - elements[i].min); // normalize between 0-1
-  //       //console.log(valueNorm)
-  //       //let valueInDegrees = valueNorm * 300 - 240; // range is -240 to 60 deg
-  //       let valueInDegrees = elements[i].value * 300 - 240; // range is -240 to 60 deg
-  //       let bipolarOffset = 0;
-  //       let start = 120;
-  //       let end = valueInDegrees + .01
-  //       if (elements[i].bipolar == true) {
-  //         start = 270;
-  //         if (end < -90) {
-  //           let startCopy = start;
-  //           start = end;
-  //           end = startCopy;
-  //         }
-  //       }
-  //       p.arc(0, 0, 2 * rKnob * sz, 2 * rKnob * sz, start, end);
+  for (let i = 0; i < elements.length; i++) {
+    // SET CURRENT ELEMENT COLOR
+    let currentColor;
+    try {
+      currentColor = elements[i].color.val;
+    } catch (error) {
+      currentColor = elements[i].color;
+    }
+    // DRAW KNOB
+    my.fill(currentColor);
+    if (elements[i].type == 'line') my.drawLine(i)
+    else if (elements[i].type == 'knob' || elements[i].type == 'dial') {
+      my.push();
+      my.translate(elements[i].x, elements[i].y);
+      let sz = elements[i].size;
+      // background circle
+      my.strokeWeight(6);
+      my.fill(my.color3);
+      my.stroke(my.color3);
+      my.ellipse(0, 0, 2.2 * rKnob * sz);
+      // full arc
+      my.strokeCap(my.SQUARE);
+      my.stroke(my.color2);
+      my.noFill();
+      my.arc(0, 0, 2 * rKnob * sz, 2 * rKnob * sz, 120, 60);
+      // active arc
+      my.stroke(currentColor);
+      //keep value from 0-1 here
+      let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max - elements[i].min); // normalize between 0-1
+      //console.log(valueNorm)
+      //let valueInDegrees = valueNorm * 300 - 240; // range is -240 to 60 deg
+      let valueInDegrees = elements[i].value * 300 - 240; // range is -240 to 60 deg
+      let bipolarOffset = 0;
+      let start = 120;
+      let end = valueInDegrees + .01
+      if (elements[i].bipolar == true) {
+        start = 270;
+        if (end < -90) {
+          let startCopy = start;
+          start = end;
+          end = startCopy;
+        }
+      }
+      my.arc(0, 0, 2 * rKnob * sz, 2 * rKnob * sz, start, end);
 
-  //       // dial lines
-  //       if (elements[i].bipolar == true) {
-  //         p.push();
-  //         p.fill(p.color3);
-  //         p.noStroke();
-  //         p.rect(-1.5, 0, 3, -rKnob * 1.1);
-  //         p.pop();
-  //       }
-  //       p.strokeCap(p.ROUND);
-  //       p.rotate(valueInDegrees);
-  //       p.push();
-  //       p.stroke(p.color3);
-  //       p.strokeWeight(12);
-  //       p.line(0, 0, rKnob * sz, 0);
-  //       p.pop();
-  //       p.line(0, 0, rKnob * sz, 0);
-  //       p.pop();
+      // dial lines
+      if (elements[i].bipolar == true) {
+        my.push();
+        my.fill(my.color3);
+        my.noStroke();
+        my.rect(-1.5, 0, 3, -rKnob * 1.1);
+        my.pop();
+      }
+      my.strokeCap(my.ROUND);
+      my.rotate(valueInDegrees);
+      my.push();
+      my.stroke(my.color3);
+      my.strokeWeight(12);
+      my.line(0, 0, rKnob * sz, 0);
+      my.pop();
+      my.line(0, 0, rKnob * sz, 0);
+      my.pop();
 
-  //       //calc current value
-  //       let scaledValue = scaleOutput(elements[i].value, 0, 1, elements[i].min, elements[i].max, elements[i].curve)
-  //       // LABEL
-  //       p.push();
-  //       p.fill(p.color4);
-  //       p.noStroke();
-  //       if (elements[i].showValue == true) {
-  //         let roundto = 0;
-  //         if (elements[i].max - elements[i].min <= .1) {
-  //           roundto = 3
-  //         } else if (elements[i].max - elements[i].min <= 1) {
-  //           roundto = 2
-  //         } else if (elements[i].max - elements[i].min <= 10) {
-  //           roundto = 1
-  //         }
-  //         scaledValue = p.round(scaledValue, roundto)
-  //         p.textSize(13);
-  //         p.text(scaledValue, elements[i].x, elements[i].y + rKnob * sz - 2);
-  //       }
-  //       if (elements[i].showLabel == true) {
-  //         p.text(elements[i].label, elements[i].x, elements[i].y + rKnob * sz + 13);
-  //       }
-  //       p.pop();
+      //calc current value
+      let scaledValue = scaleOutput(elements[i].value, 0, 1, elements[i].min, elements[i].max, elements[i].curve)
+      // LABEL
+      my.push();
+      my.fill(my.color4);
+      my.noStroke();
+      if (elements[i].showValue == true) {
+        let roundto = 0;
+        if (elements[i].max - elements[i].min <= .1) {
+          roundto = 3
+        } else if (elements[i].max - elements[i].min <= 1) {
+          roundto = 2
+        } else if (elements[i].max - elements[i].min <= 10) {
+          roundto = 1
+        }
+        scaledValue = my.round(scaledValue, roundto)
+        my.textSize(13);
+        my.text(scaledValue, elements[i].x, elements[i].y + rKnob * sz - 2);
+      }
+      if (elements[i].showLabel == true) {
+        my.text(elements[i].label, elements[i].x, elements[i].y + rKnob * sz + 13);
+      }
+      my.pop();
 
-  //       // MAP TO CONTROLS
-  //       mapToControls(elements[i].mapto, scaledValue);
-  //     }
-  //     // END KNOB
-  //     // DRAW SLIDER
-  //     else if (elements[i].type == 'slider' || elements[i].type == 'fader') {
-  //       p.push();
-  //       let sz = elements[i].size;
-  //       p.translate(elements[i].x, elements[i].y);
-  //       if (elements[i].horizontal == true) {
-  //         p.rotate(90);
-  //       }
-  //       p.rectMode(p.CENTER);
-  //       // full slider line
-  //       p.strokeCap(p.SQUARE);
-  //       p.noStroke();
-  //       // background box
-  //       p.fill(p.color3);
-  //       p.rect(0, 0, 15 * sz * 2, sliderLength * sz * 1.4);
-  //       // full line
-  //       p.fill(p.color2);
-  //       p.rect(0, 0, sliderWidth * sz, sliderLength * sz);
+      // MAP TO CONTROLS
+      mapToControls(elements[i].mapto, scaledValue);
+    }
+    // END KNOB
+    // DRAW SLIDER
+    else if (elements[i].type == 'slider' || elements[i].type == 'fader') {
+      my.push();
+      let sz = elements[i].size;
+      my.translate(elements[i].x, elements[i].y);
+      if (elements[i].horizontal == true) {
+        my.rotate(90);
+      }
+      my.rectMode(my.CENTER);
+      // full slider line
+      my.strokeCap(my.SQUARE);
+      my.noStroke();
+      // background box
+      my.fill(my.color3);
+      my.rect(0, 0, 15 * sz * 2, sliderLength * sz * 1.4);
+      // full line
+      my.fill(my.color2);
+      my.rect(0, 0, sliderWidth * sz, sliderLength * sz);
 
-  //       // active line
-  //       p.strokeWeight(sliderWidth * sz);
-  //       p.stroke(currentColor);
-  //       let convertedVal = elements[i].value * sliderLength * sz
-  //       let bipolarOffset = 0;
+      //       // active line
+      //       p.strokeWeight(sliderWidth * sz);
+      //       p.stroke(currentColor);
+      //       let convertedVal = elements[i].value * sliderLength * sz
+      //       let bipolarOffset = 0;
 
-  //       if (elements[i].bipolar == true) {
-  //         bipolarOffset = sliderLength * sz / 2;
-  //       }
-  //       p.line(0, sliderLength * sz / 2 - bipolarOffset, 0, sliderLength * sz / 2 - convertedVal);
+      //       if (elements[i].bipolar == true) {
+      //         bipolarOffset = sliderLength * sz / 2;
+      //       }
+      //       p.line(0, sliderLength * sz / 2 - bipolarOffset, 0, sliderLength * sz / 2 - convertedVal);
 
-  //       // middle line
-  //       p.strokeWeight(2 * sz);
-  //       p.stroke(p.color3);
-  //       p.line(0, .9 * sliderLength * sz / 2, 0, -.9 * sliderLength * sz / 2);
+      //       // middle line
+      //       p.strokeWeight(2 * sz);
+      //       p.stroke(p.color3);
+      //       p.line(0, .9 * sliderLength * sz / 2, 0, -.9 * sliderLength * sz / 2);
 
-  //       if (elements[i].bipolar == true) {
-  //         p.push();
-  //         p.fill(p.color3)
-  //         p.noStroke();
-  //         p.rect(0, 0, sliderWidth * 1 * sz, 2)
-  //         p.pop();
-  //       }
-  //       // control point
-  //       p.push();
-  //       let sliderKnobSize = 8 * sz
-  //       p.fill(currentColor);
-  //       p.stroke(p.color3);
-  //       p.rect(
-  //         0,
-  //         .95 * (sliderLength * sz / 2) - .95 * convertedVal,
-  //         sliderWidth * 1.5 * sz,
-  //         sliderKnobSize);
-  //       p.pop();
+      //       if (elements[i].bipolar == true) {
+      //         p.push();
+      //         p.fill(p.color3)
+      //         p.noStroke();
+      //         p.rect(0, 0, sliderWidth * 1 * sz, 2)
+      //         p.pop();
+      //       }
+      //       // control point
+      //       p.push();
+      //       let sliderKnobSize = 8 * sz
+      //       p.fill(currentColor);
+      //       p.stroke(p.color3);
+      //       p.rect(
+      //         0,
+      //         .95 * (sliderLength * sz / 2) - .95 * convertedVal,
+      //         sliderWidth * 1.5 * sz,
+      //         sliderKnobSize);
+      //       p.pop();
 
-  //       // LABEL
-  //       p.fill(p.color4);
-  //       p.noStroke();
-  //       if (elements[i].horizontal == true) {
-  //         p.rotate(-90)
-  //       }
-  //       if (elements[i].showLabel == true) {
-  //         let txt = elements[i].label;
-  //         p.textSize((2 + sz) * 4); // scales text based on num of char
-  //         let labelX = 0;
-  //         let labelY = -sliderLength * sz / 2 - 10;
-  //         if (elements[i].horizontal == true) {
-  //           p.text(txt, labelY - 5, labelX);
-  //         } else {
-  //           p.text(txt, labelX, labelY);
-  //         }
-  //       }
+      // LABEL
+      my.fill(my.color4);
+      my.noStroke();
+      if (elements[i].horizontal == true) {
+        my.rotate(-90)
+      }
+      if (elements[i].showLabel == true) {
+        let txt = elements[i].label;
+        my.textSize((2 + sz) * 4); // scales text based on num of char
+        let labelX = 0;
+        let labelY = sliderLength * sz / 2 + 10;
+        if (elements[i].horizontal == true) {
+          my.text(txt, labelY + 25, labelX);
+        } else {
+          my.text(txt, labelX, labelY + 15);
+        }
+      }
 
-  //       //calc current value
-  //       let scaledValue = scaleOutput(elements[i].value, 0, 1, elements[i].min, elements[i].max, elements[i].curve)
+      //       //calc current value
+      //       let scaledValue = scaleOutput(elements[i].value, 0, 1, elements[i].min, elements[i].max, elements[i].curve)
 
-  //       if (elements[i].showValue == true) {
-  //         let roundto = 0;
-  //         if (elements[i].max <= .1) {
-  //           roundto = 3
-  //         } else if (elements[i].max <= 1) {
-  //           roundto = 2
-  //         } else if (elements[i].max <= 10) {
-  //           roundto = 1
-  //         }
-  //         scaledValue = p.round(scaledValue, roundto)
+      //       if (elements[i].showValue == true) {
+      //         let roundto = 0;
+      //         if (elements[i].max <= .1) {
+      //           roundto = 3
+      //         } else if (elements[i].max <= 1) {
+      //           roundto = 2
+      //         } else if (elements[i].max <= 10) {
+      //           roundto = 1
+      //         }
+      //         scaledValue = p.round(scaledValue, roundto)
 
-  //         p.textSize((5 + sz) * 2); // scales text based on num of char
-  //         let labelX = 0;
-  //         let labelY = sliderLength * sz / 2 + 10;
-  //         if (elements[i].horizontal == true) {
-  //           p.text(scaledValue, labelY + 5, labelX);
-  //         } else {
-  //           p.text(scaledValue, labelX, labelY);
-  //         }
-  //       }
-  //       p.pop();
-  //       // MAP TO CONTROLS
-  //       mapToControls(elements[i].mapto, scaledValue);
-  //     }
-  //     // END SLIDER
-  //     // DRAW TOGGLE BUTTON
-  //     else if (elements[i].type == 'toggle') {
-  //       p.push(); // ASSUME ON STATE
-  //       let sz = elements[i].size;
-  //       p.translate(elements[i].x, elements[i].y);
-  //       // background circle
-  //       p.fill(p.color3);
-  //       p.ellipse(0, 0, 2.2 * rBtn * sz);
-  //       // setting up color variables
-  //       p.stroke(currentColor);
-  //       p.strokeWeight(4);
-  //       let textColor = currentColor;
-  //       if (elements[i].value == 0) { // OFF STATE
-  //         p.stroke(p.color2);
-  //         p.strokeWeight(2);
-  //         textColor = p.color2;
-  //       }
-  //       p.fill(p.color3);
-  //       p.ellipse(0, 0, sz * rBtn * 2, sz * rBtn * 2);
-  //       p.fill(textColor);
-  //       p.noStroke();
-  //       if (elements[i].showLabel == true) {
-  //         let toggleText = elements[i].label;
-  //         p.textSize(sz * 85 / toggleText.length); // scales text based on num of chars
-  //         p.text(toggleText, 0, 1);
-  //       }
-  //       p.pop();
-  //       // MAP TO CONTROLS
-  //       mapToControls(elements[i].mapto, elements[i].value);
-  //     }
-  //     // END TOGGLE
-  //     // DRAW MOMENTARY BUTTON
-  //     else if (elements[i].type == 'momentary') {
-  //       p.push(); // ASSUME OFF STATE
-  //       let sz = elements[i].size;
-  //       p.translate(elements[i].x, elements[i].y);
-  //       // background circle
-  //       p.fill(p.color3);
-  //       p.ellipse(0, 0, 2.2 * rBtn * sz);
-  //       // setting up color variables
-  //       p.fill(p.color3);
-  //       p.stroke(p.color2);
-  //       p.strokeWeight(2);
-  //       let textColor = p.color2;
-  //       if (elements[i].value == 1) { // ON STATE
-  //         p.stroke(currentColor);
-  //         textColor = currentColor;
-  //         p.strokeWeight(4);
-  //       }
-  //       p.ellipse(0, 0, sz * rBtn * 2, sz * rBtn * 2);
-  //       p.fill(textColor);
-  //       p.noStroke();
-  //       if (elements[i].showLabel == true) {
-  //         let text = elements[i].label;
-  //         p.textSize(sz * 85 / text.length); // scales text based on num of chars
-  //         p.text(text, 0, 1);
-  //       }
-  //       p.pop();
-  //       // MAP TO CONTROLS
-  //       mapToControls(elements[i].mapto, elements[i].value);
-  //     }
-  //     // END MOMENTARY
-  //     // DRAW RADIO BUTTON
-  //     else if (elements[i].type == 'radio') {
-  //       p.push();
-  //       let sz = elements[i].size;
-  //       let rBoxSz = radioBox * sz;
-  //       p.translate(elements[i].x, elements[i].y);
-  //       // boxes
-  //       p.fill(p.color2);
-  //       p.stroke(p.color3);
-  //       p.strokeWeight(2);
-  //       let numBoxes = elements[i].radioOptions.length
-  //       let yBoxInit = - Math.floor(numBoxes / 2); // y scale for where to start drawing
-  //       if (numBoxes % 2 != 0) {
-  //         yBoxInit += -0.5 // extra offset if numBoxes is odd
-  //       }
-  //       // background rect
-  //       p.push();
-  //       p.rectMode(p.CENTER);
-  //       p.fill(p.color3);
-  //       p.noStroke();
-  //       p.rect(0, 0, rBoxSz + 10 * sz, rBoxSz * numBoxes + 10 * sz);
-  //       p.pop();
-  //       // DRAW BOXES
-  //       let yBox = yBoxInit;
-  //       for (let j = 0; j < numBoxes; j++) {
-  //         let x = -rBoxSz / 2;
-  //         let y = yBox * rBoxSz;
-  //         if (elements[i].horizontal == true) {
-  //           x = y;
-  //           y = -rBoxSz / 2;
-  //         }
-  //         p.rect(x, y, rBoxSz, rBoxSz);
-  //         yBox = yBox + 1; // adjust y scale
-  //       }
-  //       // BOX LABELS
-  //       p.textSize(11);
-  //       p.noStroke();
-  //       p.fill(p.color3);
-  //       if (elements[i].showLabel == true) {
-  //         yBox = yBoxInit + 0.5; // reset to original value, add offset to center text
-  //         for (let j = 0; j < numBoxes; j++) {
-  //           let x = 0;
-  //           let y = yBox * rBoxSz;
-  //           if (elements[i].horizontal == true) {
-  //             x = y;
-  //             y = 0;
-  //           }
-  //           p.text(elements[i].radioOptions[j], x, y);
-  //           yBox = yBox + 1; // adjust y scale
-  //         }
-  //       }
-  //       // FILL IN ACTIVE BUTTON
-  //       let active = elements[i].value - 1; // adjust for 0-indexing
-  //       yBox = yBoxInit + active;
-  //       p.fill(currentColor);
-  //       p.stroke(p.color3);
-  //       p.strokeWeight(2);
-  //       let x = -rBoxSz / 2;
-  //       let y = yBox * rBoxSz;
-  //       if (elements[i].horizontal == true) {
-  //         x = y;
-  //         y = -rBoxSz / 2;
-  //       }
-  //       p.rect(x, y, rBoxSz, rBoxSz);
-  //       p.noStroke();
-  //       p.fill(p.color3);
-  //       if (elements[i].showLabel == true) {
-  //         let txt = elements[i].radioOptions[active];
-  //         let x = 0;
-  //         let y = (yBox + .5) * rBoxSz;
-  //         if (elements[i].horizontal == true) {
-  //           x = y;
-  //           y = 0;
-  //         }
-  //         p.text(txt, x, y);
-  //       }
-  //       p.pop();
-  //       // MAP TO CONTROLS
-  //       mapToControls(elements[i].mapto, elements[i].value);
-  //     }
-  //     // END RADIO
-  //     // DRAW KEYBOARD
-  //     else if (elements[i].type == 'keyboard') {
-  //       // draw element
-  //       p.push();
-  //       p.translate(elements[i].x, elements[i].y);
-  //       if (elements[i].active == true) { // highlight when 'active'
-  //         p.noFill();
-  //         p.stroke(currentColor);
-  //         p.strokeWeight(12);
-  //       }
-  //       p.rect(0, 0, elements[i].width, elements[i].height)
-  //       p.fill(255);
-  //       p.stroke(0);
-  //       p.strokeWeight(2);
-  //       let whiteKeyWidth = elements[i].wkWidth;
+      my.textSize((5 + sz) * 2); // scales text based on num of char
+      let labelX = 0;
+      let labelY = sliderLength * sz / 2 + 10;
+      if (elements[i].horizontal == true) {
+        my.text(scaledValue, labelY + 5, labelX);
+      } else {
+        my.text(scaledValue, labelX, labelY);
+      }
+    }
+    my.pop();
+    // MAP TO CONTROLS
+    mapToControls(elements[i].mapto, scaledValue, elements[i].callback);
+  }
+    // END SLIDER
+    // DRAW TOGGLE BUTTON
+      else if (elements[i].type == 'toggle') {
+  my.push(); // ASSUME ON STATE
+  let sz = elements[i].size;
+  my.translate(elements[i].x, elements[i].y);
+  // background circle
+  my.fill(my.color3);
+  my.ellipse(0, 0, 2.2 * rBtn * sz);
+  // setting up color variables
+  my.stroke(currentColor);
+  my.strokeWeight(4);
+  let textColor = currentColor;
+  if (elements[i].value == 0) { // OFF STATE
+    my.stroke(my.color2);
+    my.strokeWeight(2);
+    textColor = my.color2;
+  }
+  my.fill(my.color3);
+  my.ellipse(0, 0, sz * rBtn * 2, sz * rBtn * 2);
+  my.fill(textColor);
+  my.noStroke();
+  if (elements[i].showLabel == true) {
+    let toggleText = elements[i].label;
+    my.textSize(sz * 85 / toggleText.length); // scales text based on num of chars
+    my.text(toggleText, 0, 1);
+  }
+  my.pop();
+  // MAP TO CONTROLS
+  mapToControls(elements[i].mapto, elements[i].value, elements[i].callback);
+}
+// END TOGGLE
+// DRAW MOMENTARY BUTTON
+else if (elements[i].type == 'momentary') {
+  my.push(); // ASSUME OFF STATE
+  let sz = elements[i].size;
+  my.translate(elements[i].x, elements[i].y);
+  // background circle
+  my.fill(my.color3);
+  my.ellipse(0, 0, 2.2 * rBtn * sz);
+  // setting up color variables
+  my.fill(my.color3);
+  my.stroke(my.color2);
+  my.strokeWeight(2);
+  let textColor = my.color2;
+  if (elements[i].value == 1) { // ON STATE
+    my.stroke(currentColor);
+    textColor = currentColor;
+    my.strokeWeight(4);
+  }
+  my.ellipse(0, 0, sz * rBtn * 2, sz * rBtn * 2);
+  my.fill(textColor);
+  my.noStroke();
+  if (elements[i].showLabel == true) {
+    let text = elements[i].label;
+    my.textSize(sz * 85 / text.length); // scales text based on num of chars
+    my.text(text, 0, 1);
+  }
+  my.pop();
+  // MAP TO CONTROLS
+  mapToControls(elements[i].mapto, elements[i].value, elements[i].callback);
+}
+// END MOMENTARY
+// DRAW RADIO BUTTON
+else if (elements[i].type == 'radio') {
+  my.push();
+  let sz = elements[i].size;
+  let rBoxSz = radioBox * sz;
+  my.translate(elements[i].x, elements[i].y);
+  // boxes
+  my.fill(my.color2);
+  my.stroke(my.color3);
+  my.strokeWeight(2);
+  let numBoxes = elements[i].radioOptions.length
+  let yBoxInit = - Math.floor(numBoxes / 2); // y scale for where to start drawing
+  if (numBoxes % 2 != 0) {
+    yBoxInit += -0.5 // extra offset if numBoxes is odd
+  }
+  // background rect
+  my.push();
+  my.rectMode(my.CENTER);
+  my.fill(my.color3);
+  my.noStroke();
+  my.rect(0, 0, rBoxSz + 10 * sz, rBoxSz * numBoxes + 10 * sz);
+  my.pop();
+  // DRAW BOXES
+  let yBox = yBoxInit;
+  for (let j = 0; j < numBoxes; j++) {
+    let x = -rBoxSz / 2;
+    let y = yBox * rBoxSz;
+    if (elements[i].horizontal == true) {
+      x = y;
+      y = -rBoxSz / 2;
+    }
+    my.rect(x, y, rBoxSz, rBoxSz);
+    yBox = yBox + 1; // adjust y scale
+  }
+  // BOX LABELS
+  my.textSize(11);
+  my.noStroke();
+  my.fill(my.color3);
+  if (elements[i].showLabel == true) {
+    yBox = yBoxInit + 0.5; // reset to original value, add offset to center text
+    for (let j = 0; j < numBoxes; j++) {
+      let x = 0;
+      let y = yBox * rBoxSz;
+      if (elements[i].horizontal == true) {
+        x = y;
+        y = 0;
+      }
+      my.text(elements[i].radioOptions[j], x, y);
+      yBox = yBox + 1; // adjust y scale
+    }
+  }
+  // FILL IN ACTIVE BUTTON
+  let active = elements[i].value - 1; // adjust for 0-indexing
+  yBox = yBoxInit + active;
+  my.fill(currentColor);
+  my.stroke(my.color3);
+  my.strokeWeight(2);
+  let x = -rBoxSz / 2;
+  let y = yBox * rBoxSz;
+  if (elements[i].horizontal == true) {
+    x = y;
+    y = -rBoxSz / 2;
+  }
+  my.rect(x, y, rBoxSz, rBoxSz);
+  my.noStroke();
+  my.fill(my.color3);
+  if (elements[i].showLabel == true) {
+    let txt = elements[i].radioOptions[active];
+    let x = 0;
+    let y = (yBox + .5) * rBoxSz;
+    if (elements[i].horizontal == true) {
+      x = y;
+      y = 0;
+    }
+    my.text(txt, x, y);
+  }
+  my.pop();
+  // MAP TO CONTROLS
+  mapToControls(elements[i].mapto, elements[i].value, elements[i].callback);
+}
+// END RADIO
+// DRAW KEYBOARD
+else if (elements[i].type == 'keyboard') {
+  // draw element
+  my.push();
+  my.translate(elements[i].x, elements[i].y);
+  if (elements[i].active == true) { // highlight when 'active'
+    my.noFill();
+    my.stroke(currentColor);
+    my.strokeWeight(12);
+  }
+  my.rect(0, 0, elements[i].width, elements[i].height)
+  my.fill(255);
+  my.stroke(0);
+  my.strokeWeight(2);
+  let whiteKeyWidth = elements[i].wkWidth;
 
   //       let k = 0;
   //       // WHITE KEYS
@@ -603,9 +604,28 @@ const gui_sketch = function (p) {
   //   }
   // } //redraw
 
-  function mapToControls(mapto, value) {
+  function mapToControls(mapto, value, cb) {
     //look for method to map to
-    if (mapto.charAt(mapto.length - 1) === ')') {
+    let defined = 0
+
+    if (mapto === undefined) {
+      defined = 1
+    } else {
+      try { eval(mapto + '.rampTo(' + value + ', .1)'); }
+      catch (e) { console.log('invalid mapto', e) }
+    }
+
+    if (cb === undefined) {
+      defined = 2
+    } else {
+      try { cb(value) }
+      catch (e) { console.log('invalid callback', e) }
+    }
+
+    if (defined == 0) { console.log('no mapto or callback defined') }
+
+    /*** still thinking about the best way of implementing
+    if( mapto.charAt(mapto.length-1) === ')' ){
       try {
         mapto = mapto.slice(0, -1)
         eval(mapto + value + ', .1)');
@@ -629,6 +649,7 @@ const gui_sketch = function (p) {
         }
       }
     }
+    ****/
   }
 
   //******** MOUSE CLICKS AND KEY PRESSES ********//
@@ -642,7 +663,7 @@ const gui_sketch = function (p) {
           ogY = elements[i].y * globalScale - p.mouseY;
           ogValue = elements[i].value;
           currElement = i;
-          eval(elements[i].callback);
+          //eval(elements[i].callback);
           break
         }
       }
@@ -659,7 +680,7 @@ const gui_sketch = function (p) {
             ogY = elements[i].y * globalScale - p.mouseY;
             ogValue = -elements[i].value;
             currElement = i;
-            eval(elements[i].callback);
+            //eval(elements[i].callback);
             break
           }
         }
@@ -668,14 +689,14 @@ const gui_sketch = function (p) {
         if (p.dist(p.mouseX, p.mouseY, elements[i].x * globalScale, elements[i].y * globalScale) < rBtn * globalScale * elements[i].size) {
           elements[i].value = 1 - elements[i].value;
           currElement = i;
-          eval(elements[i].callback);
+          //eval(elements[i].callback);
           break
         }
       }
       else if (elements[i].type == "momentary") {
         if (p.dist(p.mouseX, p.mouseY, elements[i].x * globalScale, elements[i].y * globalScale) < rBtn * globalScale * elements[i].size) {
           currElement = i;
-          eval(elements[i].callback);
+          //eval(elements[i].callback);
           break
         }
       }
@@ -693,7 +714,7 @@ const gui_sketch = function (p) {
             for (let j = 0; j < numBoxes; j++) {
               if (leftBound <= mousePosX && mousePosX <= rightBound) {
                 elements[i].value = boxID;
-                eval(elements[i].callback);
+                //eval(elements[i].callback);
                 break
               }
               boxID += 1;
@@ -710,7 +731,7 @@ const gui_sketch = function (p) {
             for (let j = 0; j < numBoxes; j++) {
               if (upperBound >= mousePosY && mousePosY >= lowerBound) {
                 elements[i].value = boxID;
-                eval(elements[i].callback);
+                //eval(elements[i].callback);
                 break
               }
               boxID += 1;
@@ -845,10 +866,11 @@ const gui_sketch = function (p) {
     this.label = label; // str: name and unique ID
 
     this.mapto = mapto; // str: variable it is controlling
-    if (typeof callback == "function") {
-      this.callback = callback(); // function
-    } else {
+
+    if (typeof callback === "function") {
       this.callback = callback; // function
+    } else {
+      //this.callback = callback(x); // function
     }
 
     this.x = x; // #: pos
@@ -874,71 +896,71 @@ const gui_sketch = function (p) {
     }
   }
 
-  // p.addElement = function (type, label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal) {
-  //   let update = false;
-  //   for (let i = 0; i < elements.length; i++) {
-  //     if (elements[i].label == label) {
-  //       update = true;
-  //       // UPDATE VALS
-  //       if (mapto != undefined) { elements[i].mapto = mapto; }
-  //       if (x != undefined) { elements[i].x = p.scaleX(x); }
-  //       if (y != undefined) { elements[i].y = p.scaleX(y); }
-  //       if (min != undefined) { elements[i].min = min; }
-  //       if (max != undefined) { elements[i].max = max; }
-  //       if (curve != undefined) { elements[i].curve = curve; }
-  //       if (value != undefined) { elements[i].value = value; }
-  //       if (size != undefined) { elements[i].size = size; }
-  //       if (color != undefined) { elements[i].color = color; }
-  //       if (showLabel != undefined) { elements[i].showLabel = showLabel; }
-  //       if (showValue != undefined) { elements[i].showValue = showValue; }
-  //       if (bipolar != undefined) { elements[i].bipolar = bipolar; }
-  //       if (radioOptions != undefined) { elements[i].radioOptions = radioOptions; }
-  //       if (horizontal != undefined) { elements[i].horizontal = horizontal; }
-  //       elements[i].prev = undefined;
-  //       p.redrawGUI();
-  //       break
-  //     }
-  //   }
-  //   if (label == undefined) {
-  //     console.error("label parameter is undefined")
-  //   } else {
-  //     if (update == false) {
-  //       if (x == undefined) { x = x0 + (elements.length % 5) * 20; }
-  //       if (y == undefined) { y = y0; }
-  //       elements.push(new UserElement(type, label, mapto, callback, p.scaleX(x), p.scaleY(y), min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal));
-  //     }
-  //     p.redrawGUI();
-  //     return elements[elements.length - 1];
-  //   }
-  // }//addElement
+  my.addElement = function (type, label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal) {
+    let update = false;
+    // for (let i = 0; i < elements.length; i++) {
+    //   if (elements[i].label == label) {
+    //     update = true;
+    //     // UPDATE VALS
+    //     if (mapto != undefined) {elements[i].mapto = mapto;}
+    //     if (x != undefined) {elements[i].x = my.scaleX(x);}
+    //     if (y != undefined) {elements[i].y = my.scaleX(y);}
+    //     if (min != undefined) {elements[i].min = min;}
+    //     if (max != undefined) {elements[i].max = max;}
+    //     if (curve != undefined) {elements[i].curve = curve;}
+    //     if (value != undefined) {elements[i].value = value;}
+    //     if (size != undefined) {elements[i].size = size;}
+    //     if (color != undefined) {elements[i].color = color;}
+    //     if (showLabel != undefined) {elements[i].showLabel = showLabel;}
+    //     if (showValue != undefined) {elements[i].showValue = showValue;}
+    //     if (bipolar != undefined) {elements[i].bipolar = bipolar;}
+    //     if (radioOptions != undefined) {elements[i].radioOptions = radioOptions;}
+    //     if (horizontal != undefined) {elements[i].horizontal = horizontal;}
+    //     elements[i].prev = undefined;
+    //     my.redrawGUI();
+    //     break
+    //   }
+    // }
+    if (label == undefined) {
+      console.error("label parameter is undefined")
+    } else {
+      if (update == false) {
+        if (x == undefined) { x = x0 + (elements.length % 5) * 20; }
+        if (y == undefined) { y = y0; }
+        elements.push(new UserElement(type, label, mapto, callback, my.scaleX(x), my.scaleY(y), min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal));
+      }
+      my.redrawGUI();
+      return elements[elements.length - 1];
+    }
+  }//addElement
 
-  p.Knob = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
-    p.addElement("knob", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
+  my.Knob = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
+    return my.addElement("knob", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
   }
-  p.Dial = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
-    p.addElement("knob", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
+  my.Dial = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
+    return my.addElement("knob", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
   }
-  p.Slider = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
-    p.addElement("slider", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
+  my.Slider = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
+    return my.addElement("slider", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
   }
-  p.Fader = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
-    p.addElement("slider", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
+  my.Fader = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
+    return my.addElement("slider", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
   }
-  p.Toggle = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
+  my.Toggle = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
     if (value == undefined) { value = 0; }
-    p.addElement("toggle", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
+    return my.addElement("toggle", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
   }
-  p.Momentary = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
+  my.Momentary = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
     if (value == undefined) { value = 0; }
-    p.addElement("momentary", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
+    return my.addElement("momentary", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
   }
-  p.Button = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
+  my.Button = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
     if (value == undefined) { value = 0; }
-    p.addElement("momentary", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
+    return my.addElement("momentary", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
   }
-  p.RadioButtons = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
+  my.RadioButtons = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal }) {
     if (value == undefined) { value = 1; }
-    p.addElement("radio", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
+    return my.addElement("radio", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, horizontal);
   }
 
   //******** Element Helper Functions ********//

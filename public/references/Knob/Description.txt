@@ -1,23 +1,15 @@
-### Primary properties and methods:
-#### Properties [unit]:
-* frequency: [Hertz] the base frequency for the oscillator.
-* detune: [Hertz) another method for altering the frequency. If you have two oscillators with the same frequency, detuning one by a small amount can generate a ‘thicker’ sound.
-* type: [string] waveform for the oscillator. 
-  * Basic waveforms available include "sine", "square", "sawtooth", "triangle"
-  * You can also append a number to any of the waveforms specifying how many partials that waveform should contain, e.g. “sawtooth9” will contain the first nine partials of a sawtooth wave.
-#### Methods:
-* start(): begin generating the waveform
-* connect( destination ): sends the output of the oscillator to the input of the specified destination 
-
+## Primary properties and methods:
+### Properties
+* label: [string] a unique label to identify the userElement. Mandatory.
+* mapto: [string] the audio parameter to control. Mandatory.
+* min: [number] the minimum value of the userElement. Default: 0
+* max: [number] the maximum value of the userElement. Default: 1
+* curve: [exponent] an exponent used to allow for non-linear curves. A value of two creates an exponential curve. Default: 1
+* size: [number] allows for scaling the graphical size of the userElement. Default: 1
+### Methods
+* position ( x, y ): sets the position of the userElement as a percentage (0-100) of the gui’s canvas.
 ## Additional properties and methods:
 ### Properties [unit]:
-* mute: [boolean] mutes the oscillator
-* partials: [number array] allows you to set the amplitude of the waveforms partials. 
-* phase: [degrees 0-360] sets the starting position of the waveform. 
-* volume: [dBFS -100 to 0] sets the output amplitude of the waveform
-
-### Methods:
-* get(): gets the oscillators attributes. Good for use with console.log()
-
-
-
+* showLabel: [boolean] Whether to display the label of the userElement. Default: true
+* showValue: [boolean] Whether to display the value of the userElement. Default: true
+* bipolar: [boolean] Whether the knob is unipolar or bipolar.  Default: false

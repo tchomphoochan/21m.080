@@ -187,10 +187,7 @@ Oscilloscope.prototype.toggleAudio = function() {
 
 /****************************************
 
-
-
 SPECTROSCOPE
-
 
 ****************************************/
 

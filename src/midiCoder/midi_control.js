@@ -12,6 +12,7 @@ export var midiMsgs = {};
 export var ccCallbacks = {};
 
 eval('globalThis.setMidiInput1 = setMidiInput;');
+
 export function onMIDISuccess(midiAccess) {
 	console.log("MIDI ready!");
 	midi = midiAccess;  // store in the global
@@ -20,7 +21,6 @@ export function onMIDISuccess(midiAccess) {
 	// initializeCodeBox();
 	setupClock();
 }
-
 
 export function onMIDIFailure(msg) {
 	console.error(`Failed to get MIDI access - ${msg}`);
