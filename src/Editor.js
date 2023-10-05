@@ -18,7 +18,6 @@ function Editor(props) {
     window.Tone = Tone;
     window.Oscilloscope = Oscilloscope;
     window.Spectroscope = Spectroscope;
-    //window.gui_sketch = gui_sketch;
     var curLineNum = 0;
 
     // Save history in browser
