@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Editor from './Editor.js';
 import Navbar from './Navbar.js';
-import Template from './pages/Template.js';
-import TableOfContents from './pages/TableOfContents.js';
+import Template from './Pages/Template.js';
+import TableOfContents from './Pages/TableOfContents.js';
 import { marked } from 'marked';
 
 // import { midi, onMIDISuccess, onMIDIFailure, setMidiInput, setMidiOutput, getMidiIO,
@@ -20,16 +20,15 @@ function App() {
   const [assignments, setAssignments] = useState({});
   const [examples, setExamples] = useState({});
   const [references, setReferences] = useState({});
-  const [markdownContent, setMarkdownContent] = useState("");
 
   const exampleFiles = [
-    'FirstSteps','FourierTheorem','SubtractiveSynth', 'Aliasing',
+    'FirstSteps', 'FourierTheorem', 'SubtractiveSynth', 'Aliasing',
   ];
   const assignmentFiles = [
     'Lab1',
   ];
   const referenceFiles = [
-    'Oscillator','Filter','Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope', 'Player'
+    'Oscillator', 'Filter', 'Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope', 'Player'
   ];
 
   const homeStarterCode = `/*
