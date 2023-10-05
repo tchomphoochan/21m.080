@@ -1,4 +1,4 @@
-//4
+//6:10
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -7,60 +7,17 @@ import { javascript } from '@codemirror/lang-javascript';
 import p5 from 'p5';
 import * as Tone from 'tone';
 import Canvas from "./Canvas.js";
-import gui_sketch from './gui';
 import { Oscilloscope, Spectroscope } from './oscilloscope';
-//import Canvas from "./gui.js";
-
-const midiMain = require('./midiCoder/midi_main.js');
-const midiSeq = require('./midiCoder/seq_control.js');
-
-// import * as midiMain from './midiCoder/midi_main.js';
-
-// import * as midiControl from "./midiCoder/midi_control.js";
-// import * as seqControl from './midiCoder/seq_control.js'
-// import * as algControl from "./midiCoder/algorithm_control.js";
-// import * as starterCode from "./midiCoder/starterCode.js"
-// import * as midiMath from './midiCoder/midi_math.js';
-
-// Object.keys(midiMain).forEach((key) => {
-//     window[key] = midiMain[key];
-// });
-// Object.keys(midiControl).forEach((key) => {
-//     window[key] = midiControl[key];
-// });
-// Object.keys(seqControl).forEach((key) => {
-//     window[key] = seqControl[key];
-// });
-// Object.keys(algControl).forEach((key) => {
-//     window[key] = algControl[key];
-// });
-// Object.keys(starterCode).forEach((key) => {
-//     window[key] = starterCode[key];
-// });
-// Object.keys(midiMath).forEach((key) => {
-//     window[key] = midiMath[key];
-// });
-
-// console.log(Seq);
-// setMidiInput = setMidiInput;
-
-// window.Seq = Seq;
-
+import MidiKeyboard from './midiKeyboard.js';
 //Save history in browser
 const stateFields = { history: historyField };
 
 
 function Editor(props) {
-    //window.setupClock();
-    // eval('import * as midiControl from "./midiCoder/midi_control.js";    import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from "./midiCoder/seq_control.js"; import { makingIf, startTern } from "./midiCoder/algorithm_control.js";    import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"; import {floor, ceil, peak, cos, round, trunc, abs} from "./midiCoder/midi_math.js";');
-    // eval('console.log(Seq)');
-    //const imports = 'import { midi, onMIDISuccess, onMIDIFailure, setMidiInput, setMidiOutput, getMidiIO, handleMidiInput, outputMidiID, midiMap, ccMap, stopMap, mute, muted, toggleMute } from "./midiCoder/midi_control.js"; import * as midiControl from "./midiCoder/midi_control.js";    import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from "./midiCoder/seq_control.js"; import { makingIf, startTern } from "./midiCoder/algorithm_control.js";    import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"; import {floor, ceil, peak, cos, round, trunc, abs} from "./midiCoder/midi_math.js";'; // Add your required imports here
-
     window.p5 = p5;
     window.Tone = Tone;
     window.Oscilloscope = Oscilloscope;
     window.Spectroscope = Spectroscope;
-    window.gui_sketch = gui_sketch;
     var curLineNum = 0;
 
     // Save history in browser
@@ -71,7 +28,6 @@ function Editor(props) {
     const [code, setCode] = useState(value); //full string of user code
     const [vars, setVars] = useState({}); //current audioNodes
     const [liveMode, setLiveMode] = useState(true); //live mode is on by default
-    const [middleButton, setMiddleButton] = useState("button-container middle-clicked");
     const [refresh, setRefresh] = useState(false);
 
     const canvases = props.canvases;
@@ -108,11 +64,11 @@ function Editor(props) {
         }
 
         let incr = 0; //tracks index while editing string
-        // let p5Instances = {};
         let varNames = []; //Names of All varnames
         let variables = {}; //Name, val pairs of ONLY audioNodes
         let length1 = 'globalThis.'.length;
         let length2 = " = null".length;
+        let p5Code = "";
 
         //Take action when we see a VariableDeclaration Node
         const visitors = {
@@ -136,7 +92,14 @@ function Editor(props) {
                         string = string.substring(0, end + incr) + " = null" + string.substring(end + incr);
                         incr += length2;
                     }
-
+                    else {
+                        let val = string.substring(init.start + incr, init.end + incr);
+                        for (let canvas of canvases) {
+                            if (val.includes(canvas)) {
+                                p5Code += `${canvas}.elements[${name}]="${val}"\n`;
+                            }
+                        }
+                    }
                 }
             },
         }
@@ -149,6 +112,7 @@ function Editor(props) {
 
         try {
             eval(string);
+            eval(p5Code);
         } catch (error) {
             console.log("Error Evaluating Code", error);
         }
@@ -163,7 +127,7 @@ function Editor(props) {
                     variables[varName] = val;
                 }
             } catch (error) {
-                //Variable isn't an audioNode
+
             }
 
             //Remove all sounds that have been redefined and play new if necessary
@@ -265,20 +229,6 @@ function Editor(props) {
         }
     };
 
-    // const handleClick = (event) => {
-    //     evaluateLine();
-    // };
-
-    // function evaluateLine() {
-    // try {
-    // 	let lines = code.split('\n');
-    //     let curLine = lines[curLineNum-1]
-    //     eval(curLine);
-    // 	// runCode(line);
-    // } catch (e) {
-    // 	console.error(e);
-    // }
-    // }
 
     const handleStatistics = (data) => {
         curLineNum = data.line.number;
@@ -287,7 +237,6 @@ function Editor(props) {
     //Handle Mode Changes + Play & Stop
     const playClicked = () => {
         setLiveMode(false);
-        setMiddleButton("button-container");
         stopClicked();
         traverse(code);
 
@@ -295,11 +244,9 @@ function Editor(props) {
     const liveClicked = () => {
         if (liveMode) {
             setLiveMode(false);
-            setMiddleButton("button-container");
         }
         else {
             setLiveMode(true);
-            setMiddleButton("button-container middle-clicked");
         }
 
     }
@@ -337,17 +284,20 @@ function Editor(props) {
         }
     };
 
+    const liveCSS = liveMode ? 'button-container active' : 'button-container';
+
     return (
-        <div className="flex-container">
+        <div className="flex-container" >
             {!codeMinimized &&
-                <div className="flex-child">
+                <div className="flex-child" >
                     <span className="span-container">
-                        <span >
-                            <button className="button-container" onClick={playClicked}>Play</button>
-                            <button className={middleButton} onClick={liveClicked}>Live</button>
+                        <span className="span-container">
+                            <button className="button-container" onClick={playClicked}>Run</button>
+                            <button className={liveCSS} onClick={liveClicked}>Live</button>
                             <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
-                        <span>
+                        <span className="span-container">
+                            <MidiKeyboard />
                             <button className="button-container" onClick={refreshClicked}>Starter Code</button>
                             {!p5Minimized &&
                                 <button className="button-container" onClick={codeMinClicked}>-</button>
@@ -388,8 +338,6 @@ function Editor(props) {
                         {codeMinimized &&
                             <button className="button-container" onClick={codeMinClicked}>{"=>"}</button>
                         }
-                        {/* <div style={{ display: 'block', margin: '0 auto' }}>
-                            </div> */}
                     </span>
                     {canvases.map((id) => (
                         (!maximized || maximized === id) && (

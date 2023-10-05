@@ -1,34 +1,31 @@
 import { useState, useEffect } from 'react';
 import p5 from 'p5';
-import gui_sketch from './gui';
+import { initialize, divResized, drawElements, Knob } from './p5Library';
 
-let x_size,y_size,edgeGapX,edgeGapY;
-let globalScale = 1;
-
-let fullscreen = false;
-
+window.Knob = Knob;
 function Canvas(props) {
     const [isMaximized, setIsMaximized] = useState(false);
 
     useEffect(() => {
         const sketch = (p) => {
             let div;
+            let grey = p.color(220, 229, 234);
 
             p.setup = function () {
                 div = document.getElementById(props.id);
-                p.createCanvas(div.offsetWidth, div.offsetHeight);
+                p.initialize(div, grey);
             };
 
             p.draw = function () {
-                // Your drawing code here
+                p.drawElements();
             };
 
             p.windowResized = function () {
-                p.resizeCanvas(div.offsetWidth, div.offsetHeight);
+                p.divResized(grey);
             };
         };
         //console.log(document.getElementById(props.id))
-        //window[props.id] = new p5(sketch, props.id);
+        window[props.id] = new p5(sketch, props.id);
 
     }, [props.id]);
 
@@ -40,7 +37,7 @@ function Canvas(props) {
     return (
         <span className="p5-container">
             <span className="span-container" >
-                <div>{props.id}</div>
+                <div style={{ marginLeft: "5px" }}>{props.id}</div>
                 {props.maxOption &&
                     <span>
                         <button className="button-container" onClick={maxClicked}>
