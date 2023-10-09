@@ -1,4 +1,4 @@
-//6:10
+//1:
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -28,9 +28,11 @@ function Editor(props) {
 
     const [height, setHeight] = useState(false);
     const [code, setCode] = useState(value); //full string of user code
-    const [vars, setVars] = useState({}); //current audioNodes
+    var vars = {}; //current audioNodes
+    var varNames = [];
     const [liveMode, setLiveMode] = useState(true); //live mode is on by default
     const [refresh, setRefresh] = useState(false);
+    const [disabled, setDisabled] = useState(false); //do we want to disable codebox?
 
     const canvases = props.canvases;
     const [codeMinimized, setCodeMinimized] = useState(false);
@@ -53,24 +55,19 @@ function Editor(props) {
         return cleanedCode;
     }
 
-    function traverse(string) {
-        let cleanedCode = removeComments();
+    function updateCode(string) {
         let acorn = require('acorn');
         let walk = require('acorn-walk');
         let ast = null;
-
+        let incr = 0;
+        let length1 = 'globalThis.'.length;
+        let length2 = " = null".length;
+        //let p5Code = "";
         try {
             ast = acorn.parse(string, { ecmaVersion: 'latest' });
         } catch (error) {
             console.log("Error parsing code: ", error);
         }
-
-        let incr = 0; //tracks index while editing string
-        let varNames = []; //Names of All varnames
-        let variables = {}; //Name, val pairs of ONLY audioNodes
-        let length1 = 'globalThis.'.length;
-        let length2 = " = null".length;
-        let p5Code = "";
 
         //Take action when we see a VariableDeclaration Node
         const visitors = {
@@ -95,15 +92,38 @@ function Editor(props) {
                         incr += length2;
                     }
                     else {
-                        let val = string.substring(init.start + incr, init.end + incr);
-                        for (let canvas of canvases) {
-                            if (val.includes(canvas)) {
-                                p5Code += `${canvas}.elements[${name}]="${val}"\n`;
-                            }
+                        if (init.body) {
+                            c(init.body, state);
                         }
+                        // let val = string.substring(init.start + incr, init.end + incr);
+                        // for (let canvas of canvases) {
+                        //     if (val.includes(canvas)) {
+                        //         p5Code += `${canvas}.elements[${name}]="${val}"\n`;
+                        //     }
+                        // }
                     }
                 }
             },
+
+            FunctionDeclaration(node, state, c) {
+                let name = node.id.name;
+                let start = node.start + incr;
+                let end = node.id.end + incr;
+                let newCode = `globalThis.${name} = function`;
+                incr += newCode.length - (end - start);
+                string = string.substring(0, start) + newCode + string.substring(end);
+                c(node.body, state);
+            },
+
+            ClassDeclaration(node, state, c) {
+                let name = node.id.name;
+                let start = node.start + incr;
+                let end = node.id.end + incr;
+                let newCode = `globalThis.${name} = class`;
+                incr += newCode.length - (end - start);
+                string = string.substring(0, start) + newCode + string.substring(end);
+                c(node.body, state);
+            }
         }
 
         try {
@@ -111,47 +131,61 @@ function Editor(props) {
         } catch (error) {
             console.log("Error parsing code: ", error);
         }
+        return string;
+    }
 
+    function evaluate(string) {
         try {
             eval(string);
-            eval(p5Code);
+            //eval(p5Code);
         } catch (error) {
             console.log("Error Evaluating Code", error);
         }
+    }
 
+    function updateVars() {
+        let cleanedCode = removeComments();
         //REMINDER: Issue may arise from scheduled sounds
         for (const varName of varNames) {
-            //Add name, val pairs of ONLY audionodes to variables dictionary 
-            let val = eval(varName);
+            //Remove all sounds that have been redefined 
+            if (liveMode) {
+                //var isPlaying = true;
+                if (varName in vars) {
+                    try {
+                        vars[varName].stop();
+                    } catch (error) {
+                        // isPlaying = false;
+                    }
+                    // if (isPlaying) {
+                    //     eval(`${varName}.start()`);
+                    // }
+                }
+            }
+
+            let val;
+            //Add name if var in smaller scope (not yet defined)
+            try {
+                val = eval(varName);
+            } catch (error) {
+                vars[varName] = null;
+            }
+
+            //Add name, val pairs of ONLY audionodes to vars dictionary 
             try {
                 let isAudioNode = val.context || val instanceof AudioContext;
                 if (isAudioNode) {
-                    variables[varName] = val;
+                    vars[varName] = val;
                 }
             } catch (error) {
 
             }
 
-            //Remove all sounds that have been redefined and play new if necessary
-            if (liveMode) {
-                var isPlaying = true;
-                if (varName in vars) {
-                    try {
-                        vars[varName].stop();
-                    } catch (error) {
-                        isPlaying = false;
-                    }
-                    if (isPlaying) {
-                        eval(`${varName}.start()`);
-                    }
-                }
-            }
         }
 
-        //Remove all sounds that have been deleted from full code
+        //Remove all vars that have been deleted from full code
         if (liveMode) {
             for (const [key, val] of Object.entries(vars)) {
-                if (!(key in variables)) {
+                if (!(key in vars)) {
                     if (!(cleanedCode.includes(key))) {
                         try {
                             val.stop();
@@ -160,13 +194,17 @@ function Editor(props) {
                         }
                     }
                     else {
-                        variables[key] = val;
+                        vars[key] = val;
                     }
                 }
             }
         }
-        setVars(variables);
+    }
 
+    function traverse(string) {
+        const updatedString = updateCode(string);
+        evaluate(updatedString);
+        updateVars();
     }
 
     function evaluateLine() {
@@ -261,7 +299,16 @@ function Editor(props) {
                 //No action needed
             }
         }
-        setVars({});
+        vars = {};
+    }
+
+    const midiDown = (callBack) => {
+        midiUp(callBack);
+        return Object.keys(vars)[vars.length - 1];
+    }
+
+    const midiUp = (callBack) => {
+        traverse(callBack);
     }
 
     //Handle refresh/max/min buttons
@@ -299,7 +346,7 @@ function Editor(props) {
                             <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
                         <span className="span-container">
-                            <MidiKeyboard />
+                            <MidiKeyboard midUp={midiUp} midiDown={midiDown} disabled={disabled} setDisabled={setDisabled} />
                             <button className="button-container" onClick={refreshClicked}>Starter Code</button>
                             {!p5Minimized &&
                                 <button className="button-container" onClick={codeMinClicked}>-</button>

@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import keyboard from './Icons/keyboard.png';
 
-function MidiKeyboard() {
+function MidiKeyboard(props) {
     const [midiOn, setMidiOn] = useState(false);
-    const [noteOn, setNoteOn] = useState(false);
-    const [midiInputs, setMidiInputs] = useState([]);
-    const [currInput, setCurrInput] = useState('');
+    //const [notesOn, setNotesOn] = useState({});
+    var notesOn = {};
 
-    var octave = 3;
+    var octave = 4;
     var keyToNote = {
         65: { "midi": 60, "pitch": "C" },
         87: { "midi": 61, "pitch": "C#/Db" },
@@ -23,45 +22,46 @@ function MidiKeyboard() {
         74: { "midi": 71, "pitch": "B" },
         75: { "midi": 72, "pitch": "B#/Cb" },
     };
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
     useEffect(() => {
         if (midiOn) {
-            document.addEventListener('keydown', handleKeyboardInput);
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
         } else {
-            document.removeEventListener('keydown', handleKeyboardInput);
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keyup', handleKeyUp);
         }
 
         // Cleanup: Remove the event listener when the component unmounts
         return () => {
-            document.removeEventListener('keydown', handleKeyboardInput);
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keyup', handleKeyUp);
         };
     }, [midiOn]);
 
-    function noteToFrequency(note) {
-        return 440 * Math.pow(2, (note - 69) / 12);
+    // function noteToFrequency(note) {
+    //     return 440 * Math.pow(2, (note - 69) / 12);
+    // }
+
+    function keyDownCallBack(midiNote, pitch) {
+        try {
+            //let audioNode = props.midiDown(`keyDown(${midiNote})`);
+            let audioNode = eval(`keyDown(${midiNote})`);
+            //setNotesOn((prevNotesOn) => ({ ...prevNotesOn, [pitch]: `keyUp(${audioNode})` }));
+            notesOn[pitch] = audioNode;
+        } catch {
+
+        }
     }
 
-    function playOscillator(midiNote) {
-        const oscillator = audioContext.createOscillator();
-        oscillator.type = 'sine'; // You can change the oscillator type
-        oscillator.frequency.setValueAtTime(noteToFrequency(midiNote), audioContext.currentTime);
-        oscillator.connect(audioContext.destination);
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.5);
-        setNoteOn(false);
-    }
-
-    function handleKeyboardInput(event) {
+    function handleKeyDown(event) {
         const keyCode = event.keyCode;
-
         try {
             let note = keyToNote[keyCode];
             let midiNote = note["midi"] + (octave - 4) * 12;
             let pitch = note["pitch"] + `${octave}`;
             if (midiNote <= 127) {
-                setNoteOn(pitch);
-                playOscillator(midiNote);
+                keyDownCallBack(midiNote, pitch);
             }
         } catch {
             if (keyCode === 37) {
@@ -70,6 +70,36 @@ function MidiKeyboard() {
                 increaseOctave();
             }
         }
+    }
+
+    function keyUpCallBack(audioNode) {
+        try {
+            console.log(audioNode);
+            //props.midiUp(func);
+            eval();
+        } catch {
+        }
+    }
+
+    function handleKeyUp(event) {
+        const keyCode = event.keyCode;
+        try {
+            let pitch = keyToNote[keyCode]["pitch"] + `${octave}`;
+            console.log(notesOn);
+            let audioNode = notesOn[pitch];
+            keyUpCallBack(audioNode);
+            //removeAudioNode(pitch);
+        } catch {
+            //not midi note OR not playing
+        }
+    }
+
+    function removeAudioNode(pitch) {
+        // setNotesOn((prevNotesOn) => {
+        //     const { [pitch]: omit, ...restNotes } = prevNotesOn;
+        //     return restNotes;
+        // });
+        delete notesOn[pitch];
     }
 
     function increaseOctave() {
@@ -86,18 +116,20 @@ function MidiKeyboard() {
 
     const midiClicked = () => {
         setMidiOn(!midiOn);
+        props.setDisabled(!props.disabled);
     }
 
-    const buttonCSS = noteOn ? "button-container active" : "invisible-button";
+    //const buttonCSS = noteOn ? "button-container active" : "invisible-button";
     const keyboardCSS = midiOn ? 'icon active' : 'icon inactive';
     return (
-        <button className={buttonCSS} onClick={midiClicked} >
-            {noteOn !== false ? (
-                <div>{noteOn}</div>
-            ) : (
+        <div className='span-container'>
+            {Object.keys(notesOn).map((pitch, index) => (
+                <div key={index}>{pitch}</div>
+            ))}
+            <button className="invisible-button" onClick={midiClicked} >
                 <img className={keyboardCSS} src={keyboard} alt="Keyboard" />
-            )}
-        </button>
+            </button>
+        </div>
     );
 }
 
