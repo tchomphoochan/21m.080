@@ -24,7 +24,7 @@ function App() {
   ];
   const referenceFiles = [
     'Oscillator','Filter','Multiply', 'Noise', 'Envelope', 
-    'Oscilloscope', 'Spectroscope', 'Player', 'Knob'
+    'Oscilloscope', 'Spectroscope', 'Player', 'GUI elements'
   ];
 
   const homeStarterCode = `/*

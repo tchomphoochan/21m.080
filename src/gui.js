@@ -314,7 +314,7 @@ const gui_sketch = function(my) {
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
         my.translate(curX,curY);
-        if (elements[i].horizontal == true){
+        if (elements[i].orientation == 'horizontal'){
           my.rotate(90);
         }
         my.rectMode( my.CENTER );  
@@ -366,7 +366,7 @@ const gui_sketch = function(my) {
         // LABEL
         my.fill(my.color4);
         my.noStroke();
-        if (elements[i].horizontal == true){
+        if (elements[i].orientation == 'horizontal'){
           my.rotate(-90)
         }
         if (elements[i].showLabel == true) {
@@ -374,7 +374,7 @@ const gui_sketch = function(my) {
           my.textSize((2+sz)*4); // scales text based on num of char
           let labelX = 0;
           let labelY = sliderLength*sz/2+10;
-          if (elements[i].horizontal == true){
+          if (elements[i].orientation == 'horizontal'){
             my.text(txt, 0, labelX-15);
           } else {
             my.text(txt, labelX, labelY + 15);
@@ -398,7 +398,7 @@ const gui_sketch = function(my) {
           my.textSize((5+sz)*2); // scales text based on num of char
           let labelX = 0;
           let labelY = sliderLength*sz/2+10;
-          if (elements[i].horizontal == true){
+          if (elements[i].orientation == 'horizontal'){
             my.text( scaledValue, 0,labelX+15);
           } else {
             my.text( scaledValue, labelX,labelY);
@@ -478,9 +478,10 @@ const gui_sketch = function(my) {
         }
         my.pop();
         // MAP TO CONTROLS
-        if( elements[i].value ){
+        if( elements[i].value && elements[i].prev != elements[i].value ){
           mapToControls(elements[i].mapto, elements[i].value, elements[i].callback);
         }
+        elements[i].prev = elements[i].value
       }
     // END MOMENTARY
     // DRAW RADIO BUTTON
@@ -512,7 +513,7 @@ const gui_sketch = function(my) {
         for (let j=0; j < numBoxes; j++){
           let x = -rBoxSz/2;
           let y = yBox*rBoxSz;
-          if (elements[i].horizontal == true){
+          if (elements[i].orientation == 'horizontal'){
             x = y;
             y = -rBoxSz/2;
           }
@@ -529,7 +530,7 @@ const gui_sketch = function(my) {
           for (let j=0; j < numBoxes; j++){
             let x = -rBoxSz/4;
             let y = yBox*rBoxSz;
-            if (elements[i].horizontal == true){
+            if (elements[i].orientation == 'horizontal'){
               x = y;
               y = 0;
             } 
@@ -545,7 +546,7 @@ const gui_sketch = function(my) {
         my.strokeWeight(2);
         let x = -rBoxSz/2;
         let y = yBox*rBoxSz;
-        if (elements[i].horizontal == true){
+        if (elements[i].orientation == 'horizontal'){
           x = y;
           y = -rBoxSz/2;
         }
@@ -556,7 +557,7 @@ const gui_sketch = function(my) {
           let txt = elements[i].radioOptions[active];
           let x = 0;
           let y = (yBox+.5)*rBoxSz;
-          if (elements[i].horizontal == true){
+          if (elements[i].orientation == 'horizontal'){
             x = y;
             y = 0;
           }
@@ -698,15 +699,15 @@ const gui_sketch = function(my) {
         }
       } 
       else if (elements[i].type == "slider" || elements[i].type == 'fader'){
-        let horizontalDim = sliderWidth*2*globalScale*elements[i].size/2;
+        let orientationDim = sliderWidth*2*globalScale*elements[i].size/2;
         let verticalDim = sliderLength*globalScale*elements[i].size/2+10;
-        if (elements[i].horizontal == true){
-          horizontalDim = sliderLength*globalScale*elements[i].size/2+10;
+        if (elements[i].orientation == 'horizontal'){
+          orientationDim = sliderLength*globalScale*elements[i].size/2+10;
           verticalDim = sliderWidth*2*globalScale*elements[i].size/2;
         }
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
-        if (Math.abs(curX*globalScale - my.mouseX) <= (horizontalDim)){
+        if (Math.abs(curX*globalScale - my.mouseX) <= (orientationDim)){
           if (Math.abs(curY*globalScale - my.mouseY) <= (verticalDim)){
             ogX = curX*globalScale - my.mouseX;
             ogY = curY*globalScale - my.mouseY;
@@ -743,7 +744,7 @@ const gui_sketch = function(my) {
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
 
-        if (elements[i].horizontal == true){
+        if (elements[i].orientation == 'horizontal'){
 
           if (Math.abs(curY*globalScale - my.mouseY) <= (radioBox*scaling/2)){
             let mousePosX = my.mouseX - curX*globalScale;
@@ -905,7 +906,7 @@ const gui_sketch = function(my) {
 //******** Element Custom Objects ********//
   let elements = [];
 
-  let UserElement = function(type,label,mapto,callback,x,y,min=0,max=1,curve=1,value=.5,prev=value,size=1,color=my.color1,showLabel=true,showValue=true,bipolar=false, radioOptions="",horizontal=false) {
+  let UserElement = function(type,label,mapto,callback,x,y,min=0,max=1,curve=1,value=.5,prev=value,size=1,color=my.color1,showLabel=true,showValue=true,bipolar=false, radioOptions="",orientation='vertical') {
     this.type = type; // str: type of element
     this.label = label; // str: name and unique ID
 
@@ -931,7 +932,7 @@ const gui_sketch = function(my) {
     
     this.bipolar = bipolar; // bool
     this.radioOptions = radioOptions; // array
-    this.horizontal = horizontal; // bool: for slider or radio buttons
+    this.orientation = orientation; // bool: for slider or radio buttons
 
     this.position = function(x,y){
       this.x = (x);
@@ -940,7 +941,7 @@ const gui_sketch = function(my) {
     }
   }
   
-  my.addElement = function(type,label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal) {
+  my.addElement = function(type,label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation) {
     let update = false;
     // for (let i = 0; i < elements.length; i++) {
     //   if (elements[i].label == label) {
@@ -959,7 +960,7 @@ const gui_sketch = function(my) {
     //     if (showValue != undefined) {elements[i].showValue = showValue;}
     //     if (bipolar != undefined) {elements[i].bipolar = bipolar;}
     //     if (radioOptions != undefined) {elements[i].radioOptions = radioOptions;}
-    //     if (horizontal != undefined) {elements[i].horizontal = horizontal;}
+    //     if (orientation != undefined) {elements[i].orientation = orientation;}
     //     elements[i].prev = undefined;
     //     my.redrawGUI();
     //     break
@@ -971,48 +972,48 @@ const gui_sketch = function(my) {
       if (update == false){
         if (x == undefined) {x = x0 + (elements.length%5)*20;}
         if (y == undefined) { y = y0;}
-        elements.push(new UserElement(type,label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal));
+        elements.push(new UserElement(type,label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation));
       }
       my.redrawGUI();
       return elements[elements.length - 1];
     }
   }//addElement
 
-  my.Knob = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
-    return my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  my.Knob = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
+    return my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
   }
-  my.Dial = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
-    return my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  my.Dial = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
+    return my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
   }
-  my.Slider = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
-    return my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  my.Slider = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
+    return my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
   }
-  my.Fader = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
-    return my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+  my.Fader = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
+    return my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
   }
-  my.Toggle = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+  my.Toggle = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
     if (value == undefined) {value=0;}
-    return my.addElement("toggle",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("toggle",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
   }
-  my.Momentary = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+  my.Momentary = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
     if (value == undefined) {value=0;}
-    return my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
   }
-  my.Button = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+  my.Button = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
     if (value == undefined) {value=0;}
-    return my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
   }
-  my.RadioButtons = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+  my.RadioButtons = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
     if (value == undefined) {value=1;}
-    return my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
   }
-  my.RadioButton = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+  my.RadioButton = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
     if (value == undefined) {value=1;}
-    return my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
   }
-  my.Radio = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal}) {
+  my.Radio = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
     if (value == undefined) {value=1;}
-    return my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,horizontal);
+    return my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
   }
 
 //******** Element Helper Functions ********//
