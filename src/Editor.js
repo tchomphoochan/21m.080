@@ -9,58 +9,29 @@ import * as Tone from 'tone';
 import Canvas from "./Canvas.js";
 import gui_sketch from './gui';
 import { Oscilloscope, Spectroscope } from './oscilloscope';
-//import Canvas from "./gui.js";
 
-const midiMain = require('./midiCoder/midi_main.js');
-const midiSeq = require('./midiCoder/seq_control.js');
+const midi = require('./Midi.js');
 
-// import * as midiMain from './midiCoder/midi_main.js';
-
-// import * as midiControl from "./midiCoder/midi_control.js";
-// import * as seqControl from './midiCoder/seq_control.js'
-// import * as algControl from "./midiCoder/algorithm_control.js";
-// import * as starterCode from "./midiCoder/starterCode.js"
-// import * as midiMath from './midiCoder/midi_math.js';
-
-// Object.keys(midiMain).forEach((key) => {
-//     window[key] = midiMain[key];
-// });
-// Object.keys(midiControl).forEach((key) => {
-//     window[key] = midiControl[key];
-// });
-// Object.keys(seqControl).forEach((key) => {
-//     window[key] = seqControl[key];
-// });
-// Object.keys(algControl).forEach((key) => {
-//     window[key] = algControl[key];
-// });
-// Object.keys(starterCode).forEach((key) => {
-//     window[key] = starterCode[key];
-// });
-// Object.keys(midiMath).forEach((key) => {
-//     window[key] = midiMath[key];
-// });
-
-// console.log(Seq);
-// setMidiInput = setMidiInput;
-
-// window.Seq = Seq;
 
 //Save history in browser
 const stateFields = { history: historyField };
 
 
 function Editor(props) {
-    //window.setupClock();
-    // eval('import * as midiControl from "./midiCoder/midi_control.js";    import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from "./midiCoder/seq_control.js"; import { makingIf, startTern } from "./midiCoder/algorithm_control.js";    import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"; import {floor, ceil, peak, cos, round, trunc, abs} from "./midiCoder/midi_math.js";');
-    // eval('console.log(Seq)');
-    //const imports = 'import { midi, onMIDISuccess, onMIDIFailure, setMidiInput, setMidiOutput, getMidiIO, handleMidiInput, outputMidiID, midiMap, ccMap, stopMap, mute, muted, toggleMute } from "./midiCoder/midi_control.js"; import * as midiControl from "./midiCoder/midi_control.js";    import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from "./midiCoder/seq_control.js"; import { makingIf, startTern } from "./midiCoder/algorithm_control.js";    import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"; import {floor, ceil, peak, cos, round, trunc, abs} from "./midiCoder/midi_math.js";'; // Add your required imports here
 
     window.p5 = p5;
     window.Tone = Tone;
     window.Oscilloscope = Oscilloscope;
     window.Spectroscope = Spectroscope;
     window.gui_sketch = gui_sketch;
+    window.setMidiInput = midi.setMidiInput;
+    window.setNoteOnHandler = midi.midiHandlerInstance.setNoteOnHandler.bind(midi.midiHandlerInstance);
+    window.setNoteOffHandler = midi.midiHandlerInstance.setNoteOffHandler.bind(midi.midiHandlerInstance);
+    window.setCCHandler = midi.midiHandlerInstance.setCCHandler.bind(midi.midiHandlerInstance);
+
+    // window.handleNoteOn = midiControl.handleNoteOn;
+    // window.handleNoteOff = midiControl.handleNoteOff;
+    // window.handleCC = midiControl.handleCC;
     var curLineNum = 0;
 
     // Save history in browser
