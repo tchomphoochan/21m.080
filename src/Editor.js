@@ -9,10 +9,8 @@ import * as Tone from 'tone';
 import Canvas from "./Canvas.js";
 import gui_sketch from './gui';
 import { Oscilloscope, Spectroscope } from './oscilloscope';
-
+import MidiKeyboard from './MidiKeyboard.js';
 const midi = require('./Midi.js');
-
-
 //Save history in browser
 const stateFields = { history: historyField };
 
@@ -29,9 +27,6 @@ function Editor(props) {
     window.setNoteOffHandler = midi.midiHandlerInstance.setNoteOffHandler.bind(midi.midiHandlerInstance);
     window.setCCHandler = midi.midiHandlerInstance.setCCHandler.bind(midi.midiHandlerInstance);
 
-    // window.handleNoteOn = midiControl.handleNoteOn;
-    // window.handleNoteOff = midiControl.handleNoteOff;
-    // window.handleCC = midiControl.handleCC;
     var curLineNum = 0;
 
     // Save history in browser
@@ -79,7 +74,6 @@ function Editor(props) {
         }
 
         let incr = 0; //tracks index while editing string
-        // let p5Instances = {};
         let varNames = []; //Names of All varnames
         let variables = {}; //Name, val pairs of ONLY audioNodes
         let length1 = 'globalThis.'.length;
@@ -318,6 +312,7 @@ function Editor(props) {
                             <button className={middleButton} onClick={liveClicked}>Live</button>
                             <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
+                        <MidiKeyboard />
                         <span>
                             <button className="button-container" onClick={refreshClicked}>Starter Code</button>
                             {!p5Minimized &&
