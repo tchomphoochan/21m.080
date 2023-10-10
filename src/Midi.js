@@ -81,7 +81,6 @@ class MidiHandler {
     }
 
     setNoteOnHandler(func) {
-    	console.log(this)
         this.noteOnHandler = func;
     }
     setNoteOffHandler(func) {

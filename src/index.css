@@ -1,4 +1,4 @@
-body {
+body { 
   margin: 0;
   font-size: 16px;
   height: 100%;
@@ -82,13 +82,34 @@ code {
   margin: 5px;
   border-radius: 8px;
   cursor: pointer;
+  background-color: rgb(123, 127, 123)
 }
 
-.button-container:hover {
-  background-color: rgb(123, 127, 123);
+.active {
+  background-color: white;
 }
 
-.middle-clicked {
+.invisible-button {
+  margin: 5px;
+  border: none;
+  background-color: black;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+}
+
+.icon {
+  max-width: 35px;
+  max-height: 25px;
+  border-radius: 8px;
+  flex: 1;
+}
+
+.icon:hover {
+  background-color: white;
+}
+
+.inactive {
   background-color: rgb(123, 127, 123);
 }
 

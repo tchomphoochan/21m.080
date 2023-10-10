@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import keyboard from './Icons/keyboard.png';
+const midi = require('./Midi.js');
 
 function MidiKeyboard() {
     const [midiOn, setMidiOn] = useState(false);
     const [noteOn, setNoteOn] = useState(false);
     const [midiInputs, setMidiInputs] = useState([]);
     const [currInput, setCurrInput] = useState('');
+
+    let activeKeys = {}
 
     var octave = 3;
     var keyToNote = {
@@ -27,14 +30,17 @@ function MidiKeyboard() {
 
     useEffect(() => {
         if (midiOn) {
-            document.addEventListener('keydown', handleKeyboardInput);
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
         } else {
-            document.removeEventListener('keydown', handleKeyboardInput);
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keyup', handleKeyUp);
         }
 
         // Cleanup: Remove the event listener when the component unmounts
         return () => {
-            document.removeEventListener('keydown', handleKeyboardInput);
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keyup', handleKeyUp);
         };
     }, [midiOn]);
 
@@ -52,23 +58,46 @@ function MidiKeyboard() {
         setNoteOn(false);
     }
 
-    function handleKeyboardInput(event) {
+    function handleKeyDown(event) {
         const keyCode = event.keyCode;
+
+        if(!activeKeys[keyCode]){
+            activeKeys[keyCode] = true
+
+            try {
+                let note = keyToNote[keyCode];
+                let midiNote = note["midi"] + (octave - 4) * 12;
+                let pitch = note["pitch"] + `${octave}`;
+                if (midiNote <= 127 ) {
+                    midi.midiHandlerInstance.handleNoteOn(midiNote,100)
+                    activeKeys.push(pitch)
+                    // setNoteOn(pitch);
+                    // playOscillator(midiNote);
+                }
+            } catch {
+                if (keyCode === 37) {
+                    decreaseOctave();
+                } else if (keyCode === 39) {
+                    increaseOctave();
+                }
+            }
+        }
+    }
+
+    function handleKeyUp(event) {
+        const keyCode = event.keyCode;
+        activeKeys[keyCode] = false
 
         try {
             let note = keyToNote[keyCode];
             let midiNote = note["midi"] + (octave - 4) * 12;
             let pitch = note["pitch"] + `${octave}`;
             if (midiNote <= 127) {
-                setNoteOn(pitch);
-                playOscillator(midiNote);
+                midi.midiHandlerInstance.handleNoteOff(midiNote,0)
+                // setNoteOn(pitch);
+                // playOscillator(midiNote);
             }
         } catch {
-            if (keyCode === 37) {
-                decreaseOctave();
-            } else if (keyCode === 39) {
-                increaseOctave();
-            }
         }
     }
 

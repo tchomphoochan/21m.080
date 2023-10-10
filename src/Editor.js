@@ -302,6 +302,8 @@ function Editor(props) {
         }
     };
 
+    const liveCSS = liveMode ? 'button-container active' : 'button-container';
+
     return (
         <div className="flex-container">
             {!codeMinimized &&
@@ -309,7 +311,7 @@ function Editor(props) {
                     <span className="span-container">
                         <span className="span-container">
                             <button className="button-container" onClick={playClicked}>Play</button>
-                            <button className={middleButton} onClick={liveClicked}>Live</button>
+                            <button className={liveCSS} onClick={liveClicked}>Live</button>
                             <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
                         
