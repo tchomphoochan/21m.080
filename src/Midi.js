@@ -61,12 +61,15 @@ class MidiHandler {
     constructor() {
         this.noteOnHandler = (note, velocity) => {
             console.log('Default Note On Handler:', note, velocity);
+            console.log(`Define your own note on handler like this:\nsetNoteOnHandler(( note, vel ) => { <your code here> }) `)
         };
         this.noteOffHandler = (note, velocity) => {
             console.log('Default Note Off Handler:', note, velocity);
+            console.log(`Define your own note off handler like this:\nsetNoteOffHandler(( note, vel ) => { <your code here> }) `)
         };
         this.CCHandler = (controller, value) => {
             console.log('Default CC Handler:', controller, value);
+            console.log(`Define your own CC handler like this:\nsetCCHandler(( cc, value ) => { <your code here> }) `)
         };
     }
 

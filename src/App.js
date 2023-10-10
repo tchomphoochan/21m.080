@@ -17,7 +17,7 @@ function App() {
 
   const exampleFiles = [
     'FirstSteps','FourierTheorem','SubtractiveSynth', 'Aliasing', 
-    'AmplitudeModulation','FrequencyModulation', 'GUI'
+    'AmplitudeModulation','FrequencyModulation', 'GUI', 'MIDI'
   ];
   const assignmentFiles = [
     'Lab1',
