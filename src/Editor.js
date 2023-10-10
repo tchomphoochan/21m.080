@@ -1,4 +1,4 @@
-//4
+//4 
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -307,13 +307,14 @@ function Editor(props) {
             {!codeMinimized &&
                 <div className="flex-child">
                     <span className="span-container">
-                        <span >
+                        <span className="span-container">
                             <button className="button-container" onClick={playClicked}>Play</button>
                             <button className={middleButton} onClick={liveClicked}>Live</button>
                             <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
-                        <MidiKeyboard />
-                        <span>
+                        
+                        <span className="span-container">
+                            <MidiKeyboard />
                             <button className="button-container" onClick={refreshClicked}>Starter Code</button>
                             {!p5Minimized &&
                                 <button className="button-container" onClick={codeMinClicked}>-</button>
