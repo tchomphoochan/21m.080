@@ -1,4 +1,4 @@
-//1:
+//4 
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -9,17 +9,25 @@ import * as Tone from 'tone';
 import Canvas from "./Canvas.js";
 import gui_sketch from "./gui.js";
 import { Oscilloscope, Spectroscope } from './oscilloscope';
-import MidiKeyboard from './midiKeyboard.js';
+import MidiKeyboard from './MidiKeyboard.js';
+const midi = require('./Midi.js');
 //Save history in browser
 const stateFields = { history: historyField };
 
 
 function Editor(props) {
+
     window.p5 = p5;
     window.gui_sketch = gui_sketch;
     window.Tone = Tone;
     window.Oscilloscope = Oscilloscope;
     window.Spectroscope = Spectroscope;
+    window.gui_sketch = gui_sketch;
+    window.setMidiInput = midi.setMidiInput;
+    window.setNoteOnHandler = midi.midiHandlerInstance.setNoteOnHandler.bind(midi.midiHandlerInstance);
+    window.setNoteOffHandler = midi.midiHandlerInstance.setNoteOffHandler.bind(midi.midiHandlerInstance);
+    window.setCCHandler = midi.midiHandlerInstance.setCCHandler.bind(midi.midiHandlerInstance);
+
     var curLineNum = 0;
 
     // Save history in browser
@@ -59,15 +67,16 @@ function Editor(props) {
         let acorn = require('acorn');
         let walk = require('acorn-walk');
         let ast = null;
-        let incr = 0;
-        let length1 = 'globalThis.'.length;
-        let length2 = " = null".length;
-        //let p5Code = "";
         try {
             ast = acorn.parse(string, { ecmaVersion: 'latest' });
         } catch (error) {
             console.log("Error parsing code: ", error);
         }
+
+        let incr = 0; //tracks index while editing string
+        let varNames = []; //Names of All varnames
+        let length1 = 'globalThis.'.length;
+        let length2 = " = null".length;
 
         //Take action when we see a VariableDeclaration Node
         const visitors = {
@@ -335,50 +344,55 @@ function Editor(props) {
 
     const liveCSS = liveMode ? 'button-container active' : 'button-container';
 
+    const liveCSS = liveMode ? 'button-container active' : 'button-container';
+
     return (
         <div className="flex-container" >
             {!codeMinimized &&
                 <div className="flex-child" >
                     <span className="span-container">
                         <span className="span-container">
-                            <button className="button-container" onClick={playClicked}>Run</button>
+                            <button className="button-container" onClick={playClicked}>Play</button>
                             <button className={liveCSS} onClick={liveClicked}>Live</button>
                             <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
-                        <span className="span-container">
-                            <MidiKeyboard midUp={midiUp} midiDown={midiDown} disabled={disabled} setDisabled={setDisabled} />
-                            <button className="button-container" onClick={refreshClicked}>Starter Code</button>
-                            {!p5Minimized &&
-                                <button className="button-container" onClick={codeMinClicked}>-</button>
-                            }
-                            <button className="button-container" onClick={canvasMinClicked}>{p5Minimized ? '<=' : '+'}</button>
-                        </span>
 
-                    </span>
-                    <div id="container" >
-                        {height !== false &&
-                            <CodeMirror
-                                id="codemirror"
-                                value={refresh ? props.starterCode : value}
-                                initialState={
-                                    serializedState
-                                        ? {
-                                            json: JSON.parse(serializedState || ''),
-                                            fields: stateFields,
-                                        }
-                                        : undefined
+                        <span className="span-container">
+                            <MidiKeyboard />
+                            <span className="span-container">
+                                <MidiKeyboard midUp={midiUp} midiDown={midiDown} disabled={disabled} setDisabled={setDisabled} />
+                                <button className="button-container" onClick={refreshClicked}>Starter Code</button>
+                                {!p5Minimized &&
+                                    <button className="button-container" onClick={codeMinClicked}>-</button>
                                 }
-                                options={{
-                                    mode: 'javascript',
-                                }}
-                                extensions={[javascript({ jsx: true })]}
-                                onChange={handleCodeChange}
-                                onKeyDown={handleKeyDown}
-                                onStatistics={handleStatistics}
-                                height={height}
-                            />
-                        }
-                    </div>
+                                <button className="button-container" onClick={canvasMinClicked}>{p5Minimized ? '<=' : '+'}</button>
+                            </span>
+
+                        </span>
+                        <div id="container" >
+                            {height !== false &&
+                                <CodeMirror
+                                    id="codemirror"
+                                    value={refresh ? props.starterCode : value}
+                                    initialState={
+                                        serializedState
+                                            ? {
+                                                json: JSON.parse(serializedState || ''),
+                                                fields: stateFields,
+                                            }
+                                            : undefined
+                                    }
+                                    options={{
+                                        mode: 'javascript',
+                                    }}
+                                    extensions={[javascript({ jsx: true })]}
+                                    onChange={handleCodeChange}
+                                    onKeyDown={handleKeyDown}
+                                    onStatistics={handleStatistics}
+                                    height={height}
+                                />
+                            }
+                        </div>
                 </div>
             }
             {!p5Minimized &&

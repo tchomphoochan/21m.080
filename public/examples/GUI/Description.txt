@@ -1,0 +1,13 @@
+# Notes
+
+## Setting Object locations
+Every object can be initialized with an x and y position. The unit for these are percentages of the overall gui size.
+* You can set the position of a gui object after it has been created but using the position() method, e.g. `knob.position(25, 50)`, where the arguments are x and y position
+
+## Mapto parameter
+
+Any Tone parameter which is set by using .value (e.g. frequency.value or factor.value) can be controlled by setting the mapto parameter. 
+
+## Callback
+
+Some parameters don't use the .value syntax. These can be easily mapped to by defining a custom callback for a gui object. See the waveform and rolloff RadioButton() examples above.

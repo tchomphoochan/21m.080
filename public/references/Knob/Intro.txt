@@ -1,1 +1,0 @@
-A p5 object to generate a Knob used for setting parameter values. This builds on the `userElement` class, and will share properties with many other `userElements`.

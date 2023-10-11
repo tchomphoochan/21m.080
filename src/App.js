@@ -6,13 +6,6 @@ import Template from './Pages/Template.js';
 import TableOfContents from './Pages/TableOfContents.js';
 import { marked } from 'marked';
 
-// import { midi, onMIDISuccess, onMIDIFailure, setMidiInput, setMidiOutput, getMidiIO,
-// 	handleMidiInput, outputMidiID, midiMap, ccMap, stopMap, mute, muted, toggleMute } from "./midiCoder/midi_control.js";
-// import { Seq, seqs_dict, checkSeqs, _, stopEverything, reset} from './midiCoder/seq_control.js'
-// import { makingIf, startTern } from "./midiCoder/algorithm_control.js";
-// import { createStarterText, starterCode } from  "./midiCoder/starterCode.js"
-// import {floor, ceil, peak, cos, round, trunc, abs} from './midiCoder/midi_math.js';
-
 function App() {
   const location = useLocation();
   const initialPage = location.pathname.substring(1);
