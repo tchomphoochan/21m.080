@@ -344,23 +344,21 @@ function Editor(props) {
 
     const liveCSS = liveMode ? 'button-container active' : 'button-container';
 
-    const liveCSS = liveMode ? 'button-container active' : 'button-container';
-
     return (
         <div className="flex-container" >
             {!codeMinimized &&
                 <div className="flex-child" >
                     <span className="span-container">
                         <span className="span-container">
-                            <button className="button-container" onClick={playClicked}>Play</button>
+                            <button className="button-container" onClick={playClicked}>Run</button>
                             <button className={liveCSS} onClick={liveClicked}>Live</button>
                             <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
 
                         <span className="span-container">
-                            <MidiKeyboard />
+                           
                             <span className="span-container">
-                                <MidiKeyboard midUp={midiUp} midiDown={midiDown} disabled={disabled} setDisabled={setDisabled} />
+                                <MidiKeyboard midiUp={midiUp} midiDown={midiDown} disabled={disabled} setDisabled={setDisabled} />
                                 <button className="button-container" onClick={refreshClicked}>Starter Code</button>
                                 {!p5Minimized &&
                                     <button className="button-container" onClick={codeMinClicked}>-</button>
@@ -369,6 +367,7 @@ function Editor(props) {
                             </span>
 
                         </span>
+                    </span>    
                         <div id="container" >
                             {height !== false &&
                                 <CodeMirror
