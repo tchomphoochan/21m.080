@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import keyboard from './Icons/keyboard.png';
 const midi = require('./Midi.js');
-
 function MidiKeyboard() {
     const [midiOn, setMidiOn] = useState(false);
     const [notesOn, setNotesOn] = useState(new Set());
     let activeKeys = {};
-
     var octave = 4;
     var keyToNote = {
         90: { "midi": 60, "pitch": "C" },     // Z
@@ -27,7 +25,6 @@ function MidiKeyboard() {
         186: { "midi": 75, "pitch": "D#/Eb" }, // ; (or : depending on keyboard)
         191: { "midi": 76, "pitch": "E" }      // / (or ? depending on keyboard)
     };
-
     useEffect(() => {
         if (midiOn) {
             document.addEventListener('keydown', handleKeyDown);
@@ -36,17 +33,14 @@ function MidiKeyboard() {
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('keyup', handleKeyUp);
         }
-
         // Cleanup: Remove the event listener when the component unmounts
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('keyup', handleKeyUp);
         };
     }, [midiOn]);
-
     function handleKeyDown(event) {
         const keyCode = event.keyCode;
-
         if (!activeKeys[keyCode]) {
             activeKeys[keyCode] = true;
             try {
@@ -65,11 +59,9 @@ function MidiKeyboard() {
             }
         }
     }
-
     function handleKeyUp(event) {
         const keyCode = event.keyCode;
         activeKeys[keyCode] = false;
-
         try {
             let note = keyToNote[keyCode];
             let midiNote = note["midi"] + (octave - 4) * 12;
@@ -80,24 +72,20 @@ function MidiKeyboard() {
         } catch (error) {
         }
     }
-
     function increaseOctave() {
         if (octave < 10) {
             octave++;
         }
     }
-
     function decreaseOctave() {
         if (octave > -2) {
             octave--;
         }
     }
-
     const midiClicked = () => {
         setMidiOn(!midiOn);
     }
     const keyboardCSS = midiOn ? 'icon active' : 'icon inactive';
-
     return (
         <div className='span-container'>
             {Array.from(notesOn).map((midiNote) => (
@@ -109,5 +97,4 @@ function MidiKeyboard() {
         </div>
     );
 }
-
 export default MidiKeyboard;
