@@ -142,6 +142,15 @@ export const Oscilloscope = function(_target) {
         //console.log(this.dataArray)
         window.requestAnimationFrame(this.drawWave);
     }
+
+    this.disconnect = function(){
+        this.target.removeChild(this.svg);
+    }.bind(this)
+
+    this.connect = function(_target){
+        this.target = document.getElementById(_target)
+        this.target.appendChild(this.svg);
+    }
 }.bind(this);
 
     /**
@@ -161,13 +170,6 @@ Oscilloscope.prototype.stop = function() {
     this.running = false;
 };
 
-/**
- * Connect the analyser-node to another audio-node
- * @param  {audioNode} node An audio-node to connect to
- */
-Oscilloscope.prototype.connect = function(node) {
-    this.analyserNode.connect(node);
-};
 
 /**
  * Connect the analyser-node to the audio-context' destination
@@ -318,4 +320,13 @@ export const Spectroscope = function(_target) {
 
         window.requestAnimationFrame(this.drawWave);
     }.bind(this);
+
+    this.disconnect = function(){
+        this.target.removeChild(this.svg);
+    }.bind(this)
+
+    this.connect = function(_target){
+        this.target = document.getElementById(_target)
+        this.target.appendChild(this.svg);
+    }
 };

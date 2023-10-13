@@ -387,7 +387,7 @@ function Editor(props) {
                 <div className="flex-child" >
                     <span className="span-container">
                         <span className="span-container">
-                            <button className="button-container" onClick={playClicked}>Play</button>
+                            <button className="button-container" onClick={playClicked}>Run</button>
                             <button className={liveCSS} onClick={liveClicked}>Live</button>
                             <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
