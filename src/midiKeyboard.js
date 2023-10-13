@@ -2,13 +2,10 @@ import { useState, useEffect } from 'react';
 import keyboard from './Icons/keyboard.png';
 const midi = require('./Midi.js');
 
-function MidiKeyboard(props) {
+function MidiKeyboard() {
     const [midiOn, setMidiOn] = useState(false);
     const [notesOn, setNotesOn] = useState(new Set());
     let activeKeys = {};
-    window.setMidi = (audioNode) => {
-        window.currAudioNode = audioNode;
-    }
 
     var octave = 4;
     var keyToNote = {
@@ -30,7 +27,6 @@ function MidiKeyboard(props) {
         186: { "midi": 75, "pitch": "D#/Eb" }, // ; (or : depending on keyboard)
         191: { "midi": 76, "pitch": "E" }      // / (or ? depending on keyboard)
     };
-    let keyDownFlag = {};
 
     useEffect(() => {
         if (midiOn) {
@@ -48,57 +44,38 @@ function MidiKeyboard(props) {
         };
     }, [midiOn]);
 
-    //should notes be displayed while audioNode playing or key down?
-    function keyDownCallBack(midiNote, pitch) {
-        try {
-            props.runMidi(`keyDown(${midiNote})`);
-            activeKeys[pitch] = eval("currAudioNode");
-            setNotesOn(new Set(notesOn).add(pitch));
-        } catch (error) {
-
-        }
-    }
-
     function handleKeyDown(event) {
         const keyCode = event.keyCode;
-        if (!keyDownFlag[keyCode]) {
+
+        if (!activeKeys[keyCode]) {
+            activeKeys[keyCode] = true;
             try {
                 let note = keyToNote[keyCode];
                 let midiNote = note["midi"] + (octave - 4) * 12;
-                let pitch = note["pitch"] + `${octave}`;
                 if (midiNote <= 127) {
-                    keyDownCallBack(midiNote, pitch);
+                    setNotesOn(new Set(notesOn).add(midiNote));
+                    midi.midiHandlerInstance.handleNoteOn(midiNote, 100);
                 }
-            } catch {
+            } catch (error) {
                 if (keyCode === 37) {
                     decreaseOctave();
                 } else if (keyCode === 39) {
                     increaseOctave();
                 }
             }
-            keyDownFlag[keyCode] = true;
-        }
-    }
-
-    function keyUpCallBack(pitch) {
-        let audioNode = activeKeys[pitch];
-        try {
-            window.midiNode = audioNode;
-            props.runMidi(`keyUp(midiNode)`);
-            setNotesOn(new Set(notesOn).delete(pitch));
-        } catch (error) {
         }
     }
 
     function handleKeyUp(event) {
         const keyCode = event.keyCode;
-        keyDownFlag[keyCode] = false;
+        activeKeys[keyCode] = false;
+
         try {
             let note = keyToNote[keyCode];
             let midiNote = note["midi"] + (octave - 4) * 12;
-            let pitch = note["pitch"] + `${octave}`;
             if (midiNote <= 127) {
-                keyUpCallBack(pitch);
+                setNotesOn(new Set(notesOn).delete(midiNote));
+                midi.midiHandlerInstance.handleNoteOff(midiNote, 0);
             }
         } catch (error) {
         }
@@ -120,10 +97,11 @@ function MidiKeyboard(props) {
         setMidiOn(!midiOn);
     }
     const keyboardCSS = midiOn ? 'icon active' : 'icon inactive';
+
     return (
         <div className='span-container'>
-            {Array.from(notesOn).map((pitch) => (
-                <div key={pitch}>{pitch}</div>
+            {Array.from(notesOn).map((midiNote) => (
+                <div key={midiNote}>{midiNote}</div>
             ))}
             <button className="invisible-button" onClick={midiClicked} >
                 <img className={keyboardCSS} src={keyboard} alt="Keyboard" />

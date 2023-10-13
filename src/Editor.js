@@ -1,4 +1,4 @@
-//9:35
+//10:18
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -41,7 +41,6 @@ function Editor(props) {
     window.innerScopeVars = innerScopeVars;
     const [liveMode, setLiveMode] = useState(true); //live mode is on by default
     const [refresh, setRefresh] = useState(false);
-    const [disabled, setDisabled] = useState(false); //do we want to disable codebox?
 
     const canvases = props.canvases;
     const [codeMinimized, setCodeMinimized] = useState(false);
@@ -320,21 +319,15 @@ function Editor(props) {
 
     //Handle Mode Changes + Play & Stop
     const playClicked = () => {
-        setLiveMode(false);
         stopClicked();
         traverse(code);
 
     }
     const liveClicked = () => {
-        if (liveMode) {
-            setLiveMode(false);
-        }
-        else {
-            setLiveMode(true);
-        }
-
+        setLiveMode(!liveMode);
     }
     const stopClicked = () => {
+        clearCanvases();
         for (const key in vars) {
             let variable = vars[key];
             try {
@@ -355,10 +348,6 @@ function Editor(props) {
             innerScopeVars[key] = [];
         }
         vars = {};
-    }
-
-    const runMidi = (callBack) => {
-        traverse(callBack);
     }
 
     //Handle refresh/max/min buttons
@@ -383,6 +372,13 @@ function Editor(props) {
         }
     };
 
+    const clearCanvases = () => {
+        for (const id of canvases) {
+            let canvas = document.getElementById(id);
+            canvas.innerHTML = "";
+        }
+    }
+
     const liveCSS = liveMode ? 'button-container active' : 'button-container';
 
     return (
@@ -396,7 +392,7 @@ function Editor(props) {
                             <button className="button-container" onClick={stopClicked}>Stop</button>
                         </span>
                         <span className="span-container">
-                            <MidiKeyboard runMidi={runMidi} disabled={disabled} setDisabled={setDisabled} />
+                            <MidiKeyboard />
                             <button className="button-container" onClick={refreshClicked}>Starter Code</button>
                             {!p5Minimized &&
                                 <button className="button-container" onClick={codeMinClicked}>-</button>

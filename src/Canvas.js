@@ -1,11 +1,4 @@
 import { useState, useEffect } from 'react';
-import p5 from 'p5';
-import gui_sketch from './gui';
-
-let x_size,y_size,edgeGapX,edgeGapY;
-let globalScale = 1;
-
-let fullscreen = false;
 
 function Canvas(props) {
     const [isMaximized, setIsMaximized] = useState(false);
