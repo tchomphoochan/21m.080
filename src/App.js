@@ -16,10 +16,10 @@ function App() {
   const [markdownContent, setMarkdownContent] = useState("");
 
   const exampleFiles = [
-    'FirstSteps', 'FourierTheorem', 'SubtractiveSynth', 'Aliasing', 'AmplitudeModulation', 'FrequencyModulation'
+    'FirstSteps', 'FourierTheorem', 'SubtractiveSynth', 'Aliasing', 'AmplitudeModulation', 'FrequencyModulation', 'Midi'
   ];
   const assignmentFiles = [
-    'Lab1',
+    'Lab1','JavaScript101'
   ];
   const referenceFiles = [
     'Oscillator', 'Filter', 'Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope', 'Player', 'Knob'
