@@ -17,15 +17,15 @@ function Canvas(props) {
             };
 
             p.draw = function () {
-                p.drawElements();
+                p.drawElements(grey);
             };
 
             p.windowResized = function () {
                 p.divResized(grey);
             };
         };
-        //console.log(document.getElementById(props.id))
-        window[props.id] = new p5(sketch, props.id);
+        window.sketch = sketch;
+        //window[props.id] = new p5(sketch, props.id);
 
     }, [props.id]);
 

@@ -27,7 +27,11 @@ export function divResized(p, backgroundColor = false) {
         p.background(backgroundColor);
     }
     for (let element of Object.values(p.elements)) {
-        p.scale(scaleWidth, scaleHeight);
+        try {
+            element.resize(scaleWidth, scaleHeight);
+        } catch {
+            p.scale(scaleWidth, scaleHeight);
+        }
         eval(element);
     }
 };
@@ -36,7 +40,8 @@ p5.prototype.divResized = function (backgroundColor) {
     divResized(this, backgroundColor);
 };
 
-export function drawElements(p) {
+export function drawElements(p, backgroundColor = false) {
+    p.background(backgroundColor ? backgroundColor : [255, 255, 255]);
     for (let element of Object.values(p.elements)) {
         try {
             element.draw();
@@ -46,22 +51,29 @@ export function drawElements(p) {
     }
 }
 
-p5.prototype.drawElements = function () {
-    drawElements(this);
+p5.prototype.drawElements = function (backgroundColor) {
+    drawElements(this, backgroundColor);
 };
 
 export class Knob {
-    constructor(p, id, x, y, size) {
+    constructor(p, options = { id: "myKnob", x: 100, y: 100, size: 100, mapto: null }) {
         this.p = p;
-        this.id = id;
-        this.x = x;
-        this.y = y;
-        this.size = size;
+        this.id = options.id;
+        this.x = options.x;
+        this.y = options.y;
+        this.size = options.size;
+        this.mapto = options.mapto || null;
         this.value = 0;
         this.startAngle = 5 * this.p.PI / 8;
-        this.endAngle = 3 * this.p.PI / 8;
+        this.endAngle = 3 * this.p.PI / 8 + 2 * this.p.PI;
         this.dragging = false;
-        p.elements[id] = this;
+        p.elements[this.id] = this;
+    }
+
+    resize(scaleWidth, scaleHeight) {
+        this.x *= scaleWidth;
+        this.y *= scaleHeight;
+        //this.size *= Math.sqrt(scaleWidth ** 2 + scaleHeight ** 2);
     }
 
     draw() {
@@ -76,7 +88,7 @@ export class Knob {
 
         // Display the ID string beneath the knob
         this.p.textSize(this.size * .09);
-        this.p.strokeWeight(0.001 * this.size);
+        this.p.strokeWeight(0.0001 * this.size);
         this.p.textAlign(this.p.CENTER, this.p.TOP);
         this.p.fill(0);
         this.p.text(this.id, this.x, this.y + this.size / 2 + this.size * .05);
@@ -92,15 +104,16 @@ export class Knob {
         this.p.stroke(255, 0, 0); // Red indicator
         this.p.strokeWeight(5);
         this.p.line(this.x, this.y, indicatorX, indicatorY);
-        //console.log(this.p.mouseIsPressed);
 
         this.p.mouseDragged = () => {
             let d = this.p.dist(this.x, this.y, this.p.mouseX, this.p.mouseY);
             if (d < this.size / 2 || this.dragging) {
                 this.dragging = true;
-                if (this.p.movedY < 0) {
-                    console.log("increase");
+                if (this.p.movedY < 0 && this.value <= 1) {
                     this.value += .01;
+                }
+                else if (this.p.movedY > 0 && this.value >= 0) {
+                    this.value -= .01;
                 }
             }
         }
