@@ -6,20 +6,21 @@ import { javascript } from '@codemirror/lang-javascript';
 
 import p5 from 'p5';
 import * as Tone from 'tone';
+import ml5 from 'ml5';
 import Canvas from "./Canvas.js";
 import gui_sketch from "./gui.js";
 import { Oscilloscope, Spectroscope } from './oscilloscope';
-import MidiKeyboard from './MidiKeyboard.js';
+import MidiKeyboard from './midiKeyboard.js';
 const midi = require('./Midi.js');
 //Save history in browser
 const stateFields = { history: historyField };
 
 
 function Editor(props) {
-
     window.p5 = p5;
     window.gui_sketch = gui_sketch;
     window.Tone = Tone;
+    window.ml5 = ml5;
     window.Oscilloscope = Oscilloscope;
     window.Spectroscope = Spectroscope;
     window.gui_sketch = gui_sketch;
