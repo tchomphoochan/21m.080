@@ -340,9 +340,7 @@ function Editor(props) {
                         }
                     </span>
                     {canvases.map((id) => (
-                        (!maximized || maximized === id) && (
-                            <Canvas key={id} id={id} onMaximize={handleMaximizeCanvas} maxOption={canvases.length > 1} />
-                        )
+                        <Canvas key={id} id={id} onMaximize={handleMaximizeCanvas} maximized={maximized} maxOption={canvases.length > 1} />
                     ))}
                 </div>
             }

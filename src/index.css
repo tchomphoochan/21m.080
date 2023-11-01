@@ -190,3 +190,7 @@ code {
   font-weight: bold;
   font-size: 18px;
 }
+
+.minimize {
+  display: none;
+}

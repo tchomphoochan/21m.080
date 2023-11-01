@@ -7,6 +7,7 @@ export function initialize(p, div, backgroundColor = false) {
     p.height = div.offsetHeight;
     p.elements = {};
     if (backgroundColor) {
+        p.backgroundColor = backgroundColor;
         p.background(backgroundColor);
     }
 }
@@ -15,33 +16,32 @@ p5.prototype.initialize = function (div, backgroundColor) {
     initialize(this, div, backgroundColor);
 };
 
-export function divResized(p, backgroundColor = false) {
+export function divResized(p, newWidth = false, newHeight = false) {
+    p.resizeCanvas(0, 0);
     let prevWidth = p.width;
     let prevHeight = p.height;
-    p.width = p.div.offsetWidth;
-    p.height = p.div.offsetHeight;
+    p.width = newWidth ? newWidth : p.div.offsetWidth;
+    p.height = newHeight ? newHeight : p.div.offsetHeight;
     let scaleWidth = p.width / prevWidth;
     let scaleHeight = p.height / prevHeight;
+    console.log(document.getElementById("Canvas1").offsetHeight);
     p.resizeCanvas(p.width, p.height);
-    if (backgroundColor) {
-        p.background(backgroundColor);
-    }
     for (let element of Object.values(p.elements)) {
         try {
             element.resize(scaleWidth, scaleHeight);
         } catch {
             p.scale(scaleWidth, scaleHeight);
+            eval(element);
         }
-        eval(element);
     }
 };
 
-p5.prototype.divResized = function (backgroundColor) {
-    divResized(this, backgroundColor);
+p5.prototype.divResized = function () {
+    divResized(this);
 };
 
-export function drawElements(p, backgroundColor = false) {
-    p.background(backgroundColor ? backgroundColor : [255, 255, 255]);
+export function drawElements(p) {
+    p.background(p.backgroundColor ? p.backgroundColor : [255, 255, 255]);
     for (let element of Object.values(p.elements)) {
         try {
             element.draw();
@@ -51,8 +51,8 @@ export function drawElements(p, backgroundColor = false) {
     }
 }
 
-p5.prototype.drawElements = function (backgroundColor) {
-    drawElements(this, backgroundColor);
+p5.prototype.drawElements = function () {
+    drawElements(this);
 };
 
 export class Knob {
