@@ -25,7 +25,7 @@ function Canvas(props) {
             };
         };
         window.sketch = sketch;
-        window[props.id] = new p5(sketch, props.id);
+        //window[props.id] = new p5(sketch, props.id);
 
     }, [props.id]);
 

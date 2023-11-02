@@ -46,7 +46,7 @@ export function drawElements(p) {
         try {
             element.draw();
         } catch {
-            //doesn't have draw function
+            eval(element);
         }
     }
 }
