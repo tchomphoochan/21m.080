@@ -2,16 +2,16 @@
 //https://youtu.be/Su792jEauZg
 import p5 from 'p5';
 
-let x_size,y_size;
+let x_size, y_size;
 let globalScale = 1;
 let fullscreen = false;
 
-const gui_sketch = function(my) {
+const gui_sketch = function (my) {
   // constraining apsect ratio to 2:1 (w:h)
   my.createCanvas(20, 20);
   let divID = my.canvas.parentElement.id;
   let myID = document.getElementById(my.canvas.parentElement.id);
-  my.resizeCanvas(myID.width,myID.height)
+  my.resizeCanvas(myID.width, myID.height)
 
   //console.log(myID,myID.clientWidth,myID.clientHeight)
 
@@ -19,32 +19,32 @@ const gui_sketch = function(my) {
   let y_size = document.getElementById(divID).offsetHeight// *.985;
   let originalSize = y_size;
 
-  my.fitDrawing = function(div){
+  my.fitDrawing = function (div) {
     x_size = document.getElementById(div).offsetWidth// *.985;
     y_size = document.getElementById(div).offsetHeight// *.985;
     originalSize = y_size;
     my.setup()
   }
 
-  my.setup = function() {
+  my.setup = function () {
     my.createCanvas(x_size, y_size);
 
     //slow down draw rate
     my.frameRate(30)
 
     // my.color VARS
-    my.color1 = new guiColor(my.color(255,40,0)); // main color
-    my.color2 = my.color(170,176,180); // secondary color
-    my.color3 = my.color(220,229,234); // background
+    my.color1 = new guiColor(my.color(255, 40, 0)); // main color
+    my.color2 = my.color(170, 176, 180); // secondary color
+    my.color3 = my.color(220, 229, 234); // background
     my.color4 = my.color(30); // text
 
     // DEFAULT STYLING
     my.background(my.color3)
     my.noStroke();
-    my.angleMode( my.DEGREES );
-    my.textStyle( my.BOLD );
-    my.textAlign ( my.CENTER ,  my.CENTER );
-    
+    my.angleMode(my.DEGREES);
+    my.textStyle(my.BOLD);
+    my.textAlign(my.CENTER, my.CENTER);
+
     // INITIALIZE DRAWING
     setNewDimensions();
     my.clearGUI();
@@ -52,7 +52,7 @@ const gui_sketch = function(my) {
   }//setup
 
   // ******** INITIALIZE VARS ******** //
-  
+
   // UI ELEMENTS DEFAULT VALUES
   let dragging = false;
   let currElement = 0;
@@ -64,8 +64,8 @@ const gui_sketch = function(my) {
   let rBtn = 40; // button size
   // slider
   let sliderWidth = 10;
-  let sliderLength=100;
-  let sliderSensitivity = .008*masterSensitivity;
+  let sliderLength = 100;
+  let sliderSensitivity = .008 * masterSensitivity;
   // radio
   let radioBox = 30;
   let seqUpdateState = 'ON';
@@ -74,77 +74,77 @@ const gui_sketch = function(my) {
   let rKnob = 40; // knob size
   let ogY = 0;
   let ogX = 0;
-  let sensitivityScale = 0.006*masterSensitivity; // alters sensitivity of turning the knob
+  let sensitivityScale = 0.006 * masterSensitivity; // alters sensitivity of turning the knob
   let ogValue = 0;
   // keybaord
-  let keypattern = [0,1,0,1,0,0,1,0,1,0,1,0]; // blackk and white key pattern for an octave
-  let keyOn = [false,null]; // state of any key being pressed and element index of keyboard that was pressed
+  let keypattern = [0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0]; // blackk and white key pattern for an octave
+  let keyOn = [false, null]; // state of any key being pressed and element index of keyboard that was pressed
   my.activeKeyboardIndex = null;
-  my.keyMapping = [  '49','50','51','52','53','54','55','56','57','48','189','187'] // 1 thru 0 row of keys
+  my.keyMapping = ['49', '50', '51', '52', '53', '54', '55', '56', '57', '48', '189', '187'] // 1 thru 0 row of keys
 
-//******** my.draw() AND my.redrawGUI() ********//
-  my.draw = function() { // only updates values of elements and if they change it calls redrawGUI()
+  //******** my.draw() AND my.redrawGUI() ********//
+  my.draw = function () { // only updates values of elements and if they change it calls redrawGUI()
     //let valuesChanged = didValuesChange();
     // ITERATE THRU ALL ELEMENTS and UPDATE THEM IF NEEDED
     for (let i = 0; i < elements.length; i++) {
-    // UPDATE KNOB VALUE
-      if (elements[i].type == 'knob' || elements[i].type == 'dial'){
-        if (dragging && currElement==i) {
+      // UPDATE KNOB VALUE
+      if (elements[i].type == 'knob' || elements[i].type == 'dial') {
+        if (dragging && currElement == i) {
           //elements[i].prev = elements[i].value; // store prev val
           let curX = my.scaleX(elements[i].x)
           let curY = my.scaleY(elements[i].y)
-          let dx = (curX*globalScale - my.mouseX - ogX) * -1; // mouse units
-          let dy = curY*globalScale - my.mouseY - ogY; // mouse units
-          let dxSum = dx**2 * Math.sign(dx)  + dy**2 * Math.sign(dy) 
+          let dx = (curX * globalScale - my.mouseX - ogX) * -1; // mouse units
+          let dy = curY * globalScale - my.mouseY - ogY; // mouse units
+          let dxSum = dx ** 2 * Math.sign(dx) + dy ** 2 * Math.sign(dy)
           let dxAmplitude = Math.sqrt(Math.abs(dxSum)) * Math.sign(dxSum);
           let temp = dxAmplitude * sensitivityScale + ogValue
           //clip to 0-1
-          elements[i].value = temp>1 ? 1 : temp<0 ? 0 : temp
+          elements[i].value = temp > 1 ? 1 : temp < 0 ? 0 : temp
         }
-      } 
-    // UPDATE SLIDER VALUE
-      else if (elements[i].type == 'slider' || elements[i].type == 'fader' ){
-        if (dragging && currElement==i) {
+      }
+      // UPDATE SLIDER VALUE
+      else if (elements[i].type == 'slider' || elements[i].type == 'fader') {
+        if (dragging && currElement == i) {
           //elements[i].prev = elements[i].value; // store prev val
           let curX = my.scaleX(elements[i].x)
           let curY = my.scaleY(elements[i].y)
-          let dx = curX*globalScale - my.mouseX - ogX; // mouse units
-          var dy = curY*globalScale - my.mouseY - ogY; // mouse units
-          let dxScaled = -dx * (sliderSensitivity/elements[i].size); // mouse units + scaled for sensitivity
-          let dyScaled = dy * (sliderSensitivity/elements[i].size); // mouse units + scaled for sensitivity
-          
+          let dx = curX * globalScale - my.mouseX - ogX; // mouse units
+          var dy = curY * globalScale - my.mouseY - ogY; // mouse units
+          let dxScaled = -dx * (sliderSensitivity / elements[i].size); // mouse units + scaled for sensitivity
+          let dyScaled = dy * (sliderSensitivity / elements[i].size); // mouse units + scaled for sensitivity
+
           elements[i].value = dxScaled + dyScaled - ogValue; // update value
 
           //clip to 0-1
-          elements[i].value = elements[i].value>1 ? 1 : elements[i].value<0 ? 0 : elements[i].value
+          elements[i].value = elements[i].value > 1 ? 1 : elements[i].value < 0 ? 0 : elements[i].value
         }
-      } 
-    
-    // TOGGLE VALUE GETS UPDATED IN mousePressed()
-      else if (elements[i].type == 'toggle' ){
+      }
+
+      // TOGGLE VALUE GETS UPDATED IN mousePressed()
+      else if (elements[i].type == 'toggle') {
         //elements[i].prev = elements[i].value; // store prev val
       }
 
-    // UPDATE MOMENTARY BUTTON VALUE
-      else if (elements[i].type == 'momentary' ){
+      // UPDATE MOMENTARY BUTTON VALUE
+      else if (elements[i].type == 'momentary') {
         //elements[i].prev = elements[i].value; // store prev val
-        if (currElement == i && dragging){
+        if (currElement == i && dragging) {
           elements[i].value = 1;
         } else {
           elements[i].value = 0;
         }
       }
-    // RADIO BUTTON VALUE GETS UPDATED IN mousePressed()
-      else if (elements[i].type == 'radio' ){
+      // RADIO BUTTON VALUE GETS UPDATED IN mousePressed()
+      else if (elements[i].type == 'radio') {
         //elements[i].prev = elements[i].value; // store prev val
       }
-    // UPDATE KEYBOARD VALUES
-      else if (elements[i].type == 'keyboard'){
+      // UPDATE KEYBOARD VALUES
+      else if (elements[i].type == 'keyboard') {
         // if (elements[i].active == true){
         //   my.activeKeyboardIndex = i;
         //   my.turnOffOtherKeyboards();
         // }
-      } 
+      }
     }
     //if (valuesChanged == true) {my.redrawGUI();}
     my.redrawGUI()
@@ -160,30 +160,30 @@ const gui_sketch = function(my) {
     return false
   }
 
-  my.clearGUI = function(){
+  my.clearGUI = function () {
     my.background(my.color3);
 
-    if (fullscreen == false){
+    if (fullscreen == false) {
       // draw grid only on non-fullscreen
       my.push();
-      my.fill(30,120);
+      my.fill(30, 120);
       my.noStroke();
-      my.textSize(.03*y_size);
-      my.textStyle( my.NORMAL );
-      let yOffset = y_size / (4*globalScale)
-      let xOffset = x_size / (4*globalScale)
-      let vals = [25,50,75,100];
-      my.text(0,6,6)
+      my.textSize(.03 * y_size);
+      my.textStyle(my.NORMAL);
+      let yOffset = y_size / (4 * globalScale)
+      let xOffset = x_size / (4 * globalScale)
+      let vals = [25, 50, 75, 100];
+      my.text(0, 6, 6)
       for (let i = 1; i < 5; i++) {
-        my.text(vals[i-1],x_size*.012 +i*xOffset*.97,6)
+        my.text(vals[i - 1], x_size * .012 + i * xOffset * .97, 6)
       }
-      my.textAlign ( my.LEFT ,  my.CENTER );
+      my.textAlign(my.LEFT, my.CENTER);
       for (let i = 1; i < 5; i++) {
-        my.text(vals[i-1],1,y_size*.015 +i*yOffset*.97)
+        my.text(vals[i - 1], 1, y_size * .015 + i * yOffset * .97)
       }
       my.stroke(my.color2);
       my.noFill();
-      my.rect(0,0,x_size/globalScale,y_size/globalScale);
+      my.rect(0, 0, x_size / globalScale, y_size / globalScale);
       my.pop();
     }
 
@@ -191,14 +191,14 @@ const gui_sketch = function(my) {
     my.push();
     my.stroke(my.color2);
     my.strokeWeight(4);
-    for (let i=0; i < my.lines.length; i++){
-      let a = my.scaleX( my.lines[i][0] );
-      let b = my.scaleY( my.lines[i][1] );
-      let c = my.scaleX( my.lines[i][2] );
-      let d = my.scaleY( my.lines[i][3] );
+    for (let i = 0; i < my.lines.length; i++) {
+      let a = my.scaleX(my.lines[i][0]);
+      let b = my.scaleY(my.lines[i][1]);
+      let c = my.scaleX(my.lines[i][2]);
+      let d = my.scaleY(my.lines[i][3]);
       my.push();
       my.stroke(my.lines[i][4]);
-      my.line(a,b,c,d);
+      my.line(a, b, c, d);
       my.pop();
     }
     my.pop();
@@ -206,7 +206,7 @@ const gui_sketch = function(my) {
   }
 
 
-  my.redrawGUI = function() { //can't name it redraw because p5 already has a custom function w that name
+  my.redrawGUI = function () { //can't name it redraw because p5 already has a custom function w that name
     my.clearGUI();
 
     my.scale(globalScale);
@@ -222,167 +222,167 @@ const gui_sketch = function(my) {
       // DRAW KNOB
       my.fill(currentColor);
       if (elements[i].type == 'line') my.drawLine(i)
-      else if (elements[i].type == 'knob' || elements[i].type == 'dial'){
-          my.push();
-          let curX = my.scaleX(elements[i].x)
-          let curY = my.scaleY(elements[i].y)
-          my.translate(curX,curY);
-          let sz = elements[i].size;
-          // background circle
-          my.strokeWeight(6);
-          my.fill(my.color3);  
-          my.stroke(my.color3);
-          my.ellipse(0, 0, 1.2*rKnob*sz);
-          // full arc
-          my.strokeCap( my.SQUARE    );
-          my.stroke(my.color2);
-          my.noFill();  
-          my.arc(0, 0, 2*rKnob*sz, 2*rKnob*sz,120,60);
-          // active arc
-          my.stroke(currentColor);
-          //keep value from 0-1 here
-          let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max-elements[i].min) ; // normalize between 0-1
-          //console.log(valueNorm)
-          //let valueInDegrees = valueNorm * 300 - 240; // range is -240 to 60 deg
-          let valueInDegrees = elements[i].value * 300 - 240; // range is -240 to 60 deg
-          let bipolarOffset = 0;
-          let start = 120;
-          let end = valueInDegrees+.01
-          if (elements[i].bipolar == true){
-            start = 270;
-            if (end < -90){
-              let startCopy = start;
-              start = end;
-              end = startCopy;
-            }
+      else if (elements[i].type == 'knob' || elements[i].type == 'dial') {
+        my.push();
+        let curX = my.scaleX(elements[i].x)
+        let curY = my.scaleY(elements[i].y)
+        my.translate(curX, curY);
+        let sz = elements[i].size;
+        // background circle
+        my.strokeWeight(6);
+        my.fill(my.color3);
+        my.stroke(my.color3);
+        my.ellipse(0, 0, 1.2 * rKnob * sz);
+        // full arc
+        my.strokeCap(my.SQUARE);
+        my.stroke(my.color2);
+        my.noFill();
+        my.arc(0, 0, 2 * rKnob * sz, 2 * rKnob * sz, 120, 60);
+        // active arc
+        my.stroke(currentColor);
+        //keep value from 0-1 here
+        let valueNorm = (elements[i].value - elements[i].min) / (elements[i].max - elements[i].min); // normalize between 0-1
+        //console.log(valueNorm)
+        //let valueInDegrees = valueNorm * 300 - 240; // range is -240 to 60 deg
+        let valueInDegrees = elements[i].value * 300 - 240; // range is -240 to 60 deg
+        let bipolarOffset = 0;
+        let start = 120;
+        let end = valueInDegrees + .01
+        if (elements[i].bipolar == true) {
+          start = 270;
+          if (end < -90) {
+            let startCopy = start;
+            start = end;
+            end = startCopy;
           }
-          my.arc(0, 0, 2*rKnob*sz, 2*rKnob*sz,start,end);
-          
-          // dial lines
-          if (elements[i].bipolar == true){
-            my.push();
-            my.fill(my.color3);
-            my.noStroke();
-            my.rect(-1.5,0,3,-rKnob*1.1);
-            my.pop();
-          }
-          my.strokeCap( my.ROUND );
-          my.rotate(valueInDegrees);
+        }
+        my.arc(0, 0, 2 * rKnob * sz, 2 * rKnob * sz, start, end);
+
+        // dial lines
+        if (elements[i].bipolar == true) {
           my.push();
-          my.stroke(my.color3);
-          my.strokeWeight(12);
-          my.line(0, 0, rKnob*sz, 0);
-          my.pop();
-          my.line(0, 0, rKnob*sz, 0);
-          my.pop();
-          
-          //calc current value
-          let scaledValue = scaleOutput( elements[i].value, 0, 1, elements[i].min, elements[i].max, elements[i].curve)
-          // LABEL
-          my.push();
-          my.fill(my.color4);
+          my.fill(my.color3);
           my.noStroke();
-          if (elements[i].showValue == true) {
-            let roundto = 0;
-            if (elements[i].max-elements[i].min <= .1) {
-              roundto = 3
-            } else if (elements[i].max-elements[i].min <= 1) {
-              roundto = 2
-            } else if (elements[i].max-elements[i].min <= 10) {
-              roundto = 1
-            }
-            scaledValue = my.round(scaledValue,roundto)
-            my.textSize(13);
-            my.text( scaledValue, curX,curY+rKnob*sz-2);
-          }
-          if (elements[i].showLabel == true) {
-            my.text(elements[i].label, curX,curY+rKnob*sz+13);
-          }
+          my.rect(-1.5, 0, 3, -rKnob * 1.1);
           my.pop();
-          
-          // MAP TO CONTROLS
-          if( elements[i].prev != elements[i].value ){
-          mapToControls(elements[i].mapto, scaledValue, elements[i].callback);
+        }
+        my.strokeCap(my.ROUND);
+        my.rotate(valueInDegrees);
+        my.push();
+        my.stroke(my.color3);
+        my.strokeWeight(12);
+        my.line(0, 0, rKnob * sz, 0);
+        my.pop();
+        my.line(0, 0, rKnob * sz, 0);
+        my.pop();
+
+        //calc current value
+        let scaledValue = scaleOutput(elements[i].value, 0, 1, elements[i].min, elements[i].max, elements[i].curve)
+        // LABEL
+        my.push();
+        my.fill(my.color4);
+        my.noStroke();
+        if (elements[i].showValue == true) {
+          let roundto = 0;
+          if (elements[i].max - elements[i].min <= .1) {
+            roundto = 3
+          } else if (elements[i].max - elements[i].min <= 1) {
+            roundto = 2
+          } else if (elements[i].max - elements[i].min <= 10) {
+            roundto = 1
           }
-          elements[i].prev = elements[i].value
-      }  
-    // END KNOB
-    // DRAW SLIDER
-      else if (elements[i].type == 'slider' || elements[i].type == 'fader'){
-        my.push(); 
+          scaledValue = my.round(scaledValue, roundto)
+          my.textSize(13);
+          my.text(scaledValue, curX, curY + rKnob * sz - 2);
+        }
+        if (elements[i].showLabel == true) {
+          my.text(elements[i].label, curX, curY + rKnob * sz + 13);
+        }
+        my.pop();
+
+        // MAP TO CONTROLS
+        if (elements[i].prev != elements[i].value) {
+          mapToControls(elements[i].mapto, scaledValue, elements[i].callback);
+        }
+        elements[i].prev = elements[i].value
+      }
+      // END KNOB
+      // DRAW SLIDER
+      else if (elements[i].type == 'slider' || elements[i].type == 'fader') {
+        my.push();
         let sz = elements[i].size;
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
-        my.translate(curX,curY);
-        if (elements[i].orientation == 'horizontal'){
+        my.translate(curX, curY);
+        if (elements[i].orientation == 'horizontal') {
           my.rotate(90);
         }
-        my.rectMode( my.CENTER );  
+        my.rectMode(my.CENTER);
         // full slider line
-        my.strokeCap( my.SQUARE  );
+        my.strokeCap(my.SQUARE);
         my.noStroke();
         // background box
         my.fill(my.color3);
-        my.rect(0, 0, 15*sz*1.2, sliderLength*sz*1.2);
+        my.rect(0, 0, 15 * sz * 1.2, sliderLength * sz * 1.2);
         // full line
         my.fill(my.color2);
-        my.rect(0, 0,sliderWidth*sz, sliderLength*sz);
+        my.rect(0, 0, sliderWidth * sz, sliderLength * sz);
 
         // active line
-        my.strokeWeight(sliderWidth*sz);
+        my.strokeWeight(sliderWidth * sz);
         my.stroke(currentColor);
-        let convertedVal = elements[i].value * sliderLength*sz
+        let convertedVal = elements[i].value * sliderLength * sz
         let bipolarOffset = 0;
 
-        if (elements[i].bipolar == true){
-          bipolarOffset = sliderLength*sz/2;
+        if (elements[i].bipolar == true) {
+          bipolarOffset = sliderLength * sz / 2;
         }
-        my.line(0,sliderLength*sz/2 - bipolarOffset,0,sliderLength*sz/2-convertedVal);
-        
-        // middle line
-        my.strokeWeight(2*sz);
-        my.stroke(my.color3);
-        my.line(0,.9*sliderLength*sz/2, 0,-.9*sliderLength*sz/2);
+        my.line(0, sliderLength * sz / 2 - bipolarOffset, 0, sliderLength * sz / 2 - convertedVal);
 
-        if (elements[i].bipolar == true){
+        // middle line
+        my.strokeWeight(2 * sz);
+        my.stroke(my.color3);
+        my.line(0, .9 * sliderLength * sz / 2, 0, -.9 * sliderLength * sz / 2);
+
+        if (elements[i].bipolar == true) {
           my.push();
           my.fill(my.color3)
           my.noStroke();
-          my.rect(0,0,sliderWidth*1*sz,2)
+          my.rect(0, 0, sliderWidth * 1 * sz, 2)
           my.pop();
         }
         // control point
         my.push();
-        let sliderKnobSize = 8*sz
+        let sliderKnobSize = 8 * sz
         my.fill(currentColor);
         my.stroke(my.color3);
         my.rect(
-          0, 
-          .95*(sliderLength*sz/2) -.95*convertedVal,
-          sliderWidth*1.5*sz, 
+          0,
+          .95 * (sliderLength * sz / 2) - .95 * convertedVal,
+          sliderWidth * 1.5 * sz,
           sliderKnobSize);
         my.pop();
 
         // LABEL
         my.fill(my.color4);
         my.noStroke();
-        if (elements[i].orientation == 'horizontal'){
+        if (elements[i].orientation == 'horizontal') {
           my.rotate(-90)
         }
         if (elements[i].showLabel == true) {
           let txt = elements[i].label;
-          my.textSize((2+sz)*4); // scales text based on num of char
+          my.textSize((2 + sz) * 4); // scales text based on num of char
           let labelX = 0;
-          let labelY = sliderLength*sz/2+10;
-          if (elements[i].orientation == 'horizontal'){
-            my.text(txt, 0, labelX-15);
+          let labelY = sliderLength * sz / 2 + 10;
+          if (elements[i].orientation == 'horizontal') {
+            my.text(txt, 0, labelX - 15);
           } else {
             my.text(txt, labelX, labelY + 15);
           }
         }
 
         //calc current value
-        let scaledValue = scaleOutput( elements[i].value, 0, 1, elements[i].min, elements[i].max, elements[i].curve)
+        let scaledValue = scaleOutput(elements[i].value, 0, 1, elements[i].min, elements[i].max, elements[i].curve)
 
         if (elements[i].showValue == true) {
           let roundto = 0;
@@ -395,33 +395,33 @@ const gui_sketch = function(my) {
           }
           scaledValue = my.round(scaledValue, roundto)
 
-          my.textSize((5+sz)*2); // scales text based on num of char
+          my.textSize((5 + sz) * 2); // scales text based on num of char
           let labelX = 0;
-          let labelY = sliderLength*sz/2+10;
-          if (elements[i].orientation == 'horizontal'){
-            my.text( scaledValue, 0,labelX+15);
+          let labelY = sliderLength * sz / 2 + 10;
+          if (elements[i].orientation == 'horizontal') {
+            my.text(scaledValue, 0, labelX + 15);
           } else {
-            my.text( scaledValue, labelX,labelY);
+            my.text(scaledValue, labelX, labelY);
           }
         }
         my.pop();
         // MAP TO CONTROLS
-        if( elements[i].prev != elements[i].value ){
+        if (elements[i].prev != elements[i].value) {
           mapToControls(elements[i].mapto, scaledValue, elements[i].callback);
-          }
+        }
         elements[i].prev = elements[i].value
       }
-    // END SLIDER
-    // DRAW TOGGLE BUTTON
-      else if (elements[i].type == 'toggle' ){
+      // END SLIDER
+      // DRAW TOGGLE BUTTON
+      else if (elements[i].type == 'toggle') {
         my.push(); // ASSUME ON STATE
         let sz = elements[i].size;
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
-        my.translate(curX,curY);
+        my.translate(curX, curY);
         // background circle
-        my.fill(my.color3);  
-        my.ellipse(0, 0, 2.2*rBtn*sz);
+        my.fill(my.color3);
+        my.ellipse(0, 0, 2.2 * rBtn * sz);
         // setting up color variables
         my.stroke(currentColor);
         my.strokeWeight(4);
@@ -432,111 +432,111 @@ const gui_sketch = function(my) {
           textColor = my.color2;
         }
         my.fill(my.color3);
-        my.ellipse(0, 0, sz*rBtn*2, sz*rBtn*2);
+        my.ellipse(0, 0, sz * rBtn * 2, sz * rBtn * 2);
         my.fill(textColor);
         my.noStroke();
         if (elements[i].showLabel == true) {
           let toggleText = elements[i].label;
-          my.textSize(sz*85/toggleText.length); // scales text based on num of chars
+          my.textSize(sz * 85 / toggleText.length); // scales text based on num of chars
           my.text(toggleText, 0, 1);
         }
         my.pop();
         // MAP TO CONTROLS
-        if( elements[i].prev != elements[i].value ){
+        if (elements[i].prev != elements[i].value) {
           mapToControls(elements[i].mapto, elements[i].value, elements[i].callback);
-          }
+        }
         elements[i].prev = elements[i].value
       }
-    // END TOGGLE
-    // DRAW MOMENTARY BUTTON
-      else if (elements[i].type == 'momentary' ){
+      // END TOGGLE
+      // DRAW MOMENTARY BUTTON
+      else if (elements[i].type == 'momentary') {
         my.push(); // ASSUME OFF STATE
         let sz = elements[i].size;
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
-        my.translate(curX,curY);
+        my.translate(curX, curY);
         // background circle
-        my.fill(my.color3);  
-        my.ellipse(0, 0, 2.2*rBtn*sz);
+        my.fill(my.color3);
+        my.ellipse(0, 0, 2.2 * rBtn * sz);
         // setting up color variables
         my.fill(my.color3);
         my.stroke(my.color2);
         my.strokeWeight(2);
         let textColor = my.color2;
-        if (elements[i].value == 1){ // ON STATE
+        if (elements[i].value == 1) { // ON STATE
           my.stroke(currentColor);
           textColor = currentColor;
           my.strokeWeight(4);
         }
-        my.ellipse(0, 0, sz*rBtn*2, sz*rBtn*2);
-        my.fill (textColor);
+        my.ellipse(0, 0, sz * rBtn * 2, sz * rBtn * 2);
+        my.fill(textColor);
         my.noStroke();
         if (elements[i].showLabel == true) {
           let text = elements[i].label;
-          my.textSize(sz*85/text.length); // scales text based on num of chars
+          my.textSize(sz * 85 / text.length); // scales text based on num of chars
           my.text(text, 0, 1);
         }
         my.pop();
         // MAP TO CONTROLS
-        if( elements[i].value && elements[i].prev != elements[i].value ){
+        if (elements[i].value && elements[i].prev != elements[i].value) {
           mapToControls(elements[i].mapto, elements[i].value, elements[i].callback);
         }
         elements[i].prev = elements[i].value
       }
-    // END MOMENTARY
-    // DRAW RADIO BUTTON
-      else if (elements[i].type == 'radio'){
+      // END MOMENTARY
+      // DRAW RADIO BUTTON
+      else if (elements[i].type == 'radio') {
         my.push();
         let sz = elements[i].size;
         let rBoxSz = radioBox * sz;
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
-        my.translate(curX,curY);
+        my.translate(curX, curY);
         // boxes
         my.fill(my.color2);
         my.stroke(my.color3);
         my.strokeWeight(2);
         let numBoxes = elements[i].radioOptions.length
-        let yBoxInit = - Math.floor(numBoxes/2); // y scale for where to start drawing
-        if (numBoxes % 2 != 0){
+        let yBoxInit = - Math.floor(numBoxes / 2); // y scale for where to start drawing
+        if (numBoxes % 2 != 0) {
           yBoxInit += -0.5 // extra offset if numBoxes is odd
         }
         // background rect
         my.push();
-        my.rectMode( my.CENTER );
-        my.fill(my.color3);  
+        my.rectMode(my.CENTER);
+        my.fill(my.color3);
         my.noStroke();
-        my.rect(0, 0, rBoxSz+10*sz,rBoxSz*numBoxes+10*sz);
+        my.rect(0, 0, rBoxSz + 10 * sz, rBoxSz * numBoxes + 10 * sz);
         my.pop();
         // DRAW BOXES
         let yBox = yBoxInit;
-        for (let j=0; j < numBoxes; j++){
-          let x = -rBoxSz/2;
-          let y = yBox*rBoxSz;
-          if (elements[i].orientation == 'horizontal'){
+        for (let j = 0; j < numBoxes; j++) {
+          let x = -rBoxSz / 2;
+          let y = yBox * rBoxSz;
+          if (elements[i].orientation == 'horizontal') {
             x = y;
-            y = -rBoxSz/2;
+            y = -rBoxSz / 2;
           }
-          my.rect(x,y,rBoxSz,rBoxSz);
+          my.rect(x, y, rBoxSz, rBoxSz);
           yBox = yBox + 1; // adjust y scale
         }
         // BOX LABELS
         my.textSize(8);
         my.noStroke();
-        my.textAlign( my.LEFT)
+        my.textAlign(my.LEFT)
         my.fill(my.color3);
         if (elements[i].showLabel == true) {
           yBox = yBoxInit + 0.5; // reset to original value, add offset to center text
-          for (let j=0; j < numBoxes; j++){
-            let x = -rBoxSz/4;
-            let y = yBox*rBoxSz;
-            if (elements[i].orientation == 'horizontal'){
+          for (let j = 0; j < numBoxes; j++) {
+            let x = -rBoxSz / 4;
+            let y = yBox * rBoxSz;
+            if (elements[i].orientation == 'horizontal') {
               x = y;
               y = 0;
-            } 
+            }
             my.text(elements[i].radioOptions[j], x, y);
             yBox = yBox + 1; // adjust y scale
-          } 
+          }
         }
         // FILL IN ACTIVE BUTTON
         let active = elements[i].value - 1; // adjust for 0-indexing
@@ -544,46 +544,46 @@ const gui_sketch = function(my) {
         my.fill(currentColor);
         my.stroke(my.color3);
         my.strokeWeight(2);
-        let x = -rBoxSz/2;
-        let y = yBox*rBoxSz;
-        if (elements[i].orientation == 'horizontal'){
+        let x = -rBoxSz / 2;
+        let y = yBox * rBoxSz;
+        if (elements[i].orientation == 'horizontal') {
           x = y;
-          y = -rBoxSz/2;
+          y = -rBoxSz / 2;
         }
-        my.rect(x,y,rBoxSz,rBoxSz);
+        my.rect(x, y, rBoxSz, rBoxSz);
         my.noStroke();
         my.fill(my.color3);
         if (elements[i].showLabel == true) {
           let txt = elements[i].radioOptions[active];
           let x = 0;
-          let y = (yBox+.5)*rBoxSz;
-          if (elements[i].orientation == 'horizontal'){
+          let y = (yBox + .5) * rBoxSz;
+          if (elements[i].orientation == 'horizontal') {
             x = y;
             y = 0;
           }
-          my.text(txt, x,y);
+          my.text(txt, x, y);
         }
         my.pop();
         // MAP TO CONTROLS
-        if( elements[i].prev != elements[i].value ){
-          mapToControls(elements[i].mapto, elements[i].radioOptions[elements[i].value-1], elements[i].callback);
+        if (elements[i].prev != elements[i].value) {
+          mapToControls(elements[i].mapto, elements[i].radioOptions[elements[i].value - 1], elements[i].callback);
         }
         elements[i].prev = elements[i].value
       }
-    // END RADIO
-    // DRAW KEYBOARD
-      else if (elements[i].type == 'keyboard'){
+      // END RADIO
+      // DRAW KEYBOARD
+      else if (elements[i].type == 'keyboard') {
         // draw element
         my.push();
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
-        my.translate(curX,curY);
-        if (elements[i].active == true){ // highlight when 'active'
+        my.translate(curX, curY);
+        if (elements[i].active == true) { // highlight when 'active'
           my.noFill();
           my.stroke(currentColor);
           my.strokeWeight(12);
         }
-        my.rect(0,0,elements[i].width,elements[i].height)
+        my.rect(0, 0, elements[i].width, elements[i].height)
         my.fill(255);
         my.stroke(0);
         my.strokeWeight(2);
@@ -593,43 +593,43 @@ const gui_sketch = function(my) {
         // WHITE KEYS
         let wCount = 0;
         for (let j = 0; j < elements[i].keys; j++) {
-          if (k >= 12) {k = k - 12};
+          if (k >= 12) { k = k - 12 };
           if (keypattern[k] == 0) {
             my.fill(255);
             if (elements[i].value === my.keyMapping[j]) {
               my.fill(currentColor);
             }
-            let xShift = whiteKeyWidth*wCount;
+            let xShift = whiteKeyWidth * wCount;
             wCount++;
             my.rect(xShift, 0, whiteKeyWidth, elements[i].height);
-          } 
+          }
           k++;
         }
         // BLACK KEYS
-        let blackKeyOffset = [1,3,6,8,10];
+        let blackKeyOffset = [1, 3, 6, 8, 10];
         k = 0;
         let bCount = 0; // how many black keys have been drawn
         for (let j = 0; j < elements[i].keys; j++) {
-          if (k >= 12) {k = k - 12};
+          if (k >= 12) { k = k - 12 };
           if (keypattern[k] == 1) {
             // draw black key
             bCount++;
             // SET EITHER BLACK OR ACTIVE COLOR
-            my.fill(0); 
+            my.fill(0);
             if (elements[i].value === my.keyMapping[j]) {
               my.fill(currentColor);
             }
             // DRAW KEY RECTANGLE
-            let bOctave = Math.floor(bCount/6)
-            let xShift = whiteKeyWidth*(7/12)*blackKeyOffset[(bCount-1)%5] + whiteKeyWidth*7*bOctave; 
-            my.rect(xShift, 0, (whiteKeyWidth*7/12), elements[i].height*.6);
+            let bOctave = Math.floor(bCount / 6)
+            let xShift = whiteKeyWidth * (7 / 12) * blackKeyOffset[(bCount - 1) % 5] + whiteKeyWidth * 7 * bOctave;
+            my.rect(xShift, 0, (whiteKeyWidth * 7 / 12), elements[i].height * .6);
           }
           k++;
         }
-        my.ellipse(0,0,6);
+        my.ellipse(0, 0, 6);
         my.pop();
       }
-    }  
+    }
   } //redraw
 
   function mapToControls(mapto, value, cb) {
@@ -637,22 +637,22 @@ const gui_sketch = function(my) {
     let defined = 0
     //console.log(mapto, value, cb)
 
-    if(mapto === undefined) {
+    if (mapto === undefined) {
       defined = 1
-    } else{
-      try { eval(mapto + '.rampTo(' + value + ', .1)');}
-      catch (e) { console.log('invalid mapto', e)}
+    } else {
+      try { eval(mapto + '.rampTo(' + value + ', .1)'); }
+      catch (e) { console.log('invalid mapto', e) }
     }
 
-     if(cb === undefined) {
+    if (cb === undefined) {
       defined = 2
-    } else{
+    } else {
       try { cb(value) }
-      catch (e) { console.log('invalid callback', e)}
+      catch (e) { console.log('invalid callback', e) }
     }
 
-    if( defined == 0){ console.log('no mapto or callback defined')}
-    
+    if (defined == 0) { console.log('no mapto or callback defined') }
+
     /*** still thinking about the best way of implementing
     if( mapto.charAt(mapto.length-1) === ')' ){
       try {
@@ -679,114 +679,115 @@ const gui_sketch = function(my) {
       }
     }
     ****/
-  } 
+  }
 
-//******** MOUSE CLICKS AND KEY PRESSES ********//
-  my.mousePressed = function() {
+  //******** MOUSE CLICKS AND KEY PRESSES ********//
+  my.mousePressed = function () {
     currElement = "none";
     dragging = true; // start dragging
     for (let i = 0; i < elements.length; i++) {
-      if (elements[i].type == "knob" || elements[i].type == 'dial'){
+      if (elements[i].type == "knob" || elements[i].type == 'dial') {
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
-        if (my.dist(my.mouseX, my.mouseY, curX*globalScale, curY*globalScale) < rKnob*globalScale*elements[i].size) { 
-          ogX = curX*globalScale - my.mouseX;
-          ogY = curY*globalScale - my.mouseY;
+        if (my.dist(my.mouseX, my.mouseY, curX * globalScale, curY * globalScale) < rKnob * globalScale * elements[i].size) {
+          ogX = curX * globalScale - my.mouseX;
+          ogY = curY * globalScale - my.mouseY;
           ogValue = elements[i].value;
           currElement = i;
           //eval(elements[i].callback);
           break
         }
-      } 
-      else if (elements[i].type == "slider" || elements[i].type == 'fader'){
-        let orientationDim = sliderWidth*2*globalScale*elements[i].size/2;
-        let verticalDim = sliderLength*globalScale*elements[i].size/2+10;
-        if (elements[i].orientation == 'horizontal'){
-          orientationDim = sliderLength*globalScale*elements[i].size/2+10;
-          verticalDim = sliderWidth*2*globalScale*elements[i].size/2;
+      }
+      else if (elements[i].type == "slider" || elements[i].type == 'fader') {
+        let orientationDim = sliderWidth * 2 * globalScale * elements[i].size / 2;
+        let verticalDim = sliderLength * globalScale * elements[i].size / 2 + 10;
+        if (elements[i].orientation == 'horizontal') {
+          orientationDim = sliderLength * globalScale * elements[i].size / 2 + 10;
+          verticalDim = sliderWidth * 2 * globalScale * elements[i].size / 2;
         }
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
-        if (Math.abs(curX*globalScale - my.mouseX) <= (orientationDim)){
-          if (Math.abs(curY*globalScale - my.mouseY) <= (verticalDim)){
-            ogX = curX*globalScale - my.mouseX;
-            ogY = curY*globalScale - my.mouseY;
+        if (Math.abs(curX * globalScale - my.mouseX) <= (orientationDim)) {
+          if (Math.abs(curY * globalScale - my.mouseY) <= (verticalDim)) {
+            ogX = curX * globalScale - my.mouseX;
+            ogY = curY * globalScale - my.mouseY;
             ogValue = -elements[i].value;
             currElement = i;
             //eval(elements[i].callback);
             break
           }
         }
-      } 
-      else if (elements[i].type == "toggle"){
+      }
+      else if (elements[i].type == "toggle") {
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
-        if (my.dist(my.mouseX, my.mouseY, curX*globalScale, curY*globalScale) < rBtn*globalScale*elements[i].size) { 
+        if (my.dist(my.mouseX, my.mouseY, curX * globalScale, curY * globalScale) < rBtn * globalScale * elements[i].size) {
           elements[i].value = 1 - elements[i].value;
           currElement = i;
           //eval(elements[i].callback);
           break
         }
       }
-      else if (elements[i].type == "momentary"){
+      else if (elements[i].type == "momentary") {
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
-        if (my.dist(my.mouseX, my.mouseY, curX*globalScale, curY*globalScale) < rBtn*globalScale*elements[i].size) { 
+        if (my.dist(my.mouseX, my.mouseY, curX * globalScale, curY * globalScale) < rBtn * globalScale * elements[i].size) {
           currElement = i;
           //eval(elements[i].callback);
           break
         }
       }
-      else if (elements[i].type == "radio"){        let scaling = globalScale*elements[i].size
-        
+      else if (elements[i].type == "radio") {
+        let scaling = globalScale * elements[i].size
+
         let numBoxes = elements[i].radioOptions.length;
         let boxID = 1;
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
 
-        if (elements[i].orientation == 'horizontal'){
+        if (elements[i].orientation == 'horizontal') {
 
-          if (Math.abs(curY*globalScale - my.mouseY) <= (radioBox*scaling/2)){
-            let mousePosX = my.mouseX - curX*globalScale;
-            let leftBound = -radioBox*scaling*(numBoxes/2);
-            let rightBound = leftBound + radioBox*scaling;
-            for (let j=0; j < numBoxes; j++){
-              if (leftBound <= mousePosX && mousePosX <= rightBound){
+          if (Math.abs(curY * globalScale - my.mouseY) <= (radioBox * scaling / 2)) {
+            let mousePosX = my.mouseX - curX * globalScale;
+            let leftBound = -radioBox * scaling * (numBoxes / 2);
+            let rightBound = leftBound + radioBox * scaling;
+            for (let j = 0; j < numBoxes; j++) {
+              if (leftBound <= mousePosX && mousePosX <= rightBound) {
                 elements[i].value = boxID;
                 //eval(elements[i].callback);
                 break
               }
               boxID += 1;
-              leftBound += radioBox*scaling;
-              rightBound += radioBox*scaling;
+              leftBound += radioBox * scaling;
+              rightBound += radioBox * scaling;
             }
-          } 
-        } 
+          }
+        }
         else {
           let curX = my.scaleX(elements[i].x)
           let curY = my.scaleY(elements[i].y)
-          if (Math.abs(curX*globalScale - my.mouseX) <= (radioBox*scaling/2)){
-            let mousePosY = my.mouseY - curY*globalScale;
-            let lowerBound = -radioBox*scaling*(numBoxes/2);
-            let upperBound = lowerBound + radioBox*scaling;
-            for (let j=0; j < numBoxes; j++){
-              if (upperBound >= mousePosY && mousePosY >= lowerBound){
+          if (Math.abs(curX * globalScale - my.mouseX) <= (radioBox * scaling / 2)) {
+            let mousePosY = my.mouseY - curY * globalScale;
+            let lowerBound = -radioBox * scaling * (numBoxes / 2);
+            let upperBound = lowerBound + radioBox * scaling;
+            for (let j = 0; j < numBoxes; j++) {
+              if (upperBound >= mousePosY && mousePosY >= lowerBound) {
                 elements[i].value = boxID;
                 //eval(elements[i].callback);
                 break
               }
               boxID += 1;
-              upperBound += radioBox*scaling;
-              lowerBound += radioBox*scaling;
+              upperBound += radioBox * scaling;
+              lowerBound += radioBox * scaling;
             }
-          } 
+          }
         }
       }
-      else if (elements[i].type == "keyboard"){
+      else if (elements[i].type == "keyboard") {
         let curX = my.scaleX(elements[i].x)
         let curY = my.scaleY(elements[i].y)
-        if (my.mouseX >= (curX) && my.mouseX <= (elements[i].width + curX)){
-          if (my.mouseY >= (curY) && my.mouseY <= (elements[i].height + curY)){
+        if (my.mouseX >= (curX) && my.mouseX <= (elements[i].width + curX)) {
+          if (my.mouseY >= (curY) && my.mouseY <= (elements[i].height + curY)) {
             // INSIDE KEYBOARD
             my.activeKeyboardIndex = i;
             elements[i].active = true;
@@ -800,7 +801,7 @@ const gui_sketch = function(my) {
     }
   }// mousePressed
 
-  my.mouseReleased = function() { 
+  my.mouseReleased = function () {
     // Stop dragging
     dragging = false;
     // turn keyboard note off if its on
@@ -810,36 +811,36 @@ const gui_sketch = function(my) {
   }
   window.addEventListener('keydown', keyPressed);
 
-  function keyPressed(e){ // when computer key is pressed
+  function keyPressed(e) { // when computer key is pressed
     if (my.activeKeyboardIndex != null && keyOn[0] == false) {
       keyboardOn((e.keyCode).toString(), my.activeKeyboardIndex);
     }
   }
-  my.keyReleased = function() { // when computer key is released
+  my.keyReleased = function () { // when computer key is released
     if (keyOn[0] == true) {
       keyboardOff();
     }
   }
 
-//******** GETTING AND SENDING KEYBOARD NOTES ********//
+  //******** GETTING AND SENDING KEYBOARD NOTES ********//
   function whichKeyIsClicked(keyboardIndex) { // returns index of key (0 - numKeys), used for mouse clicks not keypresses
     let i = keyboardIndex;
     let blackKeyPressed = false; // so that pressing a black key doesnt also press the white key "underneath"
     let whiteKeyWidth = elements[i].wkWidth;
     // BLACK KEYS
-    let blackKeyOffset = [1,3,6,8,10];
+    let blackKeyOffset = [1, 3, 6, 8, 10];
     let k = 0;
     let bCount = 0; // how many black keys have been drawn
     let curX = my.scaleX(elements[i].x)
     let curY = my.scaleY(elements[i].y)
     for (let j = 0; j < elements[i].keys; j++) {
-      if (k >= 12) {k = k - 12};
+      if (k >= 12) { k = k - 12 };
       if (keypattern[k] == 1) {
         // check black key
-        let bOctave = Math.floor(j/12)
-        let xShift = whiteKeyWidth*(7/12)*k + whiteKeyWidth*7*bOctave; 
-        if ((curX+xShift) <= my.mouseX && my.mouseX <= (curX+xShift+whiteKeyWidth*7/12)) {
-          if ((curY) <= my.mouseY && my.mouseY <= (elements[i].y+elements[i].height*.6)) {
+        let bOctave = Math.floor(j / 12)
+        let xShift = whiteKeyWidth * (7 / 12) * k + whiteKeyWidth * 7 * bOctave;
+        if ((curX + xShift) <= my.mouseX && my.mouseX <= (curX + xShift + whiteKeyWidth * 7 / 12)) {
+          if ((curY) <= my.mouseY && my.mouseY <= (elements[i].y + elements[i].height * .6)) {
             blackKeyPressed = true;
             return my.keyMapping[j];
           }
@@ -851,18 +852,18 @@ const gui_sketch = function(my) {
     let wCount = 0;
     k = 0;
     for (let j = 0; j < elements[i].keys; j++) {
-      if (k >= 12) {k = k - 12};
+      if (k >= 12) { k = k - 12 };
       if (keypattern[k] == 0) {
-        let xShift = whiteKeyWidth*wCount;
+        let xShift = whiteKeyWidth * wCount;
         wCount++;
-        if ((curX+xShift) <= my.mouseX && my.mouseX <= (curX+xShift+whiteKeyWidth)) {
-          if ((curY) <= my.mouseY && my.mouseY <= (elements[i].y+elements[i].height)) {
-            if (blackKeyPressed == false){
-                return my.keyMapping[j];
+        if ((curX + xShift) <= my.mouseX && my.mouseX <= (curX + xShift + whiteKeyWidth)) {
+          if ((curY) <= my.mouseY && my.mouseY <= (elements[i].y + elements[i].height)) {
+            if (blackKeyPressed == false) {
+              return my.keyMapping[j];
             }
           }
         }
-      } 
+      }
       k++;
     }
     return "none"
@@ -875,44 +876,44 @@ const gui_sketch = function(my) {
       console.error("Key Mapping Error: key is not defined in gui.keyMapping array")
       return;
     }
-    keyOn = [true,keyboardID];
+    keyOn = [true, keyboardID];
 
     // SEND MIDI NOTE ON HERE, key value is elements[keyOn[1]].value, need to convert it to MIDI number though
   }
   function keyboardOff() { // handles end of computer key presses and mouse clicks
     elements[keyOn[1]].value = "none"; // turn off key
-    keyOn = [false,null];
+    keyOn = [false, null];
     my.redrawGUI();
 
     // SEND MIDI NOTE OFF HERE, key value is elements[keyOn[1]].value, need to convert it to MIDI number though
   }
-  my.turnOffOtherKeyboards = function(all=false){
-    if (all == true){
+  my.turnOffOtherKeyboards = function (all = false) {
+    if (all == true) {
       my.activeKeyboardIndex = null;
     }
     for (let i = 0; i < elements.length; i++) {
-      if (elements[i].type == 'keyboard'){
-        if (i != my.activeKeyboardIndex){
+      if (elements[i].type == 'keyboard') {
+        if (i != my.activeKeyboardIndex) {
           elements[i].active = false;
         }
       }
     }
-    if (all == true){
+    if (all == true) {
       my.redrawGUI();
     }
   }
 
 
-//******** Element Custom Objects ********//
+  //******** Element Custom Objects ********//
   let elements = [];
 
-  let UserElement = function(type,label,mapto,callback,x,y,min=0,max=1,curve=1,value=.5,prev=value,size=1,color=my.color1,showLabel=true,showValue=true,bipolar=false, radioOptions="",orientation='vertical') {
+  let UserElement = function (type, label, mapto, callback, x, y, min = 0, max = 1, curve = 1, value = .5, prev = value, size = 1, color = my.color1, showLabel = true, showValue = true, bipolar = false, radioOptions = "", orientation = 'vertical') {
     this.type = type; // str: type of element
     this.label = label; // str: name and unique ID
 
     this.mapto = mapto; // str: variable it is controlling
 
-    if (typeof callback === "function"){
+    if (typeof callback === "function") {
       this.callback = callback; // function
     } else {
       //this.callback = callback(x); // function
@@ -929,19 +930,19 @@ const gui_sketch = function(my) {
     this.color = color; // p5 color() object
     this.showLabel = showLabel; // bool
     this.showValue = showValue; // bool
-    
+
     this.bipolar = bipolar; // bool
     this.radioOptions = radioOptions; // array
     this.orientation = orientation; // bool: for slider or radio buttons
 
-    this.position = function(x,y){
+    this.position = function (x, y) {
       this.x = (x);
       this.y = (y);
       my.redrawGUI();
     }
   }
-  
-  my.addElement = function(type,label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation) {
+
+  my.addElement = function (type, label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation) {
     let update = false;
     // for (let i = 0; i < elements.length; i++) {
     //   if (elements[i].label == label) {
@@ -966,97 +967,97 @@ const gui_sketch = function(my) {
     //     break
     //   }
     // }
-    if (label==undefined){
+    if (label == undefined) {
       console.error("label parameter is undefined")
     } else {
-      if (update == false){
-        if (x == undefined) {x = x0 + (elements.length%5)*20;}
-        if (y == undefined) { y = y0;}
-        elements.push(new UserElement(type,label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation));
+      if (update == false) {
+        if (x == undefined) { x = x0 + (elements.length % 5) * 20; }
+        if (y == undefined) { y = y0; }
+        elements.push(new UserElement(type, label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation));
       }
       my.redrawGUI();
       return elements[elements.length - 1];
     }
   }//addElement
 
-  my.Knob = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
-    return my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
+  my.Knob = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
+    return my.addElement("knob", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
   }
-  my.Dial = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
-    return my.addElement("knob",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
+  my.Dial = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
+    return my.addElement("knob", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
   }
-  my.Slider = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
-    return my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
+  my.Slider = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
+    return my.addElement("slider", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
   }
-  my.Fader = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
-    return my.addElement("slider",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
+  my.Fader = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
+    return my.addElement("slider", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
   }
-  my.Toggle = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
-    if (value == undefined) {value=0;}
-    return my.addElement("toggle",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
+  my.Toggle = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
+    if (value == undefined) { value = 0; }
+    return my.addElement("toggle", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
   }
-  my.Momentary = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
-    if (value == undefined) {value=0;}
-    return my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
+  my.Momentary = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
+    if (value == undefined) { value = 0; }
+    return my.addElement("momentary", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
   }
-  my.Button = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
-    if (value == undefined) {value=0;}
-    return my.addElement("momentary",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
+  my.Button = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
+    if (value == undefined) { value = 0; }
+    return my.addElement("momentary", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
   }
-  my.RadioButtons = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
-    if (value == undefined) {value=1;}
-    return my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
+  my.RadioButtons = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
+    if (value == undefined) { value = 1; }
+    return my.addElement("radio", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
   }
-  my.RadioButton = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
-    if (value == undefined) {value=1;}
-    return my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
+  my.RadioButton = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
+    if (value == undefined) { value = 1; }
+    return my.addElement("radio", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
   }
-  my.Radio = function({label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation}) {
-    if (value == undefined) {value=1;}
-    return my.addElement("radio",label,mapto,callback,x,y,min,max,curve,value,prev,size,color,showLabel,showValue,bipolar,radioOptions,orientation);
+  my.Radio = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
+    if (value == undefined) { value = 1; }
+    return my.addElement("radio", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
   }
 
-//******** Element Helper Functions ********//
-  my.removeElement = function(label) {
+  //******** Element Helper Functions ********//
+  my.removeElement = function (label) {
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].label == label) {
-        elements.splice(i,1);
+        elements.splice(i, 1);
       }
     }
     my.redrawGUI();
   }//removeElement
 
-  my.removeElements = function() {
+  my.removeElements = function () {
     elements = []
     my.redrawGUI();
   }//removeElements
 
   // NOT FULLY WORKING !!!
-  my.elementGrid = function(type,xcount,ycount) {
+  my.elementGrid = function (type, xcount, ycount) {
     let x0 = 50;
     let y0 = 50;
-    for (let i=0; i < xcount; i++){
-      for (let j=0; j < ycount; j++){
-        let label = "grid"+elements.length+"_"+(i*j+j);
-        let value = Math.random()*2
-        my.addElement({x:x0+i*24,y:y0+j*24,type:type,label:label,mapto:"fakevar",min:0,max:2,value:value,size:.3,showLabel:false,showValue:false})
+    for (let i = 0; i < xcount; i++) {
+      for (let j = 0; j < ycount; j++) {
+        let label = "grid" + elements.length + "_" + (i * j + j);
+        let value = Math.random() * 2
+        my.addElement({ x: x0 + i * 24, y: y0 + j * 24, type: type, label: label, mapto: "fakevar", min: 0, max: 2, value: value, size: .3, showLabel: false, showValue: false })
 
       }
     }
     // eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
     // eval(elements[i].mapto + '.rampTo(elements[i].value, 0.1)');
   }
-  my.scaleX = function(val){
-    val = Math.min((Math.max(0,val)),100);
-    return (val/100) * x_size;
+  my.scaleX = function (val) {
+    val = Math.min((Math.max(0, val)), 100);
+    return (val / 100) * x_size;
   }
-  my.scaleY = function(val){
-    val = Math.min((Math.max(0,val)),100);
-    return (val/100) * y_size;
+  my.scaleY = function (val) {
+    val = Math.min((Math.max(0, val)), 100);
+    return (val / 100) * y_size;
   }
 
-//******** Keyboard Element Custom Object ********//
-  let Keyboard = function(label,type,mapto,x,y,value,width,height,keys,color,showLabel,wkWidth,active) {
+  //******** Keyboard Element Custom Object ********//
+  let Keyboard = function (label, type, mapto, x, y, value, width, height, keys, color, showLabel, wkWidth, active) {
     this.label = label; // str: name and unique ID
     this.type = type; // str: name and unique ID
     this.mapto = mapto; // str: variable it is controlling
@@ -1072,14 +1073,14 @@ const gui_sketch = function(my) {
     this.wkWidth = wkWidth; // bool
     this.active = active; // bool
 
-    this.position = function(x,y){
+    this.position = function (x, y) {
       this.x = x;
       this.y = x;
       my.redrawGUI();
     }
   }
 
-  my.addKeyboard = function({label,type,mapto,x,y,width,height,keys,color,showLabel,active}) {
+  my.addKeyboard = function ({ label, type, mapto, x, y, width, height, keys, color, showLabel, active }) {
     // NEW OR UPDATE EXISTING?
     let update = false;
 
@@ -1087,18 +1088,18 @@ const gui_sketch = function(my) {
       if (elements[i].label == label) {
         update = true;
         // UPDATE VALS
-        if (mapto != undefined) {elements[i].mapto = mapto;}
-        if (x != undefined) {elements[i].x = x;}
-        if (y != undefined) {elements[i].y = x;}
-        if (width != undefined) {elements[i].width = my.scaleX(width);}
-        if (height != undefined) {elements[i].height = my.scaleY(height);}
+        if (mapto != undefined) { elements[i].mapto = mapto; }
+        if (x != undefined) { elements[i].x = x; }
+        if (y != undefined) { elements[i].y = x; }
+        if (width != undefined) { elements[i].width = my.scaleX(width); }
+        if (height != undefined) { elements[i].height = my.scaleY(height); }
         if (keys != undefined) {
           elements[i].keys = keys;
           let numWhiteKeys = calculateNumWhiteKeys(keys);
           elements[i].wkWidth = my.scaleX(width) / numWhiteKeys;
         }
-        if (color != undefined) {elements[i].color = color;}
-        if (showLabel != undefined) {elements[i].showLabel = showLabel;}
+        if (color != undefined) { elements[i].color = color; }
+        if (showLabel != undefined) { elements[i].showLabel = showLabel; }
         if (active != undefined) {
           elements[i].active = active;
           if (active == true) {
@@ -1113,30 +1114,30 @@ const gui_sketch = function(my) {
       }
     }
 
-    if (update == false){
+    if (update == false) {
       // default default values
       type = "keyboard";
-      if (x == undefined) {x = 0;}
-      if (y == undefined) { y = 0;}
-      if (keys == undefined) {keys=12;}
-      if (width == undefined) {width=keys*30;}
-      if (height == undefined) {height=100;}
-      if (color == undefined) {color=my.color1;}
-      if (showLabel == undefined) {showLabel=false;}
-      if (active == undefined) {active=false;}
+      if (x == undefined) { x = 0; }
+      if (y == undefined) { y = 0; }
+      if (keys == undefined) { keys = 12; }
+      if (width == undefined) { width = keys * 30; }
+      if (height == undefined) { height = 100; }
+      if (color == undefined) { color = my.color1; }
+      if (showLabel == undefined) { showLabel = false; }
+      if (active == undefined) { active = false; }
       let numWhiteKeys = calculateNumWhiteKeys(keys);
       let wkWidth = my.scaleX(width) / numWhiteKeys;
       let value = null;
-      elements.push(new Keyboard(label,type,mapto,(x),(y),value,my.scaleX(width),my.scaleY(height),keys,color,showLabel,wkWidth,active));
+      elements.push(new Keyboard(label, type, mapto, (x), (y), value, my.scaleX(width), my.scaleY(height), keys, color, showLabel, wkWidth, active));
     }
     my.redrawGUI();
     return elements[elements.length - 1];
 
-    function calculateNumWhiteKeys(keys){
+    function calculateNumWhiteKeys(keys) {
       let numWhiteKeys = 0;
       let k = 0;
-      for (let j=0; j < keys; j++) {
-        if (k >= 12) {k = k - 12};
+      for (let j = 0; j < keys; j++) {
+        if (k >= 12) { k = k - 12 };
         if (keypattern[k] == 0) {
           numWhiteKeys++;
         }
@@ -1146,52 +1147,52 @@ const gui_sketch = function(my) {
     }
   }//addKeyboard
 
-//******** LINES ********//
+  //******** LINES ********//
   let lineNumber = 0
-  my.line2 = function(x1,y1,x2,y2,stroke=1,color,label=null) {
+  my.line2 = function (x1, y1, x2, y2, stroke = 1, color, label = null) {
     x1 = (x1)
     x2 = (x2)
     y1 = (y1)
     y2 = (y2)
     //my.line(x1,y1,x2,y2)
-    if (color == undefined){
+    if (color == undefined) {
       color = my.color2;
     }
     //lines.push([x1,y1,x2,y2,stroke,color])
 
     let type = 'line'
     if (label == null) label = 'line' + lineNumber
-    lineNumber+=1
+    lineNumber += 1
     let mapto = 'mapto'
-    let x=[x1,x2]
-    let y=[y1,y2]
+    let x = [x1, x2]
+    let y = [y1, y2]
     let min = 0
     let max = 0
     let size = stroke
 
-    elements.push(new UserElement(type,label,'mapto',x,y,0,0,0,0,size,0,0,0,0,0));
+    elements.push(new UserElement(type, label, 'mapto', x, y, 0, 0, 0, 0, size, 0, 0, 0, 0, 0));
     my.redrawGUI()
     return elements[elements.length - 1];
   } //line2
-  my.lineX = function(x,color) {
+  my.lineX = function (x, color) {
     x = (x)
-    my.line(x,0,x,y_size)
-    if (color === undefined){
+    my.line(x, 0, x, y_size)
+    if (color === undefined) {
       color = my.color2;
     }
-    my.lines.push([x,0,x,y_size,color])
+    my.lines.push([x, 0, x, y_size, color])
     my.redrawGUI()
   }
-  my.lineY = function(y,color) {
+  my.lineY = function (y, color) {
     y = (y)
-    my.line(0,y,x_size,y)
-    if (color == undefined){
+    my.line(0, y, x_size, y)
+    if (color == undefined) {
       color = my.color2;
     }
-    my.lines.push([0,y,x_size,y,color])
+    my.lines.push([0, y, x_size, y, color])
     my.redrawGUI()
   }
-  my.drawLine = function(i){
+  my.drawLine = function (i) {
     // SET COLOR
     let currentColor;
     try {
@@ -1199,19 +1200,19 @@ const gui_sketch = function(my) {
     } catch (error) {
       currentColor = elements[i].color;
     }
-    my.stroke( currentColor )
-    my.strokeWeight( elements[i].size )
+    my.stroke(currentColor)
+    my.strokeWeight(elements[i].size)
     let curX = my.scaleX(elements[i].x)
     let curY = my.scaleY(elements[i].y)
-    my.line(elements[i].x[0],elements[i].y[0],elements[i].x[1],elements[i].y[1])
+    my.line(elements[i].x[0], elements[i].y[0], elements[i].x[1], elements[i].y[1])
   }
 
 
 
-//******** SCALING & FULLSCREEN ********//
+  //******** SCALING & FULLSCREEN ********//
 
-  my.fullscreenGUI = function(){
-    if (fullscreen){
+  my.fullscreenGUI = function () {
+    if (fullscreen) {
       //reset
       document.getElementById(divID).style.top = "2%";
       document.getElementById(divID).style.right = "2";
@@ -1230,15 +1231,15 @@ const gui_sketch = function(my) {
     setNewDimensions();
   }//fullscreen
 
-  window.addEventListener('resize', function(event) {
+  window.addEventListener('resize', function (event) {
     setNewDimensions();
-  }, true); 
+  }, true);
 
   function setNewDimensions() {
     // keeps aspect ratio at 2:1 and determines if height or width is constraining dimension in div
     x_size = document.getElementById(divID).offsetWidth;
     y_size = document.getElementById(divID).offsetHeight;
-    if (2*y_size > x_size) {
+    if (2 * y_size > x_size) {
       x_size = document.getElementById(divID).offsetWidth;
       y_size = .5 * x_size;
     } else {
@@ -1252,67 +1253,67 @@ const gui_sketch = function(my) {
   }
 
 
-//******** USER CUSTOMIZATION ********//
-  my.sensitivity = function(masterSensitivity=1){
+  //******** USER CUSTOMIZATION ********//
+  my.sensitivity = function (masterSensitivity = 1) {
     // 1 is default, <1 makes it less sensitive, >1 more sensitive
-    sliderSensitivity = .008*masterSensitivity;
-    sensitivityScale = .006*masterSensitivity; 
+    sliderSensitivity = .008 * masterSensitivity;
+    sensitivityScale = .006 * masterSensitivity;
   }
-  let guiColor = function(val) {
+  let guiColor = function (val) {
     // color Object so it can be referenced and then update on all elements
-    this.val = val; 
+    this.val = val;
   }
-  my.setColor1 = function(r,g,b,a){
-    if (g==undefined){
+  my.setColor1 = function (r, g, b, a) {
+    if (g == undefined) {
       my.color1.val = my.color(r);
     }
-    else if (a==undefined){
-      my.color1.val = my.color(r,g,b);
+    else if (a == undefined) {
+      my.color1.val = my.color(r, g, b);
     } else {
-      my.color1.val = my.color(r,g,b,a);
+      my.color1.val = my.color(r, g, b, a);
     }
     my.redrawGUI();
   }
-  my.setColor2 = function(r,g,b,a){
-    if (g==undefined){
+  my.setColor2 = function (r, g, b, a) {
+    if (g == undefined) {
       my.color2 = my.color(r);
     }
-    else if (a==undefined){
-      my.color2 = my.color(r,g,b);
+    else if (a == undefined) {
+      my.color2 = my.color(r, g, b);
     } else {
-      my.color2 = my.color(r,g,b,a);
+      my.color2 = my.color(r, g, b, a);
     }
     my.redrawGUI();
   }
-  my.setBackgroundColor = function(r,g,b,a){
-    if (g==undefined){
+  my.setBackgroundColor = function (r, g, b, a) {
+    if (g == undefined) {
       my.color3 = my.color(r);
     }
-    else if (a==undefined){
-      my.color3 = my.color(r,g,b);
+    else if (a == undefined) {
+      my.color3 = my.color(r, g, b);
     } else {
-      my.color3 = my.color(r,g,b,a);
+      my.color3 = my.color(r, g, b, a);
     }
     my.redrawGUI();
   }
-  my.setTextColor = function(r,g,b,a){
-    if (g==undefined){
+  my.setTextColor = function (r, g, b, a) {
+    if (g == undefined) {
       my.color4 = my.color(r);
     }
-    else if (a==undefined){
-      my.color4 = my.color(r,g,b);
+    else if (a == undefined) {
+      my.color4 = my.color(r, g, b);
     } else {
-      my.color4 = my.color(r,g,b,a);
+      my.color4 = my.color(r, g, b, a);
     }
     my.redrawGUI();
   }
 
-//******** OTHER ********//
-  const scaleOutput = function(input,inLow,inHigh,outLow,outHigh,curve){
-    if( curve === undefined ) curve = 1;
-    let val = (input-inLow) * (1/(inHigh-inLow));
+  //******** OTHER ********//
+  const scaleOutput = function (input, inLow, inHigh, outLow, outHigh, curve) {
+    if (curve === undefined) curve = 1;
+    let val = (input - inLow) * (1 / (inHigh - inLow));
     val = Math.pow(val, curve);
-    return val*(outHigh-outLow) + outLow;
+    return val * (outHigh - outLow) + outLow;
   }
 } // END OF GUI p5 INSTANCE
 

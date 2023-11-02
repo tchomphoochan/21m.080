@@ -79,7 +79,6 @@ function Editor(props) {
         } catch (error) {
             console.log("Error parsing code: ", error);
         }
-
         function handleScopedVars(end) {
             let scopedVars = innerVars.pop();
             let newStr = "";
@@ -104,6 +103,7 @@ function Editor(props) {
                     let name = declaration.id.name;
                     let start = declaration.start;
                     let end = declaration.end;
+
                     //Add globalThis & push variable names
                     if (!state.innerScope) {
                         string = string.substring(0, start + incr) + "globalThis." + string.substring(start + incr);
@@ -117,7 +117,7 @@ function Editor(props) {
                             }
                         }
                     }
-                    else {
+                    else if (state.innerScope && !state.forLoop) {
                         innerVars[innerVars.length - 1].push(name);
                         if (!Object.keys(innerScopeVars).includes(name)) {
                             innerScopeVars[name] = [];
@@ -125,13 +125,14 @@ function Editor(props) {
                     }
                     //In case of no assignment, set to var to null
                     let init = declaration.init;
-                    if (!init) {
+                    if (!init && !state.forLoop) {
                         string = string.substring(0, end + incr) + " = null" + string.substring(end + incr);
                         incr += length2;
                     }
-                    else if (init.body) {
+                    else if (init && init.body) {
                         let newState = {
-                            innerScope: true
+                            innerScope: true,
+                            forLoop: false
                         }
                         innerVars.push([]);
                         c(init.body, newState);
@@ -156,7 +157,8 @@ function Editor(props) {
                 string = string.substring(0, start) + newCode + string.substring(end);
                 incr += newCode.length - (end - start);
                 let newState = {
-                    innerScope: true
+                    innerScope: true,
+                    forLoop: false
                 }
                 innerVars.push([]);
                 c(node.body, newState);
@@ -171,16 +173,29 @@ function Editor(props) {
                 string = string.substring(0, start) + newCode + string.substring(end);
                 incr += newCode.length - (end - start);
                 let newState = {
-                    innerScope: true
+                    innerScope: true,
+                    forLoop: false
                 }
                 innerVars.push([]);
                 c(node.body, newState);
                 handleScopedVars(node.end + incr);
+            },
+
+            ForOfStatement(node, state, c) {
+                let newState = {
+                    innerScope: true,
+                    forLoop: true
+                }
+
+                c(node.left, newState);
+                c(node.right, newState);
+                //may cause failure in sound stopping
             }
         }
 
         const initialState = {
-            innerScope: false
+            innerScope: false,
+            forLoop: false
         };
 
         try {
