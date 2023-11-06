@@ -285,11 +285,11 @@ const gui_sketch = function (my) {
         if (elements[i].showValue == true) {
           let roundto = 0;
           if (elements[i].max - elements[i].min <= .1) {
-            roundto = 3
+            roundto = 4
           } else if (elements[i].max - elements[i].min <= 1) {
-            roundto = 2
+            roundto = 3
           } else if (elements[i].max - elements[i].min <= 10) {
-            roundto = 1
+            roundto = 2
           }
           scaledValue = my.round(scaledValue, roundto)
           my.textSize(13);
@@ -387,11 +387,11 @@ const gui_sketch = function (my) {
         if (elements[i].showValue == true) {
           let roundto = 0;
           if (elements[i].max <= .1) {
-            roundto = 3
+            roundto = 4
           } else if (elements[i].max <= 1) {
-            roundto = 2
+            roundto = 3
           } else if (elements[i].max <= 10) {
-            roundto = 1
+            roundto = 2
           }
           scaledValue = my.round(scaledValue, roundto)
 
