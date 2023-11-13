@@ -284,11 +284,14 @@ const gui_sketch = function (my) {
         my.noStroke();
         if (elements[i].showValue == true) {
           let roundto = 0;
-          if (elements[i].max - elements[i].min <= .1) {
+          let curRange = elements[i].max - elements[i].min;
+          if (curRange <= .01) {
+            roundto = 6
+          } else if (curRange <= .1) {
             roundto = 4
-          } else if (elements[i].max - elements[i].min <= 1) {
+          } else if (curRange <= 1) {
             roundto = 3
-          } else if (elements[i].max - elements[i].min <= 10) {
+          } else if (curRange <= 10) {
             roundto = 2
           }
           scaledValue = my.round(scaledValue, roundto)
