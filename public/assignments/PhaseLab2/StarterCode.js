@@ -1,4 +1,4 @@
-//21M.080 phase lab
+//21M.080 phase lab pt 2
 const gui = new p5(gui_sketch, PhaseLab2)
 let output = new Tone.Multiply(0.1).toDestination()
 
