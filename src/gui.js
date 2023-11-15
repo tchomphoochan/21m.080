@@ -632,6 +632,30 @@ const gui_sketch = function (my) {
         my.ellipse(0, 0, 6);
         my.pop();
       }
+      /******TEXT BLOCK *******/
+      else if (elements[i].type == 'text') {
+        my.push();
+        let sz = elements[i].size;
+        let curX = my.scaleX(elements[i].x)
+        let curY = my.scaleY(elements[i].y)
+        my.translate(curX, curY);
+        
+        // LABEL
+        my.fill(my.color4);
+        my.noStroke();
+        if (elements[i].orientation == 'horizontal') {
+          my.rotate(-90)
+        }
+        if (elements[i].showLabel == true) {
+          let txt = elements[i].label;
+          my.textSize((2 + sz) * 4); // scales text based on num of char
+          let labelX = 0;
+          let labelY = sliderLength * sz / 2 + 10;
+          my.text(txt, 0, 0);
+        }
+        my.pop();
+      }
+      // END TEXT
     }
   } //redraw
 
@@ -1018,6 +1042,9 @@ const gui_sketch = function (my) {
   my.Radio = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
     if (value == undefined) { value = 1; }
     return my.addElement("radio", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
+  }
+  my.Text = function ({ label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation }) {
+    return my.addElement("text", label, mapto, callback, x, y, min, max, curve, value, prev, size, color, showLabel, showValue, bipolar, radioOptions, orientation);
   }
 
   //******** Element Helper Functions ********//
