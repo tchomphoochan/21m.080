@@ -83,7 +83,7 @@ let damp_label = gui.Text({
 let wet_knob = gui.Knob({
   label: 'wet',
   mapto: 'wet.factor',
-  curve:.5,
+  curve:1.5,
   x:55, y: 30
 })
 wet_knob.value = .3
@@ -91,7 +91,7 @@ wet_knob.value = .3
 let dry_knob = gui.Knob({
   label: 'dry',
   mapto: 'dry.factor',
-  curve:.5,
+  curve:1.5,
   x:80, y: 30
 })
 dry_knob.value = 1
