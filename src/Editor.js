@@ -112,6 +112,7 @@ function Editor(props) {
                         if (Object.keys(vars).includes(name)) {
                             try {
                                 vars[name].stop();
+                                //console.log('disc')
                             } catch {
 
                             }
@@ -225,6 +226,7 @@ function Editor(props) {
                 for (const instance of instances) {
                     try {
                         instance.stop();
+                        //console.log('upd')
                     } catch (error) {
                         //not playing
                     }
@@ -349,16 +351,24 @@ function Editor(props) {
             try {
                 variable.stop();
             } catch (error) {
-                //No action needed
+                try {
+                    variable.disconnect()
+                } catch(error) {
+                //console.log(variable)//No action needed
+                }   
             }
         }
 
         for (const [key, instances] of Object.entries(innerScopeVars)) {
             for (const instance of instances) {
                 try {
-                    instance.stop();
+                instance.stop();
                 } catch (error) {
-                    //val not playing sound
+                    try {
+                        instance.disconnect()
+                    } catch(error) {
+                    //console.log(variable)//No action needed
+                    }   
                 }
             }
             innerScopeVars[key] = [];
