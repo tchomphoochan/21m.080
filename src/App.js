@@ -23,7 +23,7 @@ function App() {
     'Lab1','JavaScript101', 'PhaseLab', 'PhaseLab2'
   ];
   const referenceFiles = [
-    'Oscillator', 'Filter', 'Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope', 'Player', 'Knob', 'GUI elements',
+    'Oscillator', 'Filter', 'Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope', 'Player', 'Knob', 'GUI elements', 'Convolver'
   ];
 
   const homeStarterCode = `/*
