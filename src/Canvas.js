@@ -3,7 +3,7 @@ import p5 from 'p5';
 import { initialize, divResized, drawElements, Knob } from './p5Library';
 
 window.Knob = Knob;
-window.divResized = divResized;
+//window.divResized = divResized;
 function Canvas(props) {
     const [isMaximized, setIsMaximized] = useState(false);
     useEffect(() => {
@@ -25,14 +25,14 @@ function Canvas(props) {
             };
         };
         window.sketch = sketch;
-        //window[props.id] = new p5(sketch, props.id);
+        window[props.id] = new p5(sketch, props.id);
 
     }, [props.id]);
 
     const maxClicked = () => {
         setIsMaximized(!isMaximized);
         props.onMaximize(props.id);
-        //eval(`${props.id}.divResized()`);
+        window[props.id].divResized(isMaximized ? "-h" : "+h", props.canvasLength);
     };
 
     let css = props.maximized && !(props.maximized === props.id) ? 'minimize' : "p5-container";
@@ -41,8 +41,8 @@ function Canvas(props) {
         <span className={css}>
             <span className="span-container" >
                 <div style={{ marginLeft: "5px" }}>{props.id}</div>
-                {props.maxOption &&
-                    <span>
+                {props.canvasLength > 1 &&
+                    <span id="controls">
                         <button className="button-container" onClick={maxClicked}>
                             {isMaximized ? '-' : '+'}
                         </button>

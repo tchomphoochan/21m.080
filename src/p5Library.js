@@ -6,6 +6,7 @@ export function initialize(p, div, backgroundColor = false) {
     p.width = div.offsetWidth;
     p.height = div.offsetHeight;
     p.elements = {};
+    p.p5Elements = {};
     if (backgroundColor) {
         p.backgroundColor = backgroundColor;
         p.background(backgroundColor);
@@ -16,15 +17,35 @@ p5.prototype.initialize = function (div, backgroundColor) {
     initialize(this, div, backgroundColor);
 };
 
-export function divResized(p, newWidth = false, newHeight = false) {
-    p.resizeCanvas(0, 0);
+export function divResized(p, maxClicked, canvasLength) {
     let prevWidth = p.width;
     let prevHeight = p.height;
-    p.width = newWidth ? newWidth : p.div.offsetWidth;
-    p.height = newHeight ? newHeight : p.div.offsetHeight;
+    p.resizeCanvas(0, 0);
+    let canvasesCont = document.getElementById("canvases");
+    let controlsCont = document.getElementById("controls");
+    let flexCont = document.getElementById('flex');
+    if (maxClicked === '+h') {
+        p.height = canvasesCont.offsetHeight - controlsCont.offsetHeight;
+        p.width = p.div.offsetWidth;
+    }
+    else if (maxClicked === '-h') {
+        p.height = canvasesCont.offsetHeight / canvasLength - controlsCont.offsetHeight;
+        p.width = p.div.offsetWidth;
+    }
+    else if (maxClicked === '+w') {
+        p.width = flexCont.offsetWidth;
+        p.height = p.div.offsetHeight;
+    }
+    else if (maxClicked === '-w') {
+        p.width = flexCont.offsetWidth / 2;
+        p.height = prevHeight;
+    }
+    else {
+        p.width = p.div.offsetWidth;
+        p.height = p.div.offsetHeight;
+    }
     let scaleWidth = p.width / prevWidth;
     let scaleHeight = p.height / prevHeight;
-    console.log(document.getElementById("Canvas1").offsetHeight);
     p.resizeCanvas(p.width, p.height);
     for (let element of Object.values(p.elements)) {
         try {
@@ -34,20 +55,37 @@ export function divResized(p, newWidth = false, newHeight = false) {
             eval(element);
         }
     }
+    p.drawElements();
 };
 
-p5.prototype.divResized = function () {
-    divResized(this);
+p5.prototype.divResized = function (maxClicked = false, canvasLength = null) {
+    divResized(this, maxClicked, canvasLength);
 };
+
+function drawGrid(p) {
+    let margin = 10;
+    let spacingX = Math.ceil((p.width - 2 * margin) / 3) - 5;
+    let spacingY = Math.ceil((p.height - 2 * margin) / 3) - 5;
+    p.textSize(12);
+    let isBlack = p.red(p.backgroundColor) === 0 && p.green(p.backgroundColor) === 0 && p.blue(p.backgroundColor) === 0;
+    p.fill(isBlack ? 255 : 0);
+    p.noStroke();
+    for (let i = 0; i < 4; i++) {
+        let x = margin + i * spacingX;
+        let y = margin + i * spacingY;
+        p.text(x, x, margin);
+        p.text(y, margin, y);
+    }
+}
 
 export function drawElements(p) {
     p.background(p.backgroundColor ? p.backgroundColor : [255, 255, 255]);
+    drawGrid(p);
     for (let element of Object.values(p.elements)) {
-        try {
-            element.draw();
-        } catch {
-            eval(element);
-        }
+        element.draw();
+    }
+    for (let p5Element of Object.values(p.p5Elements)) {
+        eval(p5Element);
     }
 }
 
@@ -56,18 +94,23 @@ p5.prototype.drawElements = function () {
 };
 
 export class Knob {
-    constructor(p, options = { id: "myKnob", x: 100, y: 100, size: 100, mapto: null }) {
+    constructor(p, options = {}) {
         this.p = p;
-        this.id = options.id;
-        this.x = options.x;
-        this.y = options.y;
-        this.size = options.size;
+        this.id = options.id || "myKnob";
+        this.x = options.x || p.width / 2;
+        this.y = options.y || p.height / 2;
+        this.size = options.size || .2 * p.width;
+        this.min = options.min || 0;
+        this.max = options.max || 1;
         this.mapto = options.mapto || null;
-        this.value = 0;
+        this.value = (this.max + this.min) / 2;
         this.startAngle = 5 * this.p.PI / 8;
         this.endAngle = 3 * this.p.PI / 8 + 2 * this.p.PI;
         this.dragging = false;
         p.elements[this.id] = this;
+    }
+    setValue() {
+        if (this.mapto) eval(`${this.mapto}=${this.value}`);
     }
 
     resize(scaleWidth, scaleHeight) {
@@ -102,19 +145,23 @@ export class Knob {
         let indicatorX = this.x + this.p.cos(angle) * indicatorLength;
         let indicatorY = this.y + this.p.sin(angle) * indicatorLength;
         this.p.stroke(255, 0, 0); // Red indicator
-        this.p.strokeWeight(5);
+        this.p.strokeWeight(this.size * .06);
         this.p.line(this.x, this.y, indicatorX, indicatorY);
 
         this.p.mouseDragged = () => {
             let d = this.p.dist(this.x, this.y, this.p.mouseX, this.p.mouseY);
             if (d < this.size / 2 || this.dragging) {
                 this.dragging = true;
-                if (this.p.movedY < 0 && this.value <= 1) {
+                if (this.p.movedY < 0 && this.value < this.max) {
+                    console.log("before:", this.value);
                     this.value += .01;
+                    console.log("after:", this.value);
                 }
-                else if (this.p.movedY > 0 && this.value >= 0) {
+                else if (this.p.movedY > 0 && this.value > this.min) {
+                    console.log("insid3");
                     this.value -= .01;
                 }
+                this.setValue();
             }
         }
 
@@ -124,6 +171,6 @@ export class Knob {
     }
 }
 
-p5.prototype.Knob = function (id, x, y, size) {
-    return new Knob(this, id, x, y, size);
+p5.prototype.Knob = function () {
+    return new Knob(this);
 };

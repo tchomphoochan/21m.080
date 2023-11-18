@@ -1,4 +1,3 @@
-//0
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -96,7 +95,7 @@ function Editor(props) {
                         let val = string.substring(init.start + incr, init.end + incr);
                         for (let canvas of canvases) {
                             if (val.includes(canvas)) {
-                                p5Code += `${canvas}.elements[${name}]="${val}"\n`;
+                                p5Code += `${canvas}.p5Elements[${name}]="${val}"\n`;
                             }
                         }
                     }
@@ -269,6 +268,14 @@ function Editor(props) {
     }
     const codeMinClicked = () => {
         setCodeMinimized(!codeMinimized);
+        for (let id of canvases) {
+            try {
+                window[id].divResized(codeMinimized ? '-w' : '+w');
+            }
+            catch {
+
+            }
+        }
     }
 
     const canvasMinClicked = () => {
@@ -287,7 +294,7 @@ function Editor(props) {
     const liveCSS = liveMode ? 'button-container active' : 'button-container';
 
     return (
-        <div className="flex-container" >
+        <div id="flex" className="flex-container" >
             {!codeMinimized &&
                 <div className="flex-child" >
                     <span className="span-container">
@@ -333,14 +340,14 @@ function Editor(props) {
                 </div>
             }
             {!p5Minimized &&
-                <div className="flex-child">
+                <div id="canvases" className="flex-child">
                     <span className="span-container">
                         {codeMinimized &&
                             <button className="button-container" onClick={codeMinClicked}>{"=>"}</button>
                         }
                     </span>
                     {canvases.map((id) => (
-                        <Canvas key={id} id={id} onMaximize={handleMaximizeCanvas} maximized={maximized} maxOption={canvases.length > 1} />
+                        <Canvas key={id} id={id} onMaximize={handleMaximizeCanvas} maximized={maximized} canvasLength={canvases.length} />
                     ))}
                 </div>
             }
