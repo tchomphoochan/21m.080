@@ -10,7 +10,7 @@ import ml5 from 'ml5';
 import Canvas from "./Canvas.js";
 import gui_sketch from "./gui.js";
 import { Oscilloscope, Spectroscope } from './oscilloscope';
-import MidiKeyboard from './midiKeyboard.js';
+import MidiKeyboard from './MidiKeyboard.js';
 const midi = require('./Midi.js');
 //Save history in browser
 const stateFields = { history: historyField };
@@ -112,6 +112,7 @@ function Editor(props) {
                         if (Object.keys(vars).includes(name)) {
                             try {
                                 vars[name].stop();
+                                //console.log('disc')
                             } catch {
 
                             }
@@ -225,6 +226,7 @@ function Editor(props) {
                 for (const instance of instances) {
                     try {
                         instance.stop();
+                        //console.log('upd')
                     } catch (error) {
                         //not playing
                     }
@@ -372,16 +374,24 @@ function Editor(props) {
             try {
                 variable.stop();
             } catch (error) {
-                //No action needed
+                try {
+                    variable.disconnect()
+                } catch(error) {
+                //console.log(variable)//No action needed
+                }   
             }
         }
 
         for (const [key, instances] of Object.entries(innerScopeVars)) {
             for (const instance of instances) {
                 try {
-                    instance.stop();
+                instance.stop();
                 } catch (error) {
-                    //val not playing sound
+                    try {
+                        instance.disconnect()
+                    } catch(error) {
+                    //console.log(variable)//No action needed
+                    }   
                 }
             }
             innerScopeVars[key] = [];
