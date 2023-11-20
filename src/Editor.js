@@ -275,9 +275,32 @@ function Editor(props) {
         }
     }
 
+    function removedSpaces() {
+        let lines = code.split("\n");
+        let openBraces = 0;
+        let closedBraces = 0;
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].replace(/\s/g, "") === '') {
+                if (openBraces > closedBraces) {
+                    lines[i] = "//";
+                }
+            }
+            else {
+                if (lines[i].includes("{")) {
+                    openBraces += 1;
+                }
+                if (lines[i].includes("}")) {
+                    closedBraces += 1;
+                }
+            }
+        }
+        return lines;
+    }
+
     function evaluateBlock() {
         try {
-            const lines = code.split("\n");
+            //add "//" inside innerscope
+            const lines = removedSpaces();
             var linepos = curLineNum - 1;
             var line = lines[linepos];
             while (line !== undefined && line.replace(/\s/g, "") !== '') {
