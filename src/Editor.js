@@ -10,7 +10,7 @@ import ml5 from 'ml5';
 import Canvas from "./Canvas.js";
 import gui_sketch from "./gui.js";
 import { Oscilloscope, Spectroscope } from './oscilloscope';
-import MidiKeyboard from './MidiKeyboard.js';
+import MidiKeyboard from './midiKeyboard.js';
 const midi = require('./Midi.js');
 //Save history in browser
 const stateFields = { history: historyField };
@@ -376,22 +376,22 @@ function Editor(props) {
             } catch (error) {
                 try {
                     variable.disconnect()
-                } catch(error) {
-                //console.log(variable)//No action needed
-                }   
+                } catch (error) {
+                    //console.log(variable)//No action needed
+                }
             }
         }
 
         for (const [key, instances] of Object.entries(innerScopeVars)) {
             for (const instance of instances) {
                 try {
-                instance.stop();
+                    instance.stop();
                 } catch (error) {
                     try {
                         instance.disconnect()
-                    } catch(error) {
-                    //console.log(variable)//No action needed
-                    }   
+                    } catch (error) {
+                        //console.log(variable)//No action needed
+                    }
                 }
             }
             innerScopeVars[key] = [];
