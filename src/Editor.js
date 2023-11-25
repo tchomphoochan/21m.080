@@ -94,8 +94,8 @@ function Editor(props) {
                     else {
                         let val = string.substring(init.start + incr, init.end + incr);
                         for (let canvas of canvases) {
-                            if (val.includes(canvas)) {
-                                p5Code += `${canvas}.p5Elements[${name}]="${val}"\n`;
+                            if (val.includes(canvas) && !val.includes("Knob")) {
+                                p5Code += `${canvas}.elements[${name}]="${val}"\n`;
                             }
                         }
                     }
