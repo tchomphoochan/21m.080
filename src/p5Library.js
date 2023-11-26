@@ -135,7 +135,8 @@ export class Knob {
         this.min = options.min || 0;
         this.max = options.max || 1;
         this.mapto = options.mapto || null;
-        this.value = (this.max + this.min) / 2;
+        this.value = this.mapto ? eval(`${this.mapto}.value`) : (this.max + this.min) / 2;
+        this.incr = (this.max - this.min) / 100;
         this.startAngle = 5 * this.p.PI / 8;
         this.endAngle = 3 * this.p.PI / 8 + 2 * this.p.PI;
         this.dragging = false;
@@ -148,7 +149,7 @@ export class Knob {
         p.elements[this.id] = this;
     }
     setValue() {
-        if (this.mapto) eval(`${this.mapto}=${this.value}`);
+        if (this.mapto) eval(`${this.mapto}.value=${this.value}`);
     }
 
     resize(scaleWidth, scaleHeight) {
@@ -159,7 +160,7 @@ export class Knob {
 
     draw() {
         // Calculate the angle based on the knob's value
-        let angle = this.p.map(this.value, 0, 1, this.startAngle, this.endAngle);
+        let angle = this.p.map(this.value, this.min, this.max, this.startAngle, this.endAngle);
 
         // Draw the knob background
         this.p.noFill();
@@ -191,13 +192,12 @@ export class Knob {
             if (d < this.size / 2 || this.dragging) {
                 this.dragging = true;
                 if (this.p.movedY < 0 && this.value < this.max) {
-                    console.log("before:", this.value);
-                    this.value += .01;
-                    console.log("after:", this.value);
+                    if (this.value + this.incr > this.max) this.value = this.max;
+                    else this.value += this.incr;
                 }
                 else if (this.p.movedY > 0 && this.value > this.min) {
-                    console.log("insid3");
-                    this.value -= .01;
+                    if (this.value - this.incr < this.min) this.value = this.min;
+                    else this.value -= this.incr;
                 }
                 this.setValue();
             }
