@@ -20,7 +20,7 @@ function App() {
     'FrequencyModulation', 'GUI', 'MIDI', 'Sampler', 'GranularSynth', 'Physical Model'
   ];
   const assignmentFiles = [
-    'Lab1','JavaScript101', 'PhaseLab', 'PhaseLab2'
+    'Lab1','JavaScript101', 'PhaseLab', 'PhaseLab2', 'MarkovChains'
   ];
   const referenceFiles = [
     'Oscillator', 'Filter', 'Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope', 'Player', 'Knob', 'GUI elements', 'Convolver'
