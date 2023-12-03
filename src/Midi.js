@@ -59,28 +59,28 @@ export function setMidiOutput(outputID) {
 /****** load webMIDI API ******/
 class MidiHandler {
     constructor() {
-        this.noteOnHandler = (note, velocity) => {
+        this.noteOnHandler = (note, velocity=127, channel=1) => {
             console.log('Default Note On Handler:', note, velocity);
-            console.log(`Define your own note on handler like this:\nsetNoteOnHandler(( note, vel ) => { <your code here> }) `)
+            console.log(`Define your own note on handler like this:\nsetNoteOnHandler(( note, vel, (optional:channel) ) => { <your code here> }) `)
         };
-        this.noteOffHandler = (note, velocity) => {
+        this.noteOffHandler = (note, velocity=0, channel=1) => {
             console.log('Default Note Off Handler:', note, velocity);
-            console.log(`Define your own note off handler like this:\nsetNoteOffHandler(( note, vel ) => { <your code here> }) `)
+            console.log(`Define your own note off handler like this:\nsetNoteOffHandler(( note, vel, (optional:channel) ) => { <your code here> }) `)
         };
-        this.CCHandler = (controller, value) => {
+        this.CCHandler = (controller, value, channel=1) => {
             console.log('Default CC Handler:', controller, value);
-            console.log(`Define your own CC handler like this:\nsetCCHandler(( cc, value ) => { <your code here> }) `)
+            console.log(`Define your own CC handler like this:\nsetCCHandler(( cc, value, (optionaL:channel) ) => { <your code here> }) `)
         };
     }
 
-    handleNoteOn(note, velocity) {
-        this.noteOnHandler(note, velocity);
+    handleNoteOn(note, velocity, channel) {
+        this.noteOnHandler(note, velocity, channel);
     }
-    handleNoteOff(note, velocity) {
-        this.noteOffHandler(note, velocity);
+    handleNoteOff(note, velocity, channel) {
+        this.noteOffHandler(note, velocity, channel);
     }
-    handleCC(controller, value) {
-        this.CCHandler(controller, value);
+    handleCC(controller, value, channel) {
+        this.CCHandler(controller, value, channel);
     }
 
     setNoteOnHandler(func) {
@@ -128,24 +128,26 @@ export function getMidiIO() {
 
 export function handleMidiInput(message) {
     //console.log(message)
+    let channel = (message.data[0] & 15) + 1
+    
     if (message.data[1] != null) {
         let status = message.data[0]
-        console.log('midi', status, message.data[1], message.data[2])
+        //console.log('midi', status, message.data[1], message.data[2])
         if (status >= 128 && status <= 159) {
             let note = message.data[1]
             let velocity = message.data[2]
             //note off msg
             if (status >= 128 && status <= 143 || velocity < 1) {
-                midiHandlerInstance.handleNoteOff(note, velocity)
+                midiHandlerInstance.handleNoteOff(note, velocity, channel)
             }
             //note on msg
             else {
-                midiHandlerInstance.handleNoteOn(note, velocity)
+                midiHandlerInstance.handleNoteOn(note, velocity, channel)
             }
         } else if (status >= 176 && status <= 191) {
             let cc = message.data[1]
             let value = message.data[2]
-            midiHandlerInstance.handleCC(cc, value)
+            midiHandlerInstance.handleCC(cc, value, channel)
         }
     }
 }
