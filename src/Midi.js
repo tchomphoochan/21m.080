@@ -130,11 +130,12 @@ export function handleMidiInput(message) {
     //console.log(message)
     if (message.data[1] != null) {
         let status = message.data[0]
+        console.log('midi', status, message.data[1], message.data[2])
         if (status >= 128 && status <= 159) {
             let note = message.data[1]
             let velocity = message.data[2]
             //note off msg
-            if (status >= 128 && status <= 147 || velocity < 1) {
+            if (status >= 128 && status <= 143 || velocity < 1) {
                 midiHandlerInstance.handleNoteOff(note, velocity)
             }
             //note on msg
