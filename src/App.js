@@ -23,7 +23,7 @@ function App() {
     'Lab1','JavaScript101', 'PhaseLab', 'PhaseLab2', 'MarkovChains', 'Perceptron'
   ];
   const referenceFiles = [
-    'Oscillator', 'Filter', 'Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope', 'Player', 'Knob', 'GUI elements', 'Convolver'
+    'Oscillator', 'Filter', 'Multiply', 'Noise', 'Envelope', 'Oscilloscope', 'Spectroscope', 'Player', 'Knob', 'GUI elements', 'Convolver', 'Panner3D'
   ];
 
   const homeStarterCode = `/*
