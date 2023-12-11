@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 //import p5 from 'p5';
-import { initialize, divResized, drawElements, Knob } from './p5Library';
+import { initialize, divResized, drawElements, Knob, Fader, Button, Toggle, RadioButton } from './p5Library';
 
 window.Knob = Knob;
+window.Fader = Fader;
+window.Button = Button;
+window.Toggle = Toggle;
+window.RadioButton = RadioButton;
 function Canvas(props) {
     const [isMaximized, setIsMaximized] = useState(false);
     useEffect(() => {
