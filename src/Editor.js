@@ -1,4 +1,3 @@
-//2:30
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { historyField } from '@codemirror/commands';
@@ -73,7 +72,8 @@ function Editor(props) {
         let length2 = " = null".length;
         let varNames = [];
         let innerVars = [];
-        //let p5Code = "";
+        let p5Code = "";
+
         try {
             ast = acorn.parse(string, { ecmaVersion: 'latest' });
         } catch (error) {
@@ -140,12 +140,12 @@ function Editor(props) {
                         //Add vals of innerVar to innerScopeVars
                         handleScopedVars(init.body.end + incr);
 
-                        // let val = string.substring(init.start + incr, init.end + incr);
-                        // for (let canvas of canvases) {
-                        //     if (val.includes(canvas)) {
-                        //         p5Code += `${canvas}.elements[${name}]="${val}"\n`;
-                        //     }
-                        // }
+                        let val = string.substring(init.start + incr, init.end + incr);
+                        for (let canvas of canvases) {
+                            if (val.includes(canvas) && !val.includes("Knob")) {
+                                p5Code += `${canvas}.elements[${name}]="${val}"\n`;
+                            }
+                        }
                     }
                 }
             },
@@ -204,13 +204,13 @@ function Editor(props) {
         } catch (error) {
             console.log("Error parsing code: ", error);
         }
-        return [string, varNames];
+        return [string, p5Code, varNames];
     }
 
-    function evaluate(string) {
+    function evaluate(string, p5Code) {
         try {
+            eval(p5Code);
             return eval(string);
-            //eval(p5Code);
         } catch (error) {
             console.log("Error Evaluating Code", error);
         }
@@ -263,8 +263,8 @@ function Editor(props) {
     }
 
     function traverse(string) {
-        const [updatedString, varNames] = updateCode(string);
-        evaluate(updatedString);
+        const [updatedString, p5Code, varNames] = updateCode(string);
+        evaluate(updatedString, p5Code);
         updateVars(varNames);
     }
 
@@ -404,8 +404,17 @@ function Editor(props) {
         setRefresh(true);
         localStorage.setItem(`${props.page}Value`, props.starterCode);
     }
+
     const codeMinClicked = () => {
         setCodeMinimized(!codeMinimized);
+        for (let id of canvases) {
+            try {
+                window[id].divResized(codeMinimized ? '-w' : '+w');
+            }
+            catch {
+
+            }
+        }
     }
 
     const canvasMinClicked = () => {
@@ -431,7 +440,7 @@ function Editor(props) {
     const liveCSS = liveMode ? 'button-container active' : 'button-container';
 
     return (
-        <div className="flex-container" >
+        <div id="flex" className="flex-container" >
             {!codeMinimized &&
                 <div className="flex-child" >
                     <span className="span-container">
@@ -476,16 +485,14 @@ function Editor(props) {
                 </div>
             }
             {!p5Minimized &&
-                <div className="flex-child">
+                <div id="canvases" className="flex-child">
                     <span className="span-container">
                         {codeMinimized &&
                             <button className="button-container" onClick={codeMinClicked}>{"=>"}</button>
                         }
                     </span>
                     {canvases.map((id) => (
-                        (!maximized || maximized === id) && (
-                            <Canvas key={id} id={id} onMaximize={handleMaximizeCanvas} maxOption={canvases.length > 1} />
-                        )
+                        <Canvas key={id} id={id} onMaximize={handleMaximizeCanvas} maximized={maximized} canvasLength={canvases.length} />
                     ))}
                 </div>
             }
