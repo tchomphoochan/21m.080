@@ -1,6 +1,6 @@
 import p5 from 'p5';
 
-export function initialize(p, div, backgroundColor = false) {
+export function initialize(p, div, backgroundColor) {
     p.div = div;
     p.createCanvas(div.offsetWidth, div.offsetHeight);
     p.width = div.offsetWidth;
@@ -12,7 +12,7 @@ export function initialize(p, div, backgroundColor = false) {
     }
 }
 
-p5.prototype.initialize = function (div, backgroundColor) {
+p5.prototype.initialize = function (div, backgroundColor = false) {
     initialize(this, div, backgroundColor);
 };
 

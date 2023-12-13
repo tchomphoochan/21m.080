@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-
 import { initialize, divResized, drawElements, Knob, Fader, Button, Toggle, RadioButton } from './p5Library';
+
+//if adding more P5Elements to list below, add to list "p5Elements' in Editor.js
+//traverse function -> visitors -> variableDeclaration
 window.Knob = Knob;
 window.Fader = Fader;
 window.Button = Button;

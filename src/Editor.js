@@ -103,22 +103,20 @@ function Editor(props) {
                     let name = declaration.id.name;
                     let start = declaration.start;
                     let end = declaration.end;
-
                     //Add globalThis & push variable names
-                    if (!state.innerScope) {
+                    if (!state.innerScope && !state.forLoop) {
                         string = string.substring(0, start + incr) + "globalThis." + string.substring(start + incr);
                         incr += length1;
                         varNames.push(name);
                         if (Object.keys(vars).includes(name)) {
                             try {
                                 vars[name].stop();
-                                //console.log('disc')
                             } catch {
 
                             }
                         }
                     }
-                    else if (state.innerScope && !state.forLoop) {
+                    else if (state.innerScope && (!state.forLoop || state.forOf)) {
                         innerVars[innerVars.length - 1].push(name);
                         if (!Object.keys(innerScopeVars).includes(name)) {
                             innerScopeVars[name] = [];
@@ -130,21 +128,23 @@ function Editor(props) {
                         string = string.substring(0, end + incr) + " = null" + string.substring(end + incr);
                         incr += length2;
                     }
-                    else if (init && init.body) {
-                        let newState = {
-                            innerScope: true,
-                            forLoop: false
-                        }
-                        innerVars.push([]);
-                        c(init.body, newState);
-                        //Add vals of innerVar to innerScopeVars
-                        handleScopedVars(init.body.end + incr);
-
+                    else if (init) {
                         let val = string.substring(init.start + incr, init.end + incr);
+                        let p5Elements = ["p5", "Knob", "Fader", "Button", "Toggle", "RadioButton"];
                         for (let canvas of canvases) {
-                            if (val.includes(canvas) && !val.includes("Knob")) {
+                            if (val.includes(canvas) && !p5Elements.some(word => val.includes(word))) {
                                 p5Code += `${canvas}.elements[${name}]="${val}"\n`;
                             }
+                        }
+                        if (init.body) {
+                            let newState = {
+                                innerScope: true,
+                                forLoop: false
+                            }
+                            innerVars.push([]);
+                            c(init.body, newState);
+                            //Add vals of innerVar to innerScopeVars
+                            handleScopedVars(init.body.end + incr);
                         }
                     }
                 }
@@ -182,15 +182,36 @@ function Editor(props) {
                 handleScopedVars(node.end + incr);
             },
 
-            ForOfStatement(node, state, c) {
+            ForStatement(node, state, c) {
                 let newState = {
                     innerScope: true,
                     forLoop: true
                 }
 
+                c(node.init, newState);
+                newState.forLoop = false;
+                innerVars.push([]);
+                c(node.body, newState);
+                handleScopedVars(node.end + incr);
+            },
+
+            ForOfStatement(node, state, c) {
+                let newState = {
+                    innerScope: true,
+                    forLoop: true,
+                    forOf: true
+                }
+
+                innerVars.push([]);
                 c(node.left, newState);
                 c(node.right, newState);
-                //may cause failure in sound stopping
+                handleScopedVars(node.end + incr);
+
+                innerVars.push([]);
+                newState.forOf = false;
+                newState.forLoop = false;
+                c(node.body, newState);
+                handleScopedVars(node.end + incr);
             }
         }
 
@@ -209,8 +230,9 @@ function Editor(props) {
 
     function evaluate(string, p5Code) {
         try {
+            console.log(string);
+            eval(string);
             eval(p5Code);
-            return eval(string);
         } catch (error) {
             console.log("Error Evaluating Code", error);
         }
